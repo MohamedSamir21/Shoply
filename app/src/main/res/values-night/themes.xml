@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Shoply" parent="Theme.SplashScreen.IconBackground" >
+        <item name="windowSplashScreenBackground">@color/surface_dark</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/animated_logo</item>
+    </style>
+</resources>
