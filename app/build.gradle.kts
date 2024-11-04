@@ -94,4 +94,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.kotlinx.coroutines.play.services)
+
+    // Adaptive
+    implementation(libs.androidx.compose.material3.window.size)
+    implementation(libs.androidx.compose.material3.adaptive)
 }

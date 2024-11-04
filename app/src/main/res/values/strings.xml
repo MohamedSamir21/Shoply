@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Shoply</string>
+    <string name="previous">Previous</string>
+    <string name="skip">Skip</string>
+    <string name="circle">Circle</string>
+    <string name="person_shopping">Person Shopping</string>
+    <string name="ground">Ground</string>
+    <string name="forward">Forward</string>
 </resources>

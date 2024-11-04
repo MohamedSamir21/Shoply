@@ -1,16 +1,11 @@
-package com.shopping.shoply.common.presentation.ui.theme
-
-import android.os.Build
+package com.shopping.shoply.common.presentation.theme
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
 @Immutable
 data class ExtendedColorScheme(
@@ -18,6 +13,7 @@ data class ExtendedColorScheme(
     val green: ColorFamily,
     val purple: ColorFamily,
     val yellow: ColorFamily,
+    val pink: ColorFamily,
 )
 
 private val lightScheme = lightColorScheme(
@@ -249,165 +245,201 @@ private val highContrastDarkColorScheme = darkColorScheme(
 )
 
 val extendedLight = ExtendedColorScheme(
-    blue = ColorFamily(
-        blueLight,
-        onBlueLight,
-        blueContainerLight,
-        onBlueContainerLight,
-    ),
-    green = ColorFamily(
-        greenLight,
-        onGreenLight,
-        greenContainerLight,
-        onGreenContainerLight,
-    ),
-    purple = ColorFamily(
-        purpleLight,
-        onPurpleLight,
-        purpleContainerLight,
-        onPurpleContainerLight,
-    ),
-    yellow = ColorFamily(
-        yellowLight,
-        onYellowLight,
-        yellowContainerLight,
-        onYellowContainerLight,
-    ),
+  blue = ColorFamily(
+  blueLight,
+  onBlueLight,
+  blueContainerLight,
+  onBlueContainerLight,
+  ),
+  green = ColorFamily(
+  greenLight,
+  onGreenLight,
+  greenContainerLight,
+  onGreenContainerLight,
+  ),
+  purple = ColorFamily(
+  purpleLight,
+  onPurpleLight,
+  purpleContainerLight,
+  onPurpleContainerLight,
+  ),
+  yellow = ColorFamily(
+  yellowLight,
+  onYellowLight,
+  yellowContainerLight,
+  onYellowContainerLight,
+  ),
+  pink = ColorFamily(
+  pinkLight,
+  onPinkLight,
+  pinkContainerLight,
+  onPinkContainerLight,
+  ),
 )
 
 val extendedDark = ExtendedColorScheme(
-    blue = ColorFamily(
-        blueDark,
-        onBlueDark,
-        blueContainerDark,
-        onBlueContainerDark,
-    ),
-    green = ColorFamily(
-        greenDark,
-        onGreenDark,
-        greenContainerDark,
-        onGreenContainerDark,
-    ),
-    purple = ColorFamily(
-        purpleDark,
-        onPurpleDark,
-        purpleContainerDark,
-        onPurpleContainerDark,
-    ),
-    yellow = ColorFamily(
-        yellowDark,
-        onYellowDark,
-        yellowContainerDark,
-        onYellowContainerDark,
-    ),
+  blue = ColorFamily(
+  blueDark,
+  onBlueDark,
+  blueContainerDark,
+  onBlueContainerDark,
+  ),
+  green = ColorFamily(
+  greenDark,
+  onGreenDark,
+  greenContainerDark,
+  onGreenContainerDark,
+  ),
+  purple = ColorFamily(
+  purpleDark,
+  onPurpleDark,
+  purpleContainerDark,
+  onPurpleContainerDark,
+  ),
+  yellow = ColorFamily(
+  yellowDark,
+  onYellowDark,
+  yellowContainerDark,
+  onYellowContainerDark,
+  ),
+  pink = ColorFamily(
+  pinkDark,
+  onPinkDark,
+  pinkContainerDark,
+  onPinkContainerDark,
+  ),
 )
 
 val extendedLightMediumContrast = ExtendedColorScheme(
-    blue = ColorFamily(
-        blueLightMediumContrast,
-        onBlueLightMediumContrast,
-        blueContainerLightMediumContrast,
-        onBlueContainerLightMediumContrast,
-    ),
-    green = ColorFamily(
-        greenLightMediumContrast,
-        onGreenLightMediumContrast,
-        greenContainerLightMediumContrast,
-        onGreenContainerLightMediumContrast,
-    ),
-    purple = ColorFamily(
-        purpleLightMediumContrast,
-        onPurpleLightMediumContrast,
-        purpleContainerLightMediumContrast,
-        onPurpleContainerLightMediumContrast,
-    ),
-    yellow = ColorFamily(
-        yellowLightMediumContrast,
-        onYellowLightMediumContrast,
-        yellowContainerLightMediumContrast,
-        onYellowContainerLightMediumContrast,
-    ),
+  blue = ColorFamily(
+  blueLightMediumContrast,
+  onBlueLightMediumContrast,
+  blueContainerLightMediumContrast,
+  onBlueContainerLightMediumContrast,
+  ),
+  green = ColorFamily(
+  greenLightMediumContrast,
+  onGreenLightMediumContrast,
+  greenContainerLightMediumContrast,
+  onGreenContainerLightMediumContrast,
+  ),
+  purple = ColorFamily(
+  purpleLightMediumContrast,
+  onPurpleLightMediumContrast,
+  purpleContainerLightMediumContrast,
+  onPurpleContainerLightMediumContrast,
+  ),
+  yellow = ColorFamily(
+  yellowLightMediumContrast,
+  onYellowLightMediumContrast,
+  yellowContainerLightMediumContrast,
+  onYellowContainerLightMediumContrast,
+  ),
+  pink = ColorFamily(
+  pinkLightMediumContrast,
+  onPinkLightMediumContrast,
+  pinkContainerLightMediumContrast,
+  onPinkContainerLightMediumContrast,
+  ),
 )
 
 val extendedLightHighContrast = ExtendedColorScheme(
-    blue = ColorFamily(
-        blueLightHighContrast,
-        onBlueLightHighContrast,
-        blueContainerLightHighContrast,
-        onBlueContainerLightHighContrast,
-    ),
-    green = ColorFamily(
-        greenLightHighContrast,
-        onGreenLightHighContrast,
-        greenContainerLightHighContrast,
-        onGreenContainerLightHighContrast,
-    ),
-    purple = ColorFamily(
-        purpleLightHighContrast,
-        onPurpleLightHighContrast,
-        purpleContainerLightHighContrast,
-        onPurpleContainerLightHighContrast,
-    ),
-    yellow = ColorFamily(
-        yellowLightHighContrast,
-        onYellowLightHighContrast,
-        yellowContainerLightHighContrast,
-        onYellowContainerLightHighContrast,
-    ),
+  blue = ColorFamily(
+  blueLightHighContrast,
+  onBlueLightHighContrast,
+  blueContainerLightHighContrast,
+  onBlueContainerLightHighContrast,
+  ),
+  green = ColorFamily(
+  greenLightHighContrast,
+  onGreenLightHighContrast,
+  greenContainerLightHighContrast,
+  onGreenContainerLightHighContrast,
+  ),
+  purple = ColorFamily(
+  purpleLightHighContrast,
+  onPurpleLightHighContrast,
+  purpleContainerLightHighContrast,
+  onPurpleContainerLightHighContrast,
+  ),
+  yellow = ColorFamily(
+  yellowLightHighContrast,
+  onYellowLightHighContrast,
+  yellowContainerLightHighContrast,
+  onYellowContainerLightHighContrast,
+  ),
+  pink = ColorFamily(
+  pinkLightHighContrast,
+  onPinkLightHighContrast,
+  pinkContainerLightHighContrast,
+  onPinkContainerLightHighContrast,
+  ),
 )
 
 val extendedDarkMediumContrast = ExtendedColorScheme(
-    blue = ColorFamily(
-        blueDarkMediumContrast,
-        onBlueDarkMediumContrast,
-        blueContainerDarkMediumContrast,
-        onBlueContainerDarkMediumContrast,
-    ),
-    green = ColorFamily(
-        greenDarkMediumContrast,
-        onGreenDarkMediumContrast,
-        greenContainerDarkMediumContrast,
-        onGreenContainerDarkMediumContrast,
-    ),
-    purple = ColorFamily(
-        purpleDarkMediumContrast,
-        onPurpleDarkMediumContrast,
-        purpleContainerDarkMediumContrast,
-        onPurpleContainerDarkMediumContrast,
-    ),
-    yellow = ColorFamily(
-        yellowDarkMediumContrast,
-        onYellowDarkMediumContrast,
-        yellowContainerDarkMediumContrast,
-        onYellowContainerDarkMediumContrast,
-    ),
+  blue = ColorFamily(
+  blueDarkMediumContrast,
+  onBlueDarkMediumContrast,
+  blueContainerDarkMediumContrast,
+  onBlueContainerDarkMediumContrast,
+  ),
+  green = ColorFamily(
+  greenDarkMediumContrast,
+  onGreenDarkMediumContrast,
+  greenContainerDarkMediumContrast,
+  onGreenContainerDarkMediumContrast,
+  ),
+  purple = ColorFamily(
+  purpleDarkMediumContrast,
+  onPurpleDarkMediumContrast,
+  purpleContainerDarkMediumContrast,
+  onPurpleContainerDarkMediumContrast,
+  ),
+  yellow = ColorFamily(
+  yellowDarkMediumContrast,
+  onYellowDarkMediumContrast,
+  yellowContainerDarkMediumContrast,
+  onYellowContainerDarkMediumContrast,
+  ),
+  pink = ColorFamily(
+  pinkDarkMediumContrast,
+  onPinkDarkMediumContrast,
+  pinkContainerDarkMediumContrast,
+  onPinkContainerDarkMediumContrast,
+  ),
 )
 
 val extendedDarkHighContrast = ExtendedColorScheme(
-    blue = ColorFamily(
-        blueDarkHighContrast,
-        onBlueDarkHighContrast,
-        blueContainerDarkHighContrast,
-        onBlueContainerDarkHighContrast,
-    ),
-    green = ColorFamily(
-        greenDarkHighContrast,
-        onGreenDarkHighContrast,
-        greenContainerDarkHighContrast,
-        onGreenContainerDarkHighContrast,
-    ),
-    purple = ColorFamily(
-        purpleDarkHighContrast,
-        onPurpleDarkHighContrast,
-        purpleContainerDarkHighContrast,
-        onPurpleContainerDarkHighContrast,
-    ),
-    yellow = ColorFamily(
-        yellowDarkHighContrast,
-        onYellowDarkHighContrast,
-        yellowContainerDarkHighContrast,
-        onYellowContainerDarkHighContrast,
-    ),
+  blue = ColorFamily(
+  blueDarkHighContrast,
+  onBlueDarkHighContrast,
+  blueContainerDarkHighContrast,
+  onBlueContainerDarkHighContrast,
+  ),
+  green = ColorFamily(
+  greenDarkHighContrast,
+  onGreenDarkHighContrast,
+  greenContainerDarkHighContrast,
+  onGreenContainerDarkHighContrast,
+  ),
+  purple = ColorFamily(
+  purpleDarkHighContrast,
+  onPurpleDarkHighContrast,
+  purpleContainerDarkHighContrast,
+  onPurpleContainerDarkHighContrast,
+  ),
+  yellow = ColorFamily(
+  yellowDarkHighContrast,
+  onYellowDarkHighContrast,
+  yellowContainerDarkHighContrast,
+  onYellowContainerDarkHighContrast,
+  ),
+  pink = ColorFamily(
+  pinkDarkHighContrast,
+  onPinkDarkHighContrast,
+  pinkContainerDarkHighContrast,
+  onPinkContainerDarkHighContrast,
+  ),
 )
 
 @Immutable
@@ -426,19 +458,17 @@ val unspecified_scheme = ColorFamily(
 fun ShoplyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable() () -> Unit
 ) {
-    val colorScheme = when {
+  val colorScheme = when {
+      darkTheme -> darkScheme
+      else -> lightScheme
+  }
 
-        darkTheme -> darkScheme
-        else -> lightScheme
-    }
-
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content
-    )
+  MaterialTheme(
+    colorScheme = colorScheme,
+    typography = AppTypography,
+    content = content
+  )
 }
 
