@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen
+package com.shopping.shoply.authentication.presentation.screen.onboarding
 
 import androidx.annotation.DrawableRes
 

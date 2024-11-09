@@ -1,7 +1,10 @@
-package com.shopping.shoply.authentication.presentation.screen
+package com.shopping.shoply.authentication.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.shopping.shoply.R
+import com.shopping.shoply.authentication.presentation.screen.onboarding.Onboarding
+import com.shopping.shoply.authentication.presentation.screen.onboarding.OnboardingScreenEvent
+import com.shopping.shoply.authentication.presentation.screen.onboarding.OnboardingScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 

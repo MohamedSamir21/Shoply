@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen
+package com.shopping.shoply.authentication.presentation.screen.onboarding
 
 import android.content.res.Configuration
 import androidx.compose.animation.animateContentSize
@@ -49,6 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.shopping.shoply.R
+import com.shopping.shoply.authentication.presentation.viewmodel.OnboardingViewModel
+import com.shopping.shoply.authentication.presentation.viewmodel.generateOnboardings
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 

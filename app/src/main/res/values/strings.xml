@@ -6,4 +6,19 @@
     <string name="person_shopping">Person Shopping</string>
     <string name="ground">Ground</string>
     <string name="forward">Forward</string>
+    <string name="create_account">Create Account</string>
+    <string name="promo_text">Enjoy the best products with high quality ever on the globe</string>
+    <string name="clear">Clear</string>
+    <string name="required">required</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="password">Password</string>
+    <string name="confirmed_password">Confirmed Password</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="or_continue_with">Or Continue With</string>
+    <string name="facebook">Facebook</string>
+    <string name="google">Google</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sign_in">Sign In</string>
 </resources>
