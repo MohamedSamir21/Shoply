@@ -10,6 +10,7 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.shopping.shoply.authentication.presentation.screen.onboarding.OnboardingScreen
 import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreen
+import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccount
 import com.shopping.shoply.authentication.presentation.viewmodel.SignUpViewModel
 
 @Composable
@@ -27,7 +28,8 @@ fun ShoplyNavGraph(
         startDestination = NavRoutes.SignUp.value
     ) {
         addOnboardingScreen(navController)
-        addSignupScreen(isExpandedScreen)
+        addSignupScreen(navController, isExpandedScreen)
+        addVerifyAccount()
     }
 }
 
@@ -42,6 +44,7 @@ private fun NavGraphBuilder.addOnboardingScreen(
 }
 
 private fun NavGraphBuilder.addSignupScreen(
+    navController: NavHostController,
     isExpandedScreen: Boolean
 ) {
     composable(
@@ -51,7 +54,16 @@ private fun NavGraphBuilder.addSignupScreen(
 
         SignUpScreen(
             viewModel,
+            navController,
             isExpandedScreen
         )
+    }
+}
+
+private fun NavGraphBuilder.addVerifyAccount() {
+    composable(
+        route = NavRoutes.VerifyAccount.value
+    ) {
+        VerifyAccount()
     }
 }

@@ -21,4 +21,15 @@
     <string name="google">Google</string>
     <string name="already_have_account">Already have an account?</string>
     <string name="sign_in">Sign In</string>
+
+    <string name="weak_password">The password you\'ve entered is weak</string>
+    <string name="wrong_password">The password you\'ve entered is wrong</string>
+    <string name="disabled_user">The user account has been disabled</string>
+    <string name="account_with_different_credentials">An account already exists with the same email address but a different credential</string>
+    <string name="already_email_exits">The email address is already in use</string>
+    <string name="unknown_authentication_error">Unknown Authentication Error</string>
+    <string name="enter_valid_email">Enter a valid email</string>
+    <string name="network_issue">Network issue</string>
+    <string name="unknown_error">Unknown Error</string>
+
 </resources>

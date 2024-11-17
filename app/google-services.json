@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "307848065209",
+    "project_id": "fir-da2ff",
+    "storage_bucket": "fir-da2ff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307848065209:android:377f46c0b493c79c1eab68",
+        "android_client_info": {
+          "package_name": "com.shopping.shoply"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "307848065209-dgcgdqnpfeie75qhd46k1pou65l6tmds.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shopping.shoply",
+            "certificate_hash": "774d5e74a6dde9619a9cd45899cc5d3c631791d6"
+          }
+        },
+        {
+          "client_id": "307848065209-3s9lngltvd97bptgd606kid5m6biq4c0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAs16y7A1aj651lprgoaI4Xn3xuXLGwFU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "307848065209-3s9lngltvd97bptgd606kid5m6biq4c0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

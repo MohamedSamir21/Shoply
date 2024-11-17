@@ -25,6 +25,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -57,36 +60,40 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.viewmodel.SignUpViewModel
+import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SignUpScreen(
     viewModel: SignUpViewModel,
+    navHostController: NavHostController,
     isExpandedScreen: Boolean
 ) {
     val state = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel.signUpResult) {
+        viewModel.signUpResult.collectLatest {
+            when (it) {
+                is SignUpScreenEvent.SignUp.Result.Success -> {
+                    navHostController.navigate(NavRoutes.VerifyAccount.value)
+                }
+
+                is SignUpScreenEvent.SignUp.Result.Failure -> {
+                    viewModel.onEvent(SignUpScreenEvent.SignUp.Result.Failure(it.uiText))
+                }
+            }
+        }
+    }
 
     SignUpContent(
         isExpandedScreen = isExpandedScreen,
         state = state.value,
         onEvent = {
-            when (it) {
-                is SignUpScreenEvent.Change.Username -> TODO()
-                is SignUpScreenEvent.Change.Email -> TODO()
-                is SignUpScreenEvent.Change.PhoneNumber -> TODO()
-                is SignUpScreenEvent.Change.Password -> TODO()
-                is SignUpScreenEvent.Change.ConfirmedPassword -> TODO()
-                is SignUpScreenEvent.Change.PasswordVisibility -> TODO()
-                SignUpScreenEvent.Clear.Username -> TODO()
-                SignUpScreenEvent.Clear.Email -> TODO()
-                SignUpScreenEvent.Clear.PhoneNumber -> TODO()
-                SignUpScreenEvent.Clear.Password -> TODO()
-                SignUpScreenEvent.Clear.ConfirmedPassword -> TODO()
-                SignUpScreenEvent.SignUp -> TODO()
-                else -> Unit
-            }
+            viewModel.onEvent(it)
         }
     )
 }
@@ -97,6 +104,7 @@ private fun SignUpContent(
     state: SignUpScreenState,
     onEvent: (SignUpScreenEvent) -> Unit
 ) {
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -172,6 +180,8 @@ private fun Form(
     val focusRequester = remember {
         FocusRequester()
     }
+    val signUpError = state.signUpError?.asString()
+
     FormTextFields(
         modifier = if (isExpandedScreen)
             Modifier.wrapContentWidth()
@@ -180,19 +190,34 @@ private fun Form(
         state = state,
         onEvent = { onEvent(it) }
     )
+    signUpError?.let {
+        Text(
+            modifier = Modifier.padding(top = 10.dp),
+            text = it,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error
+        )
+    }
     Spacer(modifier = Modifier.height(15.dp))
-    SignUpButton(
-        modifier = if (isExpandedScreen)
-            Modifier.wrapContentWidth()
-        else Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        onClick = {
-            focusRequester.requestFocus()
-            onEvent(SignUpScreenEvent.SignUp)
-        },
-        enable = state.enableSignUp
-    )
+    if (state.isSigningUp) {
+        CircularProgressIndicator()
+    } else {
+        SignUpButton(
+            modifier = if (isExpandedScreen)
+                Modifier
+                    .wrapContentWidth()
+                    .focusRequester(focusRequester)
+            else Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+                .focusRequester(focusRequester),
+            onClick = {
+                focusRequester.requestFocus()
+                onEvent(SignUpScreenEvent.SignUp.Submit)
+            },
+            enable = state.enableSignUp
+        )
+    }
 }
 
 @Composable
@@ -203,32 +228,36 @@ private fun FormTextFields(
 ) {
     FormUsername(
         modifier = modifier,
-        username = state.username,
+        username = state.user.username,
         onUsernameChanged = { onEvent(SignUpScreenEvent.Change.Username(it)) },
+        errorMessage = state.userError.usernameError,
         onClear = { onEvent(SignUpScreenEvent.Clear.Username) }
     )
     FormEmail(
-        modifier = modifier,
-        email = state.email,
+        modifier = modifier.padding(top = 10.dp),
+        email = state.user.email,
         onEmailChanged = { onEvent(SignUpScreenEvent.Change.Email(it)) },
+        errorMessage = state.userError.emailError,
         onClear = { onEvent(SignUpScreenEvent.Clear.Email) }
     )
     FormPhoneNumber(
-        modifier = modifier,
-        phoneNumber = state.phoneNumber,
+        modifier = modifier.padding(top = 10.dp),
+        phoneNumber = state.user.phoneNumber,
         onPhoneNumberChanged = { onEvent(SignUpScreenEvent.Change.PhoneNumber(it)) },
-        onPhoneNumberCleared = { onEvent(SignUpScreenEvent.Clear.PhoneNumber) }
+        onPhoneNumberCleared = { onEvent(SignUpScreenEvent.Clear.PhoneNumber) },
+        errorMessage = state.userError.phoneNumberError,
     )
     FormPassword(
-        modifier = modifier,
-        password = state.password,
+        modifier = modifier.padding(top = 10.dp),
+        password = state.user.password,
         onPasswordChanged = { onEvent(SignUpScreenEvent.Change.Password(it)) },
         onVisibilityChanged = { onEvent(SignUpScreenEvent.Change.PasswordVisibility(it)) },
-        showPassword = state.showPassword
+        showPassword = state.showPassword,
+        errorMessage = state.userError.passwordError,
     )
     FormConfirmedPassword(
-        modifier = modifier,
-        confirmedPassword = state.confirmedPassword,
+        modifier = modifier.padding(top = 10.dp),
+        confirmedPassword = state.user.confirmedPassword,
         showPassword = state.showPassword,
         onConfirmedPasswordChanged = {
             onEvent(
@@ -237,7 +266,8 @@ private fun FormTextFields(
                 )
             )
         },
-        onVisibilityChanged = { onEvent(SignUpScreenEvent.Change.PasswordVisibility(it)) }
+        onVisibilityChanged = { onEvent(SignUpScreenEvent.Change.PasswordVisibility(it)) },
+        errorMessage = state.userError.passwordConfirmedError
     )
 }
 
@@ -246,6 +276,7 @@ private fun FormUsername(
     modifier: Modifier = Modifier,
     username: String,
     onUsernameChanged: (String) -> Unit,
+    errorMessage: String?,
     onClear: () -> Unit
 ) {
     FormTextField(
@@ -259,6 +290,7 @@ private fun FormUsername(
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next
         ),
+        supportingText = errorMessage,
         modifier = modifier
     )
 }
@@ -268,6 +300,7 @@ private fun FormEmail(
     modifier: Modifier = Modifier,
     email: String,
     onEmailChanged: (String) -> Unit,
+    errorMessage: String?,
     onClear: () -> Unit
 ) {
     FormTextField(
@@ -281,6 +314,7 @@ private fun FormEmail(
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
         ),
+        supportingText = errorMessage,
         modifier = modifier
     )
 }
@@ -290,6 +324,7 @@ private fun FormPhoneNumber(
     modifier: Modifier = Modifier,
     phoneNumber: String,
     onPhoneNumberChanged: (String) -> Unit,
+    errorMessage: String?,
     onPhoneNumberCleared: () -> Unit
 ) {
     FormTextField(
@@ -303,6 +338,7 @@ private fun FormPhoneNumber(
             keyboardType = KeyboardType.Phone,
             imeAction = ImeAction.Next
         ),
+        supportingText = errorMessage,
         modifier = modifier
     )
 }
@@ -313,6 +349,7 @@ private fun FormPassword(
     password: String,
     showPassword: Boolean,
     onPasswordChanged: (String) -> Unit,
+    errorMessage: String?,
     onVisibilityChanged: (Boolean) -> Unit
 ) {
     val visibilityIcon = ImageVector.vectorResource(
@@ -334,7 +371,8 @@ private fun FormPassword(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Next
         ),
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+        supportingText = errorMessage,
         modifier = modifier
     )
 }
@@ -345,6 +383,7 @@ private fun FormConfirmedPassword(
     confirmedPassword: String,
     showPassword: Boolean,
     onConfirmedPasswordChanged: (String) -> Unit,
+    errorMessage: String?,
     onVisibilityChanged: (Boolean) -> Unit
 ) {
     val visibilityIcon = ImageVector.vectorResource(
@@ -366,7 +405,8 @@ private fun FormConfirmedPassword(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
-        visualTransformation = PasswordVisualTransformation(),
+        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+        supportingText = errorMessage,
         modifier = modifier
     )
 }
@@ -422,7 +462,9 @@ private fun FormTextField(
                 text = if (supportingText.isNullOrEmpty())
                     "*${stringResource(R.string.required)}"
                 else supportingText,
-                color = focusColor
+                color = if (supportingText != null)
+                    MaterialTheme.colorScheme.error
+                else focusColor
             )
         },
         singleLine = true,

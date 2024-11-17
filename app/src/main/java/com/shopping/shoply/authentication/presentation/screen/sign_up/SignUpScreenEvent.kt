@@ -1,5 +1,7 @@
 package com.shopping.shoply.authentication.presentation.screen.sign_up
 
+import com.shopping.shoply.authentication.presentation.utility.UiText
+
 sealed class SignUpScreenEvent {
     data object Change: SignUpScreenEvent() {
         data class Username(val username: String) : SignUpScreenEvent()
@@ -16,5 +18,11 @@ sealed class SignUpScreenEvent {
         data object Password : SignUpScreenEvent()
         data object ConfirmedPassword : SignUpScreenEvent()
     }
-    data object SignUp: SignUpScreenEvent()
+    sealed class SignUp: SignUpScreenEvent() {
+        data object Submit: SignUp()
+        open class Result : SignUp() {
+            data object Success : Result()
+            data class Failure(val uiText: UiText) : Result()
+        }
+    }
 }
