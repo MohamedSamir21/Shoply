@@ -6,18 +6,20 @@ import androidx.lifecycle.viewModelScope
 import com.shopping.shoply.authentication.domain.model.User
 import com.shopping.shoply.authentication.domain.usecase.CheckInputsFilledUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpUseCase
+import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithGoogleUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateConfirmedPasswordUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateEmailUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePasswordUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePhoneUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateUsernameUseCase
+import com.shopping.shoply.authentication.presentation.screen.sign_up.ActivityContext
 import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreenEvent
 import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreenState
 import com.shopping.shoply.authentication.presentation.screen.sign_up.UserError
-import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.utility.asUiText
 import com.shopping.shoply.common.domain.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,13 +37,17 @@ class SignUpViewModel @Inject constructor(
     private val validatePhoneUseCase: ValidatePhoneUseCase,
     private val validatePasswordUseCase: ValidatePasswordUseCase,
     private val validateConfirmedPasswordUseCase: ValidateConfirmedPasswordUseCase,
-    private val signUpUseCase: SignUpUseCase
+    private val signUpUseCase: SignUpUseCase,
+    private val signUpWithGoogleUseCase: SignUpWithGoogleUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(SignUpScreenState())
     val state = _state.asStateFlow()
     private val _signUpResult =
         Channel<SignUpScreenEvent.SignUp.Result>()
     val signUpResult = _signUpResult.receiveAsFlow()
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+    }
 
     fun onEvent(event: SignUpScreenEvent) {
         val currentUser = state.value.user
@@ -112,20 +118,39 @@ class SignUpViewModel @Inject constructor(
                 )
             }
 
-            SignUpScreenEvent.SignUp.Submit -> {
+            SignUpScreenEvent.SignUp.SubmitForm -> {
                 signUp()
             }
 
-            is SignUpScreenEvent.SignUp.Result.Failure -> {
-               _state.value = state.value.copy(
-                   signUpError = event.uiText
-               )
+            is SignUpScreenEvent.SignUp.Google -> {
+                signUpWithGoogle(event.activityContext)
             }
+
+            is SignUpScreenEvent.SignUp.Result.Failure -> {
+                _state.value = state.value.copy(
+                    signUpError = event.uiText
+                )
+            }
+
             else -> Unit
         }
         _state.value = state.value.copy(
             enableSignUp = areInputsFilled()
         )
+    }
+
+    private fun signUpWithGoogle(activityContext: ActivityContext) {
+        viewModelScope.launch(exceptionHandler) {
+            when (val result = signUpWithGoogleUseCase(activityContext)) {
+                is Result.Success -> {
+                    _signUpResult.send(SignUpScreenEvent.SignUp.Result.Success)
+                }
+
+                is Result.Error -> {
+                    _signUpResult.send(SignUpScreenEvent.SignUp.Result.Failure(result.error.asUiText()))
+                }
+            }
+        }
     }
 
     private fun areInputsFilled(): Boolean {

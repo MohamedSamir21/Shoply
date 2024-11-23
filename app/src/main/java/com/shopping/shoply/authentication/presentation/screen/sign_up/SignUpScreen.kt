@@ -48,6 +48,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -123,7 +124,9 @@ private fun SignUpContent(
             Form(state, isExpandedScreen, onEvent)
             if (isExpandedScreen.not()) {
                 ContinueWithRow()
-                SignUpAlternativesRow()
+                SignUpAlternativesRow(
+                    onGoogleSignUpClicked = { onEvent(SignUpScreenEvent.SignUp.Google(it)) }
+                )
                 AlreadyHaveAccountRow(
                     onSignInClicked = {}
                 )
@@ -213,7 +216,7 @@ private fun Form(
                 .focusRequester(focusRequester),
             onClick = {
                 focusRequester.requestFocus()
-                onEvent(SignUpScreenEvent.SignUp.Submit)
+                onEvent(SignUpScreenEvent.SignUp.SubmitForm)
             },
             enable = state.enableSignUp
         )
@@ -515,7 +518,10 @@ fun ContinueWithRow() {
 }
 
 @Composable
-private fun SignUpAlternativesRow() {
+private fun SignUpAlternativesRow(
+    onGoogleSignUpClicked: (ActivityContext) -> Unit
+) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -527,7 +533,9 @@ private fun SignUpAlternativesRow() {
         )
         GoogleButton(
             modifier = Modifier.weight(1f),
-            onClick = { }
+            onClick = {
+                onGoogleSignUpClicked(ActivityContext(context = context))
+            }
         )
     }
 }

@@ -19,7 +19,9 @@ sealed class SignUpScreenEvent {
         data object ConfirmedPassword : SignUpScreenEvent()
     }
     sealed class SignUp: SignUpScreenEvent() {
-        data object Submit: SignUp()
+        data object SubmitForm: SignUp()
+        data class Google(val activityContext: ActivityContext) : SignUp()
+        data object Facebook: SignUp()
         open class Result : SignUp() {
             data object Success : Result()
             data class Failure(val uiText: UiText) : Result()

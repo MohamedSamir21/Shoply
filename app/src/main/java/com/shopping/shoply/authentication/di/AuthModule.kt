@@ -1,8 +1,11 @@
 package com.shopping.shoply.authentication.di
 
+import android.content.Context
+import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shopping.shoply.authentication.data.datasource.FirebaseAuthDataSource
+import com.shopping.shoply.authentication.data.datasource.GoogleAuthClient
 import com.shopping.shoply.authentication.data.datasource.IAuthDataSource
 import com.shopping.shoply.authentication.data.repository.AuthRepositoryImpl
 import com.shopping.shoply.authentication.domain.interfaces.AuthRepository
@@ -14,6 +17,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -31,6 +35,26 @@ object AuthModule {
     @Provides
     fun provideFirebaseAuthentication(): FirebaseAuth {
         return FirebaseAuth.getInstance()
+    }
+
+    @Singleton
+    @Provides
+    fun provideCredentialManger(@ApplicationContext context: Context): CredentialManager {
+        return CredentialManager.create(
+            context
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideGoogleAuthClient(
+        credentialManager: CredentialManager,
+        firebaseAuth: FirebaseAuth
+    ): GoogleAuthClient {
+        return GoogleAuthClient(
+            credentialManager,
+            firebaseAuth
+        )
     }
 }
 
