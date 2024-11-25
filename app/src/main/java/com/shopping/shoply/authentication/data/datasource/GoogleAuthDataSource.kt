@@ -18,7 +18,7 @@ import com.shopping.shoply.common.domain.Result
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class GoogleAuthClient @Inject constructor(
+class GoogleAuthDataSource @Inject constructor(
     private val credentialManager: CredentialManager,
     private val firebaseAuth: FirebaseAuth
 ) {
@@ -69,7 +69,7 @@ class GoogleAuthClient @Inject constructor(
     private fun getGoogleIdOption(): GetGoogleIdOption {
         return GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(BuildConfig.WEB_CLIENT_ID)
+            .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
             .setAutoSelectEnabled(false)
             .build()
     }

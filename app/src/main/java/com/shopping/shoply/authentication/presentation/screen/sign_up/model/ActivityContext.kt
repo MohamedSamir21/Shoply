@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.sign_up
+package com.shopping.shoply.authentication.presentation.screen.sign_up.model
 
 import android.content.Context
 import com.shopping.shoply.authentication.domain.model.DomainContext

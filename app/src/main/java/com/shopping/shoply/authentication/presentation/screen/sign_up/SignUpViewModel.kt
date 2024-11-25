@@ -1,21 +1,22 @@
-package com.shopping.shoply.authentication.presentation.viewmodel
+package com.shopping.shoply.authentication.presentation.screen.sign_up
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.facebook.CallbackManager
+import com.facebook.login.LoginManager
 import com.shopping.shoply.authentication.domain.model.User
 import com.shopping.shoply.authentication.domain.usecase.CheckInputsFilledUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpUseCase
+import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithFacebookUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithGoogleUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateConfirmedPasswordUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateEmailUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePasswordUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePhoneUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateUsernameUseCase
-import com.shopping.shoply.authentication.presentation.screen.sign_up.ActivityContext
-import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreenEvent
-import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreenState
-import com.shopping.shoply.authentication.presentation.screen.sign_up.UserError
+import com.shopping.shoply.authentication.presentation.screen.sign_up.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.screen.sign_up.model.FBLoginManger
 import com.shopping.shoply.authentication.presentation.utility.asUiText
 import com.shopping.shoply.common.domain.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,7 +39,8 @@ class SignUpViewModel @Inject constructor(
     private val validatePasswordUseCase: ValidatePasswordUseCase,
     private val validateConfirmedPasswordUseCase: ValidateConfirmedPasswordUseCase,
     private val signUpUseCase: SignUpUseCase,
-    private val signUpWithGoogleUseCase: SignUpWithGoogleUseCase
+    private val signUpWithGoogleUseCase: SignUpWithGoogleUseCase,
+    private val signUpWithFacebookUseCase: SignUpWithFacebookUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(SignUpScreenState())
     val state = _state.asStateFlow()
@@ -50,7 +52,94 @@ class SignUpViewModel @Inject constructor(
     }
 
     fun onEvent(event: SignUpScreenEvent) {
+        when (event) {
+
+            is SignUpScreenEvent.Change -> {
+                onChange(event)
+            }
+
+            is SignUpScreenEvent.Clear -> {
+                onClear(event)
+            }
+
+            is SignUpScreenEvent.SignUp -> {
+                onSignUp(event)
+            }
+        }
+    }
+
+    private fun onSignUp(event: SignUpScreenEvent.SignUp) {
+        when (event) {
+            SignUpScreenEvent.SignUp.SubmitForm -> {
+                signUp()
+            }
+
+            is SignUpScreenEvent.SignUp.Google -> {
+                signUpWithGoogle(event.activityContext)
+            }
+
+            is SignUpScreenEvent.SignUp.Facebook -> {
+                signUpWithFacebook(
+                    event.loginManager,
+                    event.callbackManager
+                )
+            }
+
+            is SignUpScreenEvent.SignUp.Result -> {
+                onResult(event)
+            }
+        }
+    }
+
+    private fun onResult(event: SignUpScreenEvent.SignUp.Result) {
+        when (event) {
+            is SignUpScreenEvent.SignUp.Result.Success -> Unit
+            is SignUpScreenEvent.SignUp.Result.Failure -> {
+                _state.value = state.value.copy(
+                    signUpError = event.uiText
+                )
+            }
+        }
+    }
+
+    private fun onClear(event: SignUpScreenEvent.Clear) {
         val currentUser = state.value.user
+        when (event) {
+            SignUpScreenEvent.Clear.Username -> {
+                _state.value = state.value.copy(
+                    user = currentUser.copy(username = "")
+                )
+            }
+
+            SignUpScreenEvent.Clear.Email -> {
+                _state.value = state.value.copy(
+                    user = currentUser.copy(email = "")
+                )
+            }
+
+            SignUpScreenEvent.Clear.PhoneNumber -> {
+                _state.value = state.value.copy(
+                    user = currentUser.copy(phoneNumber = "")
+                )
+            }
+
+            SignUpScreenEvent.Clear.Password -> {
+                _state.value = state.value.copy(
+                    user = currentUser.copy(password = "")
+                )
+            }
+
+            SignUpScreenEvent.Clear.ConfirmedPassword -> {
+                _state.value = state.value.copy(
+                    user = currentUser.copy(confirmedPassword = "")
+                )
+            }
+        }
+    }
+
+    private fun onChange(event: SignUpScreenEvent.Change) {
+        val currentUser = state.value.user
+
         when (event) {
             is SignUpScreenEvent.Change.Username -> {
                 _state.value = state.value.copy(
@@ -87,52 +176,6 @@ class SignUpViewModel @Inject constructor(
                     showPassword = event.show
                 )
             }
-
-            SignUpScreenEvent.Clear.Username -> {
-                _state.value = state.value.copy(
-                    user = currentUser.copy(username = "")
-                )
-            }
-
-            SignUpScreenEvent.Clear.Email -> {
-                _state.value = state.value.copy(
-                    user = currentUser.copy(email = "")
-                )
-            }
-
-            SignUpScreenEvent.Clear.PhoneNumber -> {
-                _state.value = state.value.copy(
-                    user = currentUser.copy(phoneNumber = "")
-                )
-            }
-
-            SignUpScreenEvent.Clear.Password -> {
-                _state.value = state.value.copy(
-                    user = currentUser.copy(password = "")
-                )
-            }
-
-            SignUpScreenEvent.Clear.ConfirmedPassword -> {
-                _state.value = state.value.copy(
-                    user = currentUser.copy(confirmedPassword = "")
-                )
-            }
-
-            SignUpScreenEvent.SignUp.SubmitForm -> {
-                signUp()
-            }
-
-            is SignUpScreenEvent.SignUp.Google -> {
-                signUpWithGoogle(event.activityContext)
-            }
-
-            is SignUpScreenEvent.SignUp.Result.Failure -> {
-                _state.value = state.value.copy(
-                    signUpError = event.uiText
-                )
-            }
-
-            else -> Unit
         }
         _state.value = state.value.copy(
             enableSignUp = areInputsFilled()
@@ -150,6 +193,31 @@ class SignUpViewModel @Inject constructor(
                     _signUpResult.send(SignUpScreenEvent.SignUp.Result.Failure(result.error.asUiText()))
                 }
             }
+        }
+    }
+
+    private fun signUpWithFacebook(
+        loginManager: LoginManager,
+        callbackManager: CallbackManager
+    ) {
+        viewModelScope.launch {
+            Log.i(TAG, "signUpWithFacebook()")
+            signUpWithFacebookUseCase(
+                facebookLoginManger = FBLoginManger(loginManager),
+                callbackManager = callbackManager,
+                onComplete = { result ->
+                    viewModelScope.launch {
+                        when (result) {
+                            is Result.Success -> {
+                                _signUpResult.send(SignUpScreenEvent.SignUp.Result.Success)
+                            }
+
+                            is Result.Error -> {
+                                _signUpResult.send(SignUpScreenEvent.SignUp.Result.Failure(result.error.asUiText()))
+                            }
+                        }
+                    }
+                })
         }
     }
 

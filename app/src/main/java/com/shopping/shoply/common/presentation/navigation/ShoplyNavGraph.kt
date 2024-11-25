@@ -11,7 +11,7 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.shopping.shoply.authentication.presentation.screen.onboarding.OnboardingScreen
 import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreen
 import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccount
-import com.shopping.shoply.authentication.presentation.viewmodel.SignUpViewModel
+import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpViewModel
 
 @Composable
 fun ShoplyNavGraph(

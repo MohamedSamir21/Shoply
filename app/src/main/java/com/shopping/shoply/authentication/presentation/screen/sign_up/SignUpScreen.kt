@@ -1,6 +1,8 @@
 package com.shopping.shoply.authentication.presentation.screen.sign_up
 
 import android.app.UiModeManager
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +36,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,11 +65,15 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.facebook.CallbackManager
+import com.facebook.login.LoginManager
 import com.shopping.shoply.R
-import com.shopping.shoply.authentication.presentation.viewmodel.SignUpViewModel
+import com.shopping.shoply.authentication.presentation.screen.sign_up.model.ActivityContext
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import kotlinx.coroutines.flow.collectLatest
+
+private const val TAG = "SignUpScreen"
 
 @Composable
 fun SignUpScreen(
@@ -125,7 +132,15 @@ private fun SignUpContent(
             if (isExpandedScreen.not()) {
                 ContinueWithRow()
                 SignUpAlternativesRow(
-                    onGoogleSignUpClicked = { onEvent(SignUpScreenEvent.SignUp.Google(it)) }
+                    onGoogleSignUpClicked = { onEvent(SignUpScreenEvent.SignUp.Google(it)) },
+                    onFacebookSignUpClicked = {
+                        onEvent(
+                            SignUpScreenEvent.SignUp.Facebook(
+                                it.loginManager,
+                                it.callbackManager
+                            )
+                        )
+                    }
                 )
                 AlreadyHaveAccountRow(
                     onSignInClicked = {}
@@ -519,9 +534,27 @@ fun ContinueWithRow() {
 
 @Composable
 private fun SignUpAlternativesRow(
-    onGoogleSignUpClicked: (ActivityContext) -> Unit
+    onGoogleSignUpClicked: (ActivityContext) -> Unit,
+    onFacebookSignUpClicked: (SignUpScreenEvent.SignUp.Facebook) -> Unit
 ) {
     val context = LocalContext.current
+    val loginManager = remember {
+        LoginManager.getInstance()
+    }
+    val callbackManager = remember {
+        CallbackManager.Factory.create()
+    }
+    val fbLauncher = rememberLauncherForActivityResult(
+        loginManager.createLogInActivityResultContract(callbackManager, null)
+    ) {}
+
+    DisposableEffect(loginManager) {
+        onDispose {
+            Log.i(TAG, "onDispose()")
+            loginManager.unregisterCallback(callbackManager)
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -529,7 +562,16 @@ private fun SignUpAlternativesRow(
     ) {
         FacebookButton(
             modifier = Modifier.weight(1f),
-            onClick = { }
+            onClick = {
+                val permissions = listOf("email", "public_profile")
+                onFacebookSignUpClicked(
+                    SignUpScreenEvent.SignUp.Facebook(
+                        loginManager,
+                        callbackManager
+                    )
+                )
+                fbLauncher.launch(permissions)
+            }
         )
         GoogleButton(
             modifier = Modifier.weight(1f),

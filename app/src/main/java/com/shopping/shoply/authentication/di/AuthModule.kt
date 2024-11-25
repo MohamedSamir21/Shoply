@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.shopping.shoply.authentication.data.datasource.FacebookAuthDataSource
 import com.shopping.shoply.authentication.data.datasource.FirebaseAuthDataSource
-import com.shopping.shoply.authentication.data.datasource.GoogleAuthClient
+import com.shopping.shoply.authentication.data.datasource.GoogleAuthDataSource
 import com.shopping.shoply.authentication.data.datasource.IAuthDataSource
 import com.shopping.shoply.authentication.data.repository.AuthRepositoryImpl
 import com.shopping.shoply.authentication.domain.interfaces.AuthRepository
@@ -47,14 +48,22 @@ object AuthModule {
 
     @Provides
     @Singleton
-    fun provideGoogleAuthClient(
+    fun provideGoogleAuthDataSource(
         credentialManager: CredentialManager,
         firebaseAuth: FirebaseAuth
-    ): GoogleAuthClient {
-        return GoogleAuthClient(
+    ): GoogleAuthDataSource {
+        return GoogleAuthDataSource(
             credentialManager,
             firebaseAuth
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideFacebookAuthDataSource(
+        firebaseAuth: FirebaseAuth
+    ): FacebookAuthDataSource {
+        return FacebookAuthDataSource(firebaseAuth)
     }
 }
 
