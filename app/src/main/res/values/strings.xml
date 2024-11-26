@@ -31,5 +31,10 @@
     <string name="enter_valid_email">Enter a valid email</string>
     <string name="network_issue">Network issue</string>
     <string name="unknown_error">Unknown Error</string>
+    <string name="verify_your_account">Verify Your Account</string>
+    <string name="enter_the_verification_code_sent_to">Enter the verification code sent to</string>
+    <string name="send_a_new_code">send a new code (%1$s)</string>
+    <string name="resend_code">Resend code</string>
+    <string name="continue_">Continue</string>
 
 </resources>
