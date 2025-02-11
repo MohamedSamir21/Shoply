@@ -45,7 +45,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.7"
     }
     packaging {
         resources {
@@ -110,4 +110,7 @@ dependencies {
 
     // Facebook Login
     implementation(libs.facebook.login)
+
+    // Firebase DeepLinks
+    implementation(libs.firebase.dynamic.links)
 }

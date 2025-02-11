@@ -12,6 +12,7 @@ import com.shopping.shoply.authentication.data.repository.AuthRepositoryImpl
 import com.shopping.shoply.authentication.domain.interfaces.AuthRepository
 import com.shopping.shoply.authentication.domain.interfaces.EmailValidator
 import com.shopping.shoply.authentication.domain.interfaces.PhoneValidator
+import com.shopping.shoply.authentication.domain.usecase.count_down.FormatCountDownTimeUseCase
 import com.shopping.shoply.authentication.presentation.utility.EmailValidatorUtil
 import com.shopping.shoply.authentication.presentation.utility.PhoneValidatorUtil
 import dagger.Binds
@@ -65,6 +66,11 @@ object AuthModule {
     ): FacebookAuthDataSource {
         return FacebookAuthDataSource(firebaseAuth)
     }
+
+    @Provides
+    @Singleton
+    fun provideFormatCountDownTimeUseCase() = FormatCountDownTimeUseCase()
+
 }
 
 @Module

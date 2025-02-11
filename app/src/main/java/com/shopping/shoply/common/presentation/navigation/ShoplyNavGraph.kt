@@ -1,17 +1,29 @@
 package com.shopping.shoply.common.presentation.navigation
 
+
+import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.shopping.shoply.authentication.presentation.screen.onboarding.OnboardingScreen
+import com.shopping.shoply.authentication.presentation.screen.sign_in.SignInScreen
 import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreen
 import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountScreen
 import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpViewModel
+import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountIntent
+import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountViewModel
+import com.shopping.shoply.authentication.presentation.screen.verify_result.VerificationResultScreen
+import com.shopping.shoply.common.presentation.util.getActivity
 
 @Composable
 fun ShoplyNavGraph(
@@ -22,14 +34,57 @@ fun ShoplyNavGraph(
         WindowWidthSizeClass.COMPACT -> false
         else -> true
     }
+    val deepLink = extractDeepLink()
 
     NavHost(
         navController = navController,
-        startDestination = NavRoutes.VerifyAccount.value
+        startDestination = if (deepLink != null) {
+            NavRoutes.VerificationResult.route
+        } else {
+            NavRoutes.SignUp.route
+        }
     ) {
         addOnboardingScreen(navController)
         addSignupScreen(navController, isExpandedScreen)
-        addVerifyAccount()
+        addVerifyAccount(navController)
+        addSignInScreen()
+        addVerificationResult(navController, deepLink.toString())
+        addHomeScreen()
+    }
+}
+
+fun NavGraphBuilder.addVerificationResult(
+    navController: NavHostController,
+    deepLink: String
+) {
+    composable(
+        route = NavRoutes.VerificationResult.route,
+        deepLinks = listOf(
+            navDeepLink {
+                uriPattern = DeepLinks.VERIFICATION_RESULT_ROUTE
+            }
+        )
+    ) {
+        VerificationResultScreen(
+            navHostController = navController,
+            deepLink = deepLink
+        )
+    }
+}
+
+fun NavGraphBuilder.addHomeScreen() {
+    composable(
+        route = NavRoutes.Home.route
+    ) {
+
+    }
+}
+
+fun NavGraphBuilder.addSignInScreen() {
+    composable(
+        route = NavRoutes.SignIn.route
+    ) {
+        SignInScreen()
     }
 }
 
@@ -37,7 +92,7 @@ private fun NavGraphBuilder.addOnboardingScreen(
     navController: NavHostController
 ) {
     composable(
-        route = NavRoutes.Onboarding.value
+        route = NavRoutes.Onboarding.route
     ) {
         OnboardingScreen(navController = navController)
     }
@@ -48,7 +103,7 @@ private fun NavGraphBuilder.addSignupScreen(
     isExpandedScreen: Boolean
 ) {
     composable(
-        route = NavRoutes.SignUp.value
+        route = NavRoutes.SignUp.route
     ) {
         val viewModel: SignUpViewModel = hiltViewModel()
 
@@ -60,10 +115,48 @@ private fun NavGraphBuilder.addSignupScreen(
     }
 }
 
-private fun NavGraphBuilder.addVerifyAccount() {
+private fun NavGraphBuilder.addVerifyAccount(
+    navController: NavHostController
+) {
     composable(
-        route = NavRoutes.VerifyAccount.value
-    ) {
-        VerifyAccountScreen()
+        route = NavRoutes.VerifyAccount.route,
+        arguments = listOf(
+            navArgument(
+                name = NavRoutes.VerifyAccount.Args.EMAIL
+            ) {
+                type = NavType.StringType
+            }
+        )
+    ) { navBackStack ->
+
+        val email = navBackStack.arguments?.getString(NavRoutes.VerifyAccount.Args.EMAIL)
+        val viewModel: VerifyAccountViewModel = hiltViewModel()
+        val state = viewModel.state.collectAsStateWithLifecycle()
+        val countDownTime = state.value.countDownTime
+        val countDownFinished = state.value.countDownFinished
+        val sendEmailLinkSuccess = state.value.sendEmailLinkSuccessMessage
+        val sendEmailLinkError = state.value.sendEmailLinkError
+
+        VerifyAccountScreen(
+            navController = navController,
+            email = email,
+            count = countDownTime,
+            countDownFinished = countDownFinished,
+            sendEmailLinkSuccess = sendEmailLinkSuccess,
+            sendEmailLinkError = sendEmailLinkError,
+            onResend = {
+                viewModel.onIntent(VerifyAccountIntent.Resend)
+            },
+            onShowEmailLinkSuccessMessage = viewModel::resetEmailLinkSuccessMessage,
+            onShowEmailLinkErrorMessage = viewModel::resetEmailLinkErrorMessage
+        )
     }
+}
+
+@Composable
+private fun extractDeepLink(): Uri? {
+    val context = LocalContext.current
+    val activity = context.getActivity()
+    val deepLink = activity.intent.data
+    return deepLink
 }

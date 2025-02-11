@@ -61,7 +61,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -84,14 +83,34 @@ fun SignUpScreen(
     val state = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel.signUpResult) {
-        viewModel.signUpResult.collectLatest {
-            when (it) {
-                is SignUpScreenEvent.SignUp.Result.Success -> {
-                    navHostController.navigate(NavRoutes.VerifyAccount.value)
+        viewModel.signUpResult.collectLatest { result ->
+            when (result) {
+                is SignUpScreenEvent.SignUpResult.Success -> {
+                    when (result) {
+                        SignUpScreenEvent.SignUpResult.Success.NotVerified -> { // In case the user uses sign up form, then we need to send him verification email!!
+                            navHostController.popBackStack()
+                            navHostController.navigate(
+                                NavRoutes.VerifyAccount.route.replace(
+                                    "{email}",
+                                    state.value.user.email
+                                )
+                            )
+                        }
+
+                        SignUpScreenEvent.SignUpResult.Success.Verified -> { // In case the user uses Facebook or Google Sign up, he is verified by default!!
+                            navHostController.popBackStack(
+                                route = NavRoutes.SignUp.route,
+                                inclusive = true
+                            )
+                            navHostController.navigate(
+                                NavRoutes.Home.route
+                            )
+                        }
+                    }
                 }
 
-                is SignUpScreenEvent.SignUp.Result.Failure -> {
-                    viewModel.onEvent(SignUpScreenEvent.SignUp.Result.Failure(it.uiText))
+                is SignUpScreenEvent.SignUpResult.Failure -> {
+                    viewModel.onIntent(SignUpScreenEvent.SignUpResult.Failure(result.uiText))
                 }
             }
         }
@@ -100,8 +119,12 @@ fun SignUpScreen(
     SignUpContent(
         isExpandedScreen = isExpandedScreen,
         state = state.value,
-        onEvent = {
-            viewModel.onEvent(it)
+        onEvent = { event ->
+            if (event is SignUpScreenIntent.SignIn) {
+                navHostController.navigate(NavRoutes.SignIn.route)
+            } else {
+                viewModel.onIntent(event)
+            }
         }
     )
 }
@@ -110,7 +133,7 @@ fun SignUpScreen(
 private fun SignUpContent(
     isExpandedScreen: Boolean,
     state: SignUpScreenState,
-    onEvent: (SignUpScreenEvent) -> Unit
+    onEvent: (SignUpScreenIntent) -> Unit
 ) {
 
     Box(
@@ -132,10 +155,10 @@ private fun SignUpContent(
             if (isExpandedScreen.not()) {
                 ContinueWithRow()
                 SignUpAlternativesRow(
-                    onGoogleSignUpClicked = { onEvent(SignUpScreenEvent.SignUp.Google(it)) },
+                    onGoogleSignUpClicked = { onEvent(SignUpScreenIntent.SignUp.Google(it)) },
                     onFacebookSignUpClicked = {
                         onEvent(
-                            SignUpScreenEvent.SignUp.Facebook(
+                            SignUpScreenIntent.SignUp.Facebook(
                                 it.loginManager,
                                 it.callbackManager
                             )
@@ -143,7 +166,9 @@ private fun SignUpContent(
                     }
                 )
                 AlreadyHaveAccountRow(
-                    onSignInClicked = {}
+                    onSignInClicked = {
+                        onEvent(SignUpScreenIntent.SignIn)
+                    }
                 )
             }
         }
@@ -193,7 +218,7 @@ private fun PromoText() {
 private fun Form(
     state: SignUpScreenState,
     isExpandedScreen: Boolean,
-    onEvent: (SignUpScreenEvent) -> Unit
+    onEvent: (SignUpScreenIntent) -> Unit
 ) {
     val focusRequester = remember {
         FocusRequester()
@@ -231,7 +256,7 @@ private fun Form(
                 .focusRequester(focusRequester),
             onClick = {
                 focusRequester.requestFocus()
-                onEvent(SignUpScreenEvent.SignUp.SubmitForm)
+                onEvent(SignUpScreenIntent.SignUp.SubmitForm)
             },
             enable = state.enableSignUp
         )
@@ -242,34 +267,34 @@ private fun Form(
 private fun FormTextFields(
     modifier: Modifier = Modifier,
     state: SignUpScreenState,
-    onEvent: (SignUpScreenEvent) -> Unit
+    onEvent: (SignUpScreenIntent) -> Unit
 ) {
     FormUsername(
         modifier = modifier,
         username = state.user.username,
-        onUsernameChanged = { onEvent(SignUpScreenEvent.Change.Username(it)) },
+        onUsernameChanged = { onEvent(SignUpScreenIntent.Change.Username(it)) },
         errorMessage = state.userError.usernameError,
-        onClear = { onEvent(SignUpScreenEvent.Clear.Username) }
+        onClear = { onEvent(SignUpScreenIntent.Clear.Username) }
     )
     FormEmail(
         modifier = modifier.padding(top = 10.dp),
         email = state.user.email,
-        onEmailChanged = { onEvent(SignUpScreenEvent.Change.Email(it)) },
+        onEmailChanged = { onEvent(SignUpScreenIntent.Change.Email(it)) },
         errorMessage = state.userError.emailError,
-        onClear = { onEvent(SignUpScreenEvent.Clear.Email) }
+        onClear = { onEvent(SignUpScreenIntent.Clear.Email) }
     )
     FormPhoneNumber(
         modifier = modifier.padding(top = 10.dp),
         phoneNumber = state.user.phoneNumber,
-        onPhoneNumberChanged = { onEvent(SignUpScreenEvent.Change.PhoneNumber(it)) },
-        onPhoneNumberCleared = { onEvent(SignUpScreenEvent.Clear.PhoneNumber) },
+        onPhoneNumberChanged = { onEvent(SignUpScreenIntent.Change.PhoneNumber(it)) },
+        onPhoneNumberCleared = { onEvent(SignUpScreenIntent.Clear.PhoneNumber) },
         errorMessage = state.userError.phoneNumberError,
     )
     FormPassword(
         modifier = modifier.padding(top = 10.dp),
         password = state.user.password,
-        onPasswordChanged = { onEvent(SignUpScreenEvent.Change.Password(it)) },
-        onVisibilityChanged = { onEvent(SignUpScreenEvent.Change.PasswordVisibility(it)) },
+        onPasswordChanged = { onEvent(SignUpScreenIntent.Change.Password(it)) },
+        onVisibilityChanged = { onEvent(SignUpScreenIntent.Change.PasswordVisibility(it)) },
         showPassword = state.showPassword,
         errorMessage = state.userError.passwordError,
     )
@@ -279,12 +304,12 @@ private fun FormTextFields(
         showPassword = state.showPassword,
         onConfirmedPasswordChanged = {
             onEvent(
-                SignUpScreenEvent.Change.ConfirmedPassword(
+                SignUpScreenIntent.Change.ConfirmedPassword(
                     it
                 )
             )
         },
-        onVisibilityChanged = { onEvent(SignUpScreenEvent.Change.PasswordVisibility(it)) },
+        onVisibilityChanged = { onEvent(SignUpScreenIntent.Change.PasswordVisibility(it)) },
         errorMessage = state.userError.passwordConfirmedError
     )
 }
@@ -535,7 +560,7 @@ fun ContinueWithRow() {
 @Composable
 private fun SignUpAlternativesRow(
     onGoogleSignUpClicked: (ActivityContext) -> Unit,
-    onFacebookSignUpClicked: (SignUpScreenEvent.SignUp.Facebook) -> Unit
+    onFacebookSignUpClicked: (SignUpScreenIntent.SignUp.Facebook) -> Unit
 ) {
     val context = LocalContext.current
     val loginManager = remember {
@@ -565,7 +590,7 @@ private fun SignUpAlternativesRow(
             onClick = {
                 val permissions = listOf("email", "public_profile")
                 onFacebookSignUpClicked(
-                    SignUpScreenEvent.SignUp.Facebook(
+                    SignUpScreenIntent.SignUp.Facebook(
                         loginManager,
                         callbackManager
                     )
@@ -650,8 +675,7 @@ fun AlreadyHaveAccountRow(
 @Preview(
     name = "Signup Screen",
     showSystemUi = true,
-    uiMode = UiModeManager.MODE_NIGHT_YES,
-    device = Devices.TABLET
+    uiMode = UiModeManager.MODE_NIGHT_YES
 )
 @Composable
 private fun SignupContentPreview() {

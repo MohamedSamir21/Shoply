@@ -1,39 +1,14 @@
 package com.shopping.shoply.authentication.presentation.screen.sign_up
 
-import com.facebook.CallbackManager
-import com.facebook.login.LoginManager
-import com.shopping.shoply.authentication.presentation.screen.sign_up.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreenIntent.SignUp
 import com.shopping.shoply.authentication.presentation.utility.UiText
 
-sealed class SignUpScreenEvent {
-    sealed class Change : SignUpScreenEvent() {
-        data class Username(val username: String) : Change()
-        data class Email(val email: String) : Change()
-        data class PhoneNumber(val phoneNumber: String) : Change()
-        data class Password(val password: String) : Change()
-        data class ConfirmedPassword(val confirmedPassword: String) : Change()
-        data class PasswordVisibility(val show: Boolean) : Change()
-    }
-
-    sealed class Clear : SignUpScreenEvent() {
-        data object Username : Clear()
-        data object Email : Clear()
-        data object PhoneNumber : Clear()
-        data object Password : Clear()
-        data object ConfirmedPassword : Clear()
-    }
-
-    sealed class SignUp : SignUpScreenEvent() {
-        data object SubmitForm : SignUp()
-        data class Google(val activityContext: ActivityContext) : SignUp()
-        data class Facebook(
-            val loginManager: LoginManager,
-            val callbackManager: CallbackManager
-        ) : SignUp()
-
-        sealed class Result : SignUp() {
-            data object Success : Result()
-            data class Failure(val uiText: UiText) : Result()
+sealed interface SignUpScreenEvent {
+    sealed class SignUpResult : SignUp() {
+        sealed class Success : SignUpResult() {
+            data object Verified: Success()
+            data object NotVerified: Success()
         }
+        data class Failure(val uiText: UiText) : SignUpResult()
     }
 }

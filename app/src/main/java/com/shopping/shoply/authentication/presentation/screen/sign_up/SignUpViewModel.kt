@@ -45,56 +45,58 @@ class SignUpViewModel @Inject constructor(
     private val _state = MutableStateFlow(SignUpScreenState())
     val state = _state.asStateFlow()
     private val _signUpResult =
-        Channel<SignUpScreenEvent.SignUp.Result>()
+        Channel<SignUpScreenEvent.SignUpResult>()
     val signUpResult = _signUpResult.receiveAsFlow()
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.printStackTrace()
     }
 
-    fun onEvent(event: SignUpScreenEvent) {
-        when (event) {
+    fun onIntent(intent: SignUpScreenIntent) {
+        when (intent) {
 
-            is SignUpScreenEvent.Change -> {
-                onChange(event)
+            is SignUpScreenIntent.Change -> {
+                onChange(intent)
             }
 
-            is SignUpScreenEvent.Clear -> {
-                onClear(event)
+            is SignUpScreenIntent.Clear -> {
+                onClear(intent)
             }
 
-            is SignUpScreenEvent.SignUp -> {
-                onSignUp(event)
+            is SignUpScreenIntent.SignUp -> {
+                onSignUp(intent)
             }
+
+            else -> Unit
         }
     }
 
-    private fun onSignUp(event: SignUpScreenEvent.SignUp) {
+    private fun onSignUp(event: SignUpScreenIntent.SignUp) {
         when (event) {
-            SignUpScreenEvent.SignUp.SubmitForm -> {
+            SignUpScreenIntent.SignUp.SubmitForm -> {
                 signUp()
             }
 
-            is SignUpScreenEvent.SignUp.Google -> {
+            is SignUpScreenIntent.SignUp.Google -> {
                 signUpWithGoogle(event.activityContext)
             }
 
-            is SignUpScreenEvent.SignUp.Facebook -> {
+            is SignUpScreenIntent.SignUp.Facebook -> {
                 signUpWithFacebook(
                     event.loginManager,
                     event.callbackManager
                 )
             }
 
-            is SignUpScreenEvent.SignUp.Result -> {
+            is SignUpScreenEvent.SignUpResult -> {
                 onResult(event)
             }
         }
     }
 
-    private fun onResult(event: SignUpScreenEvent.SignUp.Result) {
+    private fun onResult(event: SignUpScreenEvent.SignUpResult) {
         when (event) {
-            is SignUpScreenEvent.SignUp.Result.Success -> Unit
-            is SignUpScreenEvent.SignUp.Result.Failure -> {
+            is SignUpScreenEvent.SignUpResult.Success -> Unit
+            is SignUpScreenEvent.SignUpResult.Failure -> {
                 _state.value = state.value.copy(
                     signUpError = event.uiText
                 )
@@ -102,34 +104,34 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onClear(event: SignUpScreenEvent.Clear) {
+    private fun onClear(event: SignUpScreenIntent.Clear) {
         val currentUser = state.value.user
         when (event) {
-            SignUpScreenEvent.Clear.Username -> {
+            SignUpScreenIntent.Clear.Username -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(username = "")
                 )
             }
 
-            SignUpScreenEvent.Clear.Email -> {
+            SignUpScreenIntent.Clear.Email -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(email = "")
                 )
             }
 
-            SignUpScreenEvent.Clear.PhoneNumber -> {
+            SignUpScreenIntent.Clear.PhoneNumber -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(phoneNumber = "")
                 )
             }
 
-            SignUpScreenEvent.Clear.Password -> {
+            SignUpScreenIntent.Clear.Password -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(password = "")
                 )
             }
 
-            SignUpScreenEvent.Clear.ConfirmedPassword -> {
+            SignUpScreenIntent.Clear.ConfirmedPassword -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(confirmedPassword = "")
                 )
@@ -137,41 +139,41 @@ class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onChange(event: SignUpScreenEvent.Change) {
+    private fun onChange(event: SignUpScreenIntent.Change) {
         val currentUser = state.value.user
 
         when (event) {
-            is SignUpScreenEvent.Change.Username -> {
+            is SignUpScreenIntent.Change.Username -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(username = event.username)
                 )
             }
 
-            is SignUpScreenEvent.Change.Email -> {
+            is SignUpScreenIntent.Change.Email -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(email = event.email)
                 )
             }
 
-            is SignUpScreenEvent.Change.PhoneNumber -> {
+            is SignUpScreenIntent.Change.PhoneNumber -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(phoneNumber = event.phoneNumber)
                 )
             }
 
-            is SignUpScreenEvent.Change.Password -> {
+            is SignUpScreenIntent.Change.Password -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(password = event.password)
                 )
             }
 
-            is SignUpScreenEvent.Change.ConfirmedPassword -> {
+            is SignUpScreenIntent.Change.ConfirmedPassword -> {
                 _state.value = state.value.copy(
                     user = currentUser.copy(confirmedPassword = event.confirmedPassword)
                 )
             }
 
-            is SignUpScreenEvent.Change.PasswordVisibility -> {
+            is SignUpScreenIntent.Change.PasswordVisibility -> {
                 _state.value = state.value.copy(
                     showPassword = event.show
                 )
@@ -186,11 +188,11 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler) {
             when (val result = signUpWithGoogleUseCase(activityContext)) {
                 is Result.Success -> {
-                    _signUpResult.send(SignUpScreenEvent.SignUp.Result.Success)
+                    _signUpResult.send(SignUpScreenEvent.SignUpResult.Success.Verified)
                 }
 
                 is Result.Error -> {
-                    _signUpResult.send(SignUpScreenEvent.SignUp.Result.Failure(result.error.asUiText()))
+                    _signUpResult.send(SignUpScreenEvent.SignUpResult.Failure(result.error.asUiText()))
                 }
             }
         }
@@ -209,11 +211,11 @@ class SignUpViewModel @Inject constructor(
                     viewModelScope.launch {
                         when (result) {
                             is Result.Success -> {
-                                _signUpResult.send(SignUpScreenEvent.SignUp.Result.Success)
+                                _signUpResult.send(SignUpScreenEvent.SignUpResult.Success.Verified)
                             }
 
                             is Result.Error -> {
-                                _signUpResult.send(SignUpScreenEvent.SignUp.Result.Failure(result.error.asUiText()))
+                                _signUpResult.send(SignUpScreenEvent.SignUpResult.Failure(result.error.asUiText()))
                             }
                         }
                     }
@@ -246,12 +248,12 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             when (val result = signUpUseCase(state.value.user)) {
                 is Result.Success -> {
-                    _signUpResult.send(SignUpScreenEvent.SignUp.Result.Success)
+                    _signUpResult.send(SignUpScreenEvent.SignUpResult.Success.NotVerified)
                 }
 
                 is Result.Error -> {
                     val error = result.error
-                    _signUpResult.send(SignUpScreenEvent.SignUp.Result.Failure(uiText = error.asUiText()))
+                    _signUpResult.send(SignUpScreenEvent.SignUpResult.Failure(uiText = error.asUiText()))
                 }
             }
             _state.value = state.value.copy(

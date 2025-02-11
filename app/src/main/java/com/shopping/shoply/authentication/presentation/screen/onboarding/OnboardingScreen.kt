@@ -67,14 +67,14 @@ fun OnboardingScreen(
         onForward = {
             viewModel.onEvent(OnboardingScreenEvent.Forward)
             if (state.value.finish)
-                navController.navigate(NavRoutes.SignUp.value)
+                navController.navigate(NavRoutes.SignUp.route)
         },
         onPrevious = {
             viewModel.onEvent(OnboardingScreenEvent.Previous)
         },
         onSkip = {
             navController.navigate(
-                NavRoutes.SignUp.value
+                NavRoutes.SignUp.route
             )
         }
     )

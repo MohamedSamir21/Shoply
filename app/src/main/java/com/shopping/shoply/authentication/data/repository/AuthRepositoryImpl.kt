@@ -29,9 +29,7 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signIn(user: User): Result<Unit, DataError> {
-        return withContext(Dispatchers.IO) {
-            authDataSource.signIn(user)
-        }
+        return authDataSource.signIn(user)
     }
 
     override suspend fun signUpWithGoogle(domainContext: DomainContext): Result<Unit, DataError> {
@@ -52,5 +50,13 @@ class AuthRepositoryImpl @Inject constructor(
             callbackManager,
             onComplete
         )
+    }
+
+    override suspend fun resendVerificationEmailLink(): Result<Unit, DataError> {
+        return authDataSource.resendVerificationEmailLink()
+    }
+
+    override suspend fun verifyEmail(deepLink: String): Result<Unit, DataError> {
+        return authDataSource.verifyEmail(deepLink)
     }
 }
