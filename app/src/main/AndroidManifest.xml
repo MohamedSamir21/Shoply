@@ -24,8 +24,7 @@
 
         <activity
             android:name="com.facebook.FacebookActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            />
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation" />
         <activity
             android:name="com.facebook.CustomTabActivity"
             android:exported="true">
@@ -47,6 +46,17 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="shoply.page.link"
+                    android:pathPrefix="/verify"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
     </application>

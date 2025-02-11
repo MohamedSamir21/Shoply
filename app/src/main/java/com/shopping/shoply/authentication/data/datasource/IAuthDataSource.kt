@@ -7,4 +7,6 @@ import com.shopping.shoply.common.domain.Result
 interface IAuthDataSource {
     suspend fun signUp(user: User): Result<Unit, DataError>
     suspend fun signIn(user: User): Result<Unit, DataError>
+    suspend fun resendVerificationEmailLink(): Result<Unit, DataError>
+    suspend fun verifyEmail(deepLink: String): Result<Unit, DataError>
 }

@@ -39,6 +39,8 @@ fun DataError.asUiText(): UiText {
         DataError.Authentication.ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL -> UiText.StringResource(R.string.account_with_different_credentials)
         DataError.Authentication.EMAIL_ALREADY_IN_USE -> UiText.StringResource(R.string.already_email_exits)
         DataError.Authentication.USER_COLLISION -> UiText.StringResource(R.string.already_email_exits)
+        DataError.Authentication.NOT_VERIFIED -> UiText.StringResource(R.string.cannot_verify_you)
+        DataError.Authentication.ALREADY_VERIFIED -> UiText.StringResource(R.string.already_verified_message)
         DataError.Authentication.UNKNOWN -> UiText.StringResource(R.string.unknown_authentication_error)
         DataError.Network -> UiText.StringResource(R.string.network_issue)
         DataError.Unknown -> UiText.StringResource(R.string.unknown_error)

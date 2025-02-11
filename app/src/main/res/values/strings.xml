@@ -32,9 +32,18 @@
     <string name="network_issue">Network issue</string>
     <string name="unknown_error">Unknown Error</string>
     <string name="verify_your_account">Verify Your Account</string>
-    <string name="enter_the_verification_code_sent_to">Enter the verification code sent to</string>
-    <string name="send_a_new_code">send a new code (%1$s)</string>
     <string name="resend_code">Resend code</string>
-    <string name="continue_">Continue</string>
+    <string name="ok">OK</string>
+    <string name="send_verification_link_again">send verification link again</string>
+    <string name="check_the_verification_email_link_sent_to">Check the verification email link sent to</string>
+    <string name="continue_to_home">Continue to home</string>
+    <string name="resend">Resend</string>
+    <string name="send_verification_link_again_in">Send verification link again in</string>
+    <string name="new_email_link_verification">New Email Link verification has been sent successfully!!</string>
+    <string name="verifying">Verifying...</string>
+    <string name="oops">Oops!</string>
+    <string name="cannot_verify_you">Cannot verify you!!</string>
+    <string name="congratulations">Congratulations</string>
+    <string name="already_verified_message">you\'re already verified!!</string>
 
 </resources>

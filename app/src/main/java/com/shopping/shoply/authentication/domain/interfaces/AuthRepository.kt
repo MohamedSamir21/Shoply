@@ -16,4 +16,7 @@ interface AuthRepository {
         callbackManager: CallbackManager,
         onComplete: (Result<Unit, DataError>) -> Unit
     )
+
+    suspend fun resendVerificationEmailLink(): Result<Unit, DataError>
+    suspend fun verifyEmail(deepLink: String): Result<Unit, DataError>
 }

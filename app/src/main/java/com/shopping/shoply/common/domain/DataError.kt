@@ -11,7 +11,9 @@ sealed interface DataError : Error {
         ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL,
         EMAIL_ALREADY_IN_USE,
         USER_COLLISION,
-        UNKNOWN
+        UNKNOWN,
+        NOT_VERIFIED,
+        ALREADY_VERIFIED
     }
 }
 
