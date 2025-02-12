@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.verify_result
+package com.shopping.shoply.authentication.presentation.verify_result
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

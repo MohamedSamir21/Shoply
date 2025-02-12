@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.sign_in
+package com.shopping.shoply.authentication.presentation.sign_in
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text

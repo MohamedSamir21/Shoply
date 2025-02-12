@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.verify_account
+package com.shopping.shoply.authentication.presentation.verify_account
 
 import com.shopping.shoply.authentication.presentation.utility.UiText
 

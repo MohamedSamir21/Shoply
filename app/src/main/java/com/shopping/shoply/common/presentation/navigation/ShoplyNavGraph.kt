@@ -15,14 +15,14 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
-import com.shopping.shoply.authentication.presentation.screen.onboarding.OnboardingScreen
-import com.shopping.shoply.authentication.presentation.screen.sign_in.SignInScreen
-import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreen
-import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountScreen
-import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpViewModel
-import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountIntent
-import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountViewModel
-import com.shopping.shoply.authentication.presentation.screen.verify_result.VerificationResultScreen
+import com.shopping.shoply.authentication.presentation.onboarding.OnboardingScreen
+import com.shopping.shoply.authentication.presentation.sign_in.SignInScreen
+import com.shopping.shoply.authentication.presentation.sign_up.SignUpScreen
+import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountScreen
+import com.shopping.shoply.authentication.presentation.sign_up.SignUpViewModel
+import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountIntent
+import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountViewModel
+import com.shopping.shoply.authentication.presentation.verify_result.VerificationResultScreen
 import com.shopping.shoply.common.presentation.util.getActivity
 
 @Composable

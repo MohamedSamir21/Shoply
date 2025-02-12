@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.sign_up
+package com.shopping.shoply.authentication.presentation.sign_up
 
 import android.app.UiModeManager
 import android.util.Log
@@ -67,7 +67,7 @@ import androidx.navigation.NavHostController
 import com.facebook.CallbackManager
 import com.facebook.login.LoginManager
 import com.shopping.shoply.R
-import com.shopping.shoply.authentication.presentation.screen.sign_up.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.sign_up.model.ActivityContext
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import kotlinx.coroutines.flow.collectLatest

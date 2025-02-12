@@ -1,6 +1,6 @@
-package com.shopping.shoply.authentication.presentation.screen.sign_up
+package com.shopping.shoply.authentication.presentation.sign_up
 
-import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreenIntent.SignUp
+import com.shopping.shoply.authentication.presentation.sign_up.SignUpScreenIntent.SignUp
 import com.shopping.shoply.authentication.presentation.utility.UiText
 
 sealed interface SignUpScreenEvent {
