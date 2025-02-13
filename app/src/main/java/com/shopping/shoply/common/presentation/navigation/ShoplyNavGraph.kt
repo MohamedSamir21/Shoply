@@ -41,13 +41,13 @@ fun ShoplyNavGraph(
         startDestination = if (deepLink != null) {
             NavRoutes.VerificationResult.route
         } else {
-            NavRoutes.SignUp.route
+            NavRoutes.SignIn.route
         }
     ) {
         addOnboardingScreen(navController)
         addSignupScreen(navController, isExpandedScreen)
         addVerifyAccount(navController)
-        addSignInScreen()
+        addSignInScreen(navController, isExpandedScreen)
         addVerificationResult(navController, deepLink.toString())
         addHomeScreen()
     }
@@ -80,11 +80,17 @@ fun NavGraphBuilder.addHomeScreen() {
     }
 }
 
-fun NavGraphBuilder.addSignInScreen() {
+fun NavGraphBuilder.addSignInScreen(
+    navController: NavHostController,
+    isExpandedScreen: Boolean
+) {
     composable(
         route = NavRoutes.SignIn.route
     ) {
-        SignInScreen()
+        SignInScreen(
+            navController = navController,
+            isExpandedScreen = isExpandedScreen
+        )
     }
 }
 

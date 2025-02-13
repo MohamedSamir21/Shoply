@@ -4,7 +4,6 @@ import android.app.UiModeManager
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,30 +24,20 @@ import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -67,6 +56,13 @@ import androidx.navigation.NavHostController
 import com.facebook.CallbackManager
 import com.facebook.login.LoginManager
 import com.shopping.shoply.R
+import com.shopping.shoply.authentication.presentation.components.ContinueWithRow
+import com.shopping.shoply.authentication.presentation.components.FacebookButton
+import com.shopping.shoply.authentication.presentation.components.FormEmail
+import com.shopping.shoply.authentication.presentation.components.FormPassword
+import com.shopping.shoply.authentication.presentation.components.FormTextField
+import com.shopping.shoply.authentication.presentation.components.GoogleButton
+import com.shopping.shoply.authentication.presentation.components.RoundedShoplyButton
 import com.shopping.shoply.authentication.presentation.sign_up.model.ActivityContext
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
@@ -245,7 +241,8 @@ private fun Form(
     if (state.isSigningUp) {
         CircularProgressIndicator()
     } else {
-        SignUpButton(
+        RoundedShoplyButton(
+            label = stringResource(R.string.sign_up),
             modifier = if (isExpandedScreen)
                 Modifier
                     .wrapContentWidth()
@@ -339,30 +336,6 @@ private fun FormUsername(
 }
 
 @Composable
-private fun FormEmail(
-    modifier: Modifier = Modifier,
-    email: String,
-    onEmailChanged: (String) -> Unit,
-    errorMessage: String?,
-    onClear: () -> Unit
-) {
-    FormTextField(
-        value = email,
-        onValueChange = { onEmailChanged(it) },
-        onTrailingIconClicked = onClear,
-        label = stringResource(R.string.email),
-        leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_email),
-        trailingIcon = Icons.Outlined.Clear,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Email,
-            imeAction = ImeAction.Next
-        ),
-        supportingText = errorMessage,
-        modifier = modifier
-    )
-}
-
-@Composable
 private fun FormPhoneNumber(
     modifier: Modifier = Modifier,
     phoneNumber: String,
@@ -381,40 +354,6 @@ private fun FormPhoneNumber(
             keyboardType = KeyboardType.Phone,
             imeAction = ImeAction.Next
         ),
-        supportingText = errorMessage,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun FormPassword(
-    modifier: Modifier = Modifier,
-    password: String,
-    showPassword: Boolean,
-    onPasswordChanged: (String) -> Unit,
-    errorMessage: String?,
-    onVisibilityChanged: (Boolean) -> Unit
-) {
-    val visibilityIcon = ImageVector.vectorResource(
-        id = if (showPassword) {
-            R.drawable.ic_visibility_on
-        } else {
-            R.drawable.ic_visibility_off
-        }
-    )
-
-    FormTextField(
-        value = password,
-        onValueChange = { onPasswordChanged(it) },
-        onTrailingIconClicked = { onVisibilityChanged(showPassword.not()) },
-        label = stringResource(R.string.password),
-        leadingIcon = Icons.Outlined.Lock,
-        trailingIcon = visibilityIcon,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Next
-        ),
-        visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
         supportingText = errorMessage,
         modifier = modifier
     )
@@ -455,109 +394,6 @@ private fun FormConfirmedPassword(
 }
 
 @Composable
-private fun FormTextField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    leadingIcon: ImageVector,
-    trailingIcon: ImageVector,
-    onTrailingIconClicked: () -> Unit,
-    supportingText: String? = null,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    visualTransformation: VisualTransformation = VisualTransformation.None
-) {
-    var hasFocus by remember {
-        mutableStateOf(false)
-    }
-    val focusColor = if (hasFocus)
-        MaterialTheme.colorScheme.primary
-    else
-        MaterialTheme.colorScheme.tertiary
-
-    OutlinedTextField(
-        value = value,
-        onValueChange = {
-            onValueChange(it)
-        },
-        label = {
-            Text(text = label)
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = leadingIcon,
-                contentDescription = "",
-                tint = focusColor
-            )
-        },
-        trailingIcon = {
-            if (hasFocus) {
-                Icon(
-                    imageVector = trailingIcon,
-                    contentDescription = "",
-                    modifier = Modifier.clickable { onTrailingIconClicked() },
-                    tint = focusColor
-                )
-            }
-        },
-        supportingText = {
-            Text(
-                text = if (supportingText.isNullOrEmpty())
-                    "*${stringResource(R.string.required)}"
-                else supportingText,
-                color = if (supportingText != null)
-                    MaterialTheme.colorScheme.error
-                else focusColor
-            )
-        },
-        singleLine = true,
-        keyboardOptions = keyboardOptions,
-        visualTransformation = visualTransformation,
-        modifier = modifier.onFocusChanged {
-            hasFocus = it.isFocused
-        }
-    )
-}
-
-@Composable
-fun SignUpButton(
-    modifier: Modifier = Modifier,
-    enable: Boolean,
-    onClick: () -> Unit,
-) {
-    Button(
-        modifier = modifier,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ),
-        enabled = enable,
-        onClick = onClick
-    ) {
-        Text(text = stringResource(R.string.sign_up))
-    }
-}
-
-@Composable
-fun ContinueWithRow() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 20.dp, horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        HorizontalDivider(modifier = Modifier.width(100.dp))
-        Text(
-            text = stringResource(R.string.or_continue_with),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        HorizontalDivider(modifier = Modifier.width(100.dp))
-    }
-}
-
-@Composable
 private fun SignUpAlternativesRow(
     onGoogleSignUpClicked: (ActivityContext) -> Unit,
     onFacebookSignUpClicked: (SignUpScreenIntent.SignUp.Facebook) -> Unit
@@ -587,6 +423,7 @@ private fun SignUpAlternativesRow(
     ) {
         FacebookButton(
             modifier = Modifier.weight(1f),
+            textColor = MaterialTheme.colorScheme.inverseSurface,
             onClick = {
                 val permissions = listOf("email", "public_profile")
                 onFacebookSignUpClicked(
@@ -600,51 +437,10 @@ private fun SignUpAlternativesRow(
         )
         GoogleButton(
             modifier = Modifier.weight(1f),
+            textColor = MaterialTheme.colorScheme.inverseSurface,
             onClick = {
                 onGoogleSignUpClicked(ActivityContext(context = context))
             }
-        )
-    }
-}
-
-@Composable
-fun GoogleButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    OutlinedButton(
-        modifier = modifier,
-        onClick = onClick
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_google),
-            contentDescription = stringResource(
-                R.string.google
-            )
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = stringResource(id = R.string.google)
-        )
-    }
-}
-
-@Composable
-fun FacebookButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    OutlinedButton(
-        modifier = modifier,
-        onClick = onClick
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_facebook),
-            contentDescription = stringResource(R.string.facebook)
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = stringResource(id = R.string.facebook)
         )
     }
 }

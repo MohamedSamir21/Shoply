@@ -45,5 +45,14 @@
     <string name="cannot_verify_you">Cannot verify you!!</string>
     <string name="congratulations">Congratulations</string>
     <string name="already_verified_message">you\'re already verified!!</string>
+    <string name="shoply_logo">Shoply Logo</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="login_guiding">Log in to your account using email or social networks</string>
+    <string name="continue_with_facebook">Continue With Facebook</string>
+    <string name="continue_with_google">Continue With Google</string>
+    <string name="user_gmail_com">user@gmail.com</string>
+    <string name="button">Button</string>
+    <string name="forgot_password">Forgot Password</string>
+    <string name="didn_no_have_account">Didn’t have an account yet?</string>
 
 </resources>
