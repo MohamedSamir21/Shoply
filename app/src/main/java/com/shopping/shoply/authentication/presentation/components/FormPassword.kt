@@ -41,7 +41,7 @@ fun FormPassword(
     FormTextField(
         value = password,
         onValueChange = { onPasswordChanged(it) },
-        onTrailingIconClicked = { onVisibilityChanged(showPassword.not()) },
+        onTrailingIconClicked = { onVisibilityChanged(showPassword) },
         label = stringResource(R.string.password),
         leadingIcon = Icons.Outlined.Lock,
         trailingIcon = visibilityIcon,

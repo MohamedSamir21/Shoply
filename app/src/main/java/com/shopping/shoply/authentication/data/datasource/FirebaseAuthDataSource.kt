@@ -229,9 +229,16 @@ class FirebaseAuthDataSource @Inject constructor(
             suspendCancellableCoroutine { continuation ->
                 auth.signInWithEmailAndPassword(user.email, user.password)
                     .addOnCompleteListener {
-                        Log.d(TAG, "User is signed in!!")
-                        if (continuation.isActive) {
-                            continuation.resume(Result.Success(Unit))
+                        if (it.isSuccessful) {
+                            Log.d(TAG, "User is signed in!!")
+                            if (continuation.isActive) {
+                                continuation.resume(Result.Success(Unit))
+                            }
+                        } else {
+                            Log.d(TAG, "Invalid Credentials!!")
+                            if (continuation.isActive) {
+                                continuation.resume(Result.Error(DataError.Authentication.INVALID_CREDENTIALS))
+                            }
                         }
                     }.addOnFailureListener {
                         if (continuation.isActive) {

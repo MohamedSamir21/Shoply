@@ -10,4 +10,8 @@ class CheckInputsFilledUseCase @Inject constructor() {
                     && it.password.isNotBlank() && it.confirmedPassword.isNotBlank()
         }
     }
+
+    operator fun invoke(email: String, password: String): Boolean {
+        return email.isNotBlank() && password.isNotBlank()
+    }
 }

@@ -379,7 +379,7 @@ private fun FormConfirmedPassword(
     FormTextField(
         value = confirmedPassword,
         onValueChange = { onConfirmedPasswordChanged(it) },
-        onTrailingIconClicked = { onVisibilityChanged(showPassword.not()) },
+        onTrailingIconClicked = { onVisibilityChanged(showPassword) },
         label = stringResource(R.string.confirmed_password),
         leadingIcon = Icons.Outlined.Lock,
         trailingIcon = visibilityIcon,

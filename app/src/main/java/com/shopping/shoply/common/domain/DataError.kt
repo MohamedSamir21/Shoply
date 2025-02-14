@@ -13,6 +13,7 @@ sealed interface DataError : Error {
         USER_COLLISION,
         UNKNOWN,
         NOT_VERIFIED,
+        INVALID_CREDENTIALS,
         ALREADY_VERIFIED
     }
 }

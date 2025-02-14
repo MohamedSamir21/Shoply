@@ -1,6 +1,7 @@
 package com.shopping.shoply.authentication.presentation.sign_in
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,11 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -31,6 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.components.ContinueWithRow
@@ -39,21 +45,49 @@ import com.shopping.shoply.authentication.presentation.components.FormEmail
 import com.shopping.shoply.authentication.presentation.components.FormPassword
 import com.shopping.shoply.authentication.presentation.components.GoogleButton
 import com.shopping.shoply.authentication.presentation.components.RoundedShoplyButton
+import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
+import kotlinx.coroutines.flow.collectLatest
+
+private const val TAG = "SignInScreen"
 
 @Composable
 fun SignInScreen(
     navController: NavHostController,
     isExpandedScreen: Boolean
 ) {
+    val viewModel: SignInViewModel = hiltViewModel()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(viewModel.signInResult) {
+        viewModel.signInResult.collectLatest { result ->
+            when (result) {
+                SignInScreenEvent.SignInResult.Success -> {
+                    navController.popBackStack()
+                    navController.navigate(NavRoutes.Home.route)
+                }
+
+                is SignInScreenEvent.SignInResult.Failure -> {
+                    viewModel.onEvent(SignInScreenEvent.SignInResult.Failure(result.uiText))
+                }
+            }
+        }
+    }
+
     SignInContent(
-        state = SignInScreenState("", ""),
+        state = state,
         isExpandedScreen = isExpandedScreen,
-        onContinueWithFacebook = {},
-        onContinueWithGoogle = {},
-        onForgotClicked = {},
-        onSignInClicked = {},
-        onSignUpClicked = {}
+        onChange = {
+            viewModel.onIntent(it)
+        },
+        onForgotPasswordClicked = {
+            navController.popBackStack()
+            navController.navigate(NavRoutes.ForgotPassword.route)
+        },
+        onSignUpClicked = {
+            navController.popBackStack()
+            navController.navigate(NavRoutes.SignUp.route)
+        }
     )
 }
 
@@ -62,10 +96,8 @@ fun SignInContent(
     modifier: Modifier = Modifier,
     state: SignInScreenState,
     isExpandedScreen: Boolean,
-    onContinueWithFacebook: () -> Unit,
-    onContinueWithGoogle: () -> Unit,
-    onForgotClicked: () -> Unit,
-    onSignInClicked: () -> Unit,
+    onChange: (SignInScreenIntent) -> Unit,
+    onForgotPasswordClicked: () -> Unit,
     onSignUpClicked: () -> Unit
 ) {
     val configuration = LocalConfiguration.current
@@ -74,6 +106,8 @@ fun SignInContent(
         Configuration.ORIENTATION_LANDSCAPE -> true
         else -> false
     }
+    val signInError = state.signInError
+    val emailHasError = state.emailValidationError != null
 
     Column(
         modifier = modifier
@@ -98,7 +132,9 @@ fun SignInContent(
             },
             label = stringResource(R.string.continue_with_facebook),
             textColor = MaterialTheme.colorScheme.inverseSurface,
-            onClick = onContinueWithFacebook
+            onClick = {
+                onChange(SignInScreenIntent.ContinueWithFacebook)
+            }
         )
         Spacer(Modifier.height(10.dp))
         GoogleButton(
@@ -113,7 +149,9 @@ fun SignInContent(
             },
             label = stringResource(R.string.continue_with_google),
             textColor = MaterialTheme.colorScheme.inverseSurface,
-            onClick = onContinueWithGoogle
+            onClick = {
+                onChange(SignInScreenIntent.ContinueWithGoogle)
+            }
         )
         if (!isInLandscapeMode) {
 
@@ -130,11 +168,13 @@ fun SignInContent(
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
-                showSupportingText = false,
-                errorMessage = state.errorMessage,
-                onEmailChanged = {},
-                onClear = {}
+                showSupportingText = emailHasError,
+                errorMessage = state.emailValidationError,
+                onEmailChanged = { onChange(SignInScreenIntent.Change.Email(it)) },
+                onClear = { onChange(SignInScreenIntent.Clear.Email) }
             )
+            if (emailHasError)
+                Spacer(Modifier.height(5.dp))
             FormPassword(
                 modifier = if (!isExpandedScreen) {
                     Modifier
@@ -147,9 +187,9 @@ fun SignInContent(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 showSupportingText = false,
-                errorMessage = state.errorMessage,
-                onPasswordChanged = {},
-                onVisibilityChanged = {},
+                errorMessage = null,
+                onPasswordChanged = { onChange(SignInScreenIntent.Change.Password(it)) },
+                onVisibilityChanged = { onChange(SignInScreenIntent.Change.PasswordVisibility(it)) },
                 showPassword = state.showPassword
             )
             Box(
@@ -159,17 +199,35 @@ fun SignInContent(
                 contentAlignment = Alignment.TopEnd
             ) {
                 ForgotPasswordTextButton(
-                    onForgotClicked = onForgotClicked
+                    onForgotClicked = onForgotPasswordClicked
                 )
             }
             Spacer(Modifier.height(10.dp))
-            RoundedShoplyButton(
-                modifier = if (!isExpandedScreen) {
-                    Modifier.fillMaxWidth()
-                } else Modifier,
-                label = stringResource(R.string.sign_in),
-                onClick = onSignInClicked
-            )
+            signInError?.let {
+                Log.d(TAG, it.asString())
+                Text(
+                    modifier = Modifier.padding(top = 10.dp),
+                    text = it.asString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+            Spacer(modifier = Modifier.height(15.dp))
+            Log.d(TAG, "isSigningIn: ${state.isSigningIn}")
+            if (state.isSigningIn) {
+                CircularProgressIndicator()
+            } else {
+                RoundedShoplyButton(
+                    modifier = if (!isExpandedScreen) {
+                        Modifier.fillMaxWidth()
+                    } else Modifier,
+                    label = stringResource(R.string.sign_in),
+                    onClick = {
+                        onChange(SignInScreenIntent.SignIn)
+                    },
+                    enable = state.enableSignIn
+                )
+            }
             HaveNotAccountRow(
                 onSignUpClicked = onSignUpClicked
             )
@@ -262,10 +320,8 @@ private fun SignInContentPreview() {
             ),
             state = state,
             isExpandedScreen = false,
-            onContinueWithFacebook = {},
-            onContinueWithGoogle = {},
-            onForgotClicked = {},
-            onSignInClicked = {},
+            onChange = {},
+            onForgotPasswordClicked = {},
             onSignUpClicked = {}
         )
     }

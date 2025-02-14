@@ -175,7 +175,7 @@ class SignUpViewModel @Inject constructor(
 
             is SignUpScreenIntent.Change.PasswordVisibility -> {
                 _state.value = state.value.copy(
-                    showPassword = event.show
+                    showPassword = !event.show
                 )
             }
         }

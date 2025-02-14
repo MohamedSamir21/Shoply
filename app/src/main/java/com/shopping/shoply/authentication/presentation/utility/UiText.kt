@@ -41,6 +41,7 @@ fun DataError.asUiText(): UiText {
         DataError.Authentication.USER_COLLISION -> UiText.StringResource(R.string.already_email_exits)
         DataError.Authentication.NOT_VERIFIED -> UiText.StringResource(R.string.cannot_verify_you)
         DataError.Authentication.ALREADY_VERIFIED -> UiText.StringResource(R.string.already_verified_message)
+        DataError.Authentication.INVALID_CREDENTIALS -> UiText.StringResource(R.string.invalid_credentials)
         DataError.Authentication.UNKNOWN -> UiText.StringResource(R.string.unknown_authentication_error)
         DataError.Network -> UiText.StringResource(R.string.network_issue)
         DataError.Unknown -> UiText.StringResource(R.string.unknown_error)
