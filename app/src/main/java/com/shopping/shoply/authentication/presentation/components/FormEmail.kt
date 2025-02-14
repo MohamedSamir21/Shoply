@@ -6,6 +6,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -25,6 +27,7 @@ fun FormEmail(
     showSupportingText: Boolean = true,
     errorMessage: String?,
     onClear: () -> Unit,
+    colors: TextFieldColors = TextFieldDefaults.colors(),
     shape: Shape = OutlinedTextFieldDefaults.shape
 ) {
     FormTextField(
@@ -41,7 +44,8 @@ fun FormEmail(
         showSupportingText = showSupportingText,
         supportingText = errorMessage,
         modifier = modifier,
-        shape = shape
+        shape = shape,
+        colors = colors
     )
 }
 

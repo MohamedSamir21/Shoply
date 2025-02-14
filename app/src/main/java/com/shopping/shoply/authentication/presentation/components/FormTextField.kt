@@ -11,6 +11,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +40,8 @@ fun FormTextField(
     supportingText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    shape: Shape = OutlinedTextFieldDefaults.shape
+    shape: Shape = OutlinedTextFieldDefaults.shape,
+    colors: TextFieldColors = TextFieldDefaults.colors()
 ) {
     var hasFocus by remember {
         mutableStateOf(false)
@@ -91,7 +94,8 @@ fun FormTextField(
         modifier = modifier.onFocusChanged {
             hasFocus = it.isFocused
         },
-        shape = shape
+        shape = shape,
+        colors = colors
     )
 }
 

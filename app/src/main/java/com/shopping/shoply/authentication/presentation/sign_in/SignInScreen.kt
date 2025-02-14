@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -126,6 +127,9 @@ fun SignInContent(
                 } else Modifier,
                 email = state.email,
                 shape = RoundedCornerShape(10.dp),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
                 showSupportingText = false,
                 errorMessage = state.errorMessage,
                 onEmailChanged = {},
@@ -139,6 +143,9 @@ fun SignInContent(
                 } else Modifier,
                 password = state.password,
                 shape = RoundedCornerShape(10.dp),
+                colors = TextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
                 showSupportingText = false,
                 errorMessage = state.errorMessage,
                 onPasswordChanged = {},

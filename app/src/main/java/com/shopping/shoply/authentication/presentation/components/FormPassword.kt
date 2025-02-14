@@ -3,6 +3,7 @@ package com.shopping.shoply.authentication.presentation.components
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,7 +27,8 @@ fun FormPassword(
     showSupportingText: Boolean = true,
     errorMessage: String?,
     onVisibilityChanged: (Boolean) -> Unit,
-    shape: Shape = TextFieldDefaults.shape
+    shape: Shape = TextFieldDefaults.shape,
+    colors: TextFieldColors = TextFieldDefaults.colors()
 ) {
     val visibilityIcon = ImageVector.vectorResource(
         id = if (showPassword) {
@@ -51,7 +53,8 @@ fun FormPassword(
         showSupportingText = showSupportingText,
         supportingText = errorMessage,
         modifier = modifier,
-        shape = shape
+        shape = shape,
+        colors = colors
     )
 }
 
