@@ -1,8 +1,6 @@
 package com.shopping.shoply.authentication.presentation.sign_up
 
 import android.app.UiModeManager
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -53,8 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.facebook.CallbackManager
-import com.facebook.login.LoginManager
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.components.ContinueWithRow
 import com.shopping.shoply.authentication.presentation.components.FacebookButton
@@ -63,12 +58,10 @@ import com.shopping.shoply.authentication.presentation.components.FormPassword
 import com.shopping.shoply.authentication.presentation.components.FormTextField
 import com.shopping.shoply.authentication.presentation.components.GoogleButton
 import com.shopping.shoply.authentication.presentation.components.RoundedShoplyButton
-import com.shopping.shoply.authentication.presentation.sign_up.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.model.ActivityContext
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import kotlinx.coroutines.flow.collectLatest
-
-private const val TAG = "SignUpScreen"
 
 @Composable
 fun SignUpScreen(
@@ -399,22 +392,6 @@ private fun SignUpAlternativesRow(
     onFacebookSignUpClicked: (SignUpScreenIntent.SignUp.Facebook) -> Unit
 ) {
     val context = LocalContext.current
-    val loginManager = remember {
-        LoginManager.getInstance()
-    }
-    val callbackManager = remember {
-        CallbackManager.Factory.create()
-    }
-    val fbLauncher = rememberLauncherForActivityResult(
-        loginManager.createLogInActivityResultContract(callbackManager, null)
-    ) {}
-
-    DisposableEffect(loginManager) {
-        onDispose {
-            Log.i(TAG, "onDispose()")
-            loginManager.unregisterCallback(callbackManager)
-        }
-    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -424,15 +401,13 @@ private fun SignUpAlternativesRow(
         FacebookButton(
             modifier = Modifier.weight(1f),
             textColor = MaterialTheme.colorScheme.inverseSurface,
-            onClick = {
-                val permissions = listOf("email", "public_profile")
+            onClick = { loginManager, callbackManager ->
                 onFacebookSignUpClicked(
                     SignUpScreenIntent.SignUp.Facebook(
                         loginManager,
                         callbackManager
                     )
                 )
-                fbLauncher.launch(permissions)
             }
         )
         GoogleButton(

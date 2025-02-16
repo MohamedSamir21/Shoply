@@ -1,10 +1,14 @@
 package com.shopping.shoply.authentication.presentation.sign_in
 
 import android.content.Context
-import com.shopping.shoply.authentication.presentation.sign_up.model.ActivityContext
+import com.facebook.CallbackManager
+import com.facebook.login.LoginManager
 
 sealed class SignInScreenIntent {
-    data object ContinueWithFacebook : SignInScreenIntent()
+    data class ContinueWithFacebook(
+        val loginManager: LoginManager,
+        val callbackManager: CallbackManager
+    ) : SignInScreenIntent()
     data class ContinueWithGoogle(val context: Context) : SignInScreenIntent()
     data object SignIn : SignInScreenIntent()
     sealed class Change : SignInScreenIntent() {

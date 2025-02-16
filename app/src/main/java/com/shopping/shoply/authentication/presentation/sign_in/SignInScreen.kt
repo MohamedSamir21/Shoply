@@ -134,8 +134,13 @@ fun SignInContent(
             },
             label = stringResource(R.string.continue_with_facebook),
             textColor = MaterialTheme.colorScheme.inverseSurface,
-            onClick = {
-                onChange(SignInScreenIntent.ContinueWithFacebook)
+            onClick = { loginManager, callbackManger ->
+                onChange(
+                    SignInScreenIntent.ContinueWithFacebook(
+                        loginManager = loginManager,
+                        callbackManager = callbackManger
+                    )
+                )
             }
         )
         Spacer(Modifier.height(10.dp))

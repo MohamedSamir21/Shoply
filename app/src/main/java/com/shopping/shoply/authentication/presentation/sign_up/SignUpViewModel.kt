@@ -15,8 +15,8 @@ import com.shopping.shoply.authentication.domain.usecase.validate.ValidateEmailU
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePasswordUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePhoneUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateUsernameUseCase
-import com.shopping.shoply.authentication.presentation.sign_up.model.ActivityContext
-import com.shopping.shoply.authentication.presentation.sign_up.model.FBLoginManger
+import com.shopping.shoply.authentication.presentation.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.model.FBLoginManger
 import com.shopping.shoply.authentication.presentation.utility.asUiText
 import com.shopping.shoply.common.domain.Result
 import dagger.hilt.android.lifecycle.HiltViewModel

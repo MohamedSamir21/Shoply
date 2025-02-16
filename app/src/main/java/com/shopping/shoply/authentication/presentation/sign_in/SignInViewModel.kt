@@ -4,13 +4,16 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.facebook.CallbackManager
+import com.facebook.login.LoginManager
 import com.shopping.shoply.authentication.domain.model.User
 import com.shopping.shoply.authentication.domain.usecase.CheckInputsFilledUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignInUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithFacebookUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithGoogleUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateEmailUseCase
-import com.shopping.shoply.authentication.presentation.sign_up.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.model.FBLoginManger
 import com.shopping.shoply.authentication.presentation.utility.asUiText
 import com.shopping.shoply.common.domain.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,7 +46,11 @@ class SignInViewModel @Inject constructor(
 
     fun onIntent(intent: SignInScreenIntent) {
         when (intent) {
-            SignInScreenIntent.ContinueWithFacebook -> continueWithFacebook()
+            is SignInScreenIntent.ContinueWithFacebook -> continueWithFacebook(
+                loginManager = intent.loginManager,
+                callbackManager = intent.callbackManager
+            )
+
             is SignInScreenIntent.ContinueWithGoogle -> continueWithGoogle(intent.context)
             SignInScreenIntent.SignIn -> signIn()
             is SignInScreenIntent.Change -> {
@@ -198,8 +205,35 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun continueWithFacebook() {
-        TODO("Not yet implemented")
+    private fun continueWithFacebook(
+        loginManager: LoginManager,
+        callbackManager: CallbackManager
+    ) {
+        viewModelScope.launch {
+            continueWithFacebookUseCase(
+                facebookLoginManger = FBLoginManger(loginManager),
+                callbackManager = callbackManager,
+                onComplete = { result ->
+                    when (result) {
+                        is Result.Success -> {
+                            viewModelScope.launch {
+                                _signInResult.send(SignInScreenEvent.SignInResult.Success)
+                            }
+                        }
+
+                        is Result.Error -> {
+                            viewModelScope.launch {
+                                _signInResult.send(
+                                    SignInScreenEvent.SignInResult.Failure(
+                                        uiText = result.error.asUiText()
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            )
+        }
     }
 
 
