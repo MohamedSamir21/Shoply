@@ -68,9 +68,9 @@ class GoogleAuthDataSource @Inject constructor(
 
     private fun getGoogleIdOption(): GetGoogleIdOption {
         return GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
+            .setFilterByAuthorizedAccounts(true)
             .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
-            .setAutoSelectEnabled(false)
+            .setAutoSelectEnabled(true)
             .build()
     }
 

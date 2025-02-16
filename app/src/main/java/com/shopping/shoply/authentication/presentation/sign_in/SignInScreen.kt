@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -100,6 +101,7 @@ fun SignInContent(
     onForgotPasswordClicked: () -> Unit,
     onSignUpClicked: () -> Unit
 ) {
+    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val orientation = configuration.orientation
     val isInLandscapeMode = when (orientation) {
@@ -150,7 +152,7 @@ fun SignInContent(
             label = stringResource(R.string.continue_with_google),
             textColor = MaterialTheme.colorScheme.inverseSurface,
             onClick = {
-                onChange(SignInScreenIntent.ContinueWithGoogle)
+                onChange(SignInScreenIntent.ContinueWithGoogle(context))
             }
         )
         if (!isInLandscapeMode) {

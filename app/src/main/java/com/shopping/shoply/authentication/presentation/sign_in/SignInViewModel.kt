@@ -1,15 +1,20 @@
 package com.shopping.shoply.authentication.presentation.sign_in
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopping.shoply.authentication.domain.model.User
 import com.shopping.shoply.authentication.domain.usecase.CheckInputsFilledUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignInUseCase
+import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithFacebookUseCase
+import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithGoogleUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateEmailUseCase
+import com.shopping.shoply.authentication.presentation.sign_up.model.ActivityContext
 import com.shopping.shoply.authentication.presentation.utility.asUiText
 import com.shopping.shoply.common.domain.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +27,8 @@ private const val TAG = "SignInViewModel"
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
+    private val continueWithFacebookUseCase: SignUpWithFacebookUseCase,
+    private val continueWithGoogleUseCase: SignUpWithGoogleUseCase,
     private val checkInputsFilledUseCase: CheckInputsFilledUseCase,
     private val validateEmailUseCase: ValidateEmailUseCase,
     private val signInUseCase: SignInUseCase
@@ -30,11 +37,14 @@ class SignInViewModel @Inject constructor(
     val state = _state.asStateFlow()
     private val _signInResult = Channel<SignInScreenEvent.SignInResult>()
     val signInResult = _signInResult.receiveAsFlow()
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+    }
 
     fun onIntent(intent: SignInScreenIntent) {
         when (intent) {
             SignInScreenIntent.ContinueWithFacebook -> continueWithFacebook()
-            SignInScreenIntent.ContinueWithGoogle -> continueWithGoogle()
+            is SignInScreenIntent.ContinueWithGoogle -> continueWithGoogle(intent.context)
             SignInScreenIntent.SignIn -> signIn()
             is SignInScreenIntent.Change -> {
                 onChange(intent)
@@ -174,8 +184,18 @@ class SignInViewModel @Inject constructor(
         return hasError
     }
 
-    private fun continueWithGoogle() {
-        TODO("Not yet implemented")
+    private fun continueWithGoogle(context: Context) {
+        viewModelScope.launch(exceptionHandler) {
+            when (val result = continueWithGoogleUseCase(ActivityContext(context))) {
+                is Result.Success -> {
+                    _signInResult.send(SignInScreenEvent.SignInResult.Success)
+                }
+
+                is Result.Error -> {
+                    _signInResult.send(SignInScreenEvent.SignInResult.Failure(result.error.asUiText()))
+                }
+            }
+        }
     }
 
     private fun continueWithFacebook() {
