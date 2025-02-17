@@ -15,14 +15,14 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
-import com.shopping.shoply.authentication.presentation.screen.onboarding.OnboardingScreen
-import com.shopping.shoply.authentication.presentation.screen.sign_in.SignInScreen
-import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpScreen
-import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountScreen
-import com.shopping.shoply.authentication.presentation.screen.sign_up.SignUpViewModel
-import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountIntent
-import com.shopping.shoply.authentication.presentation.screen.verify_account.VerifyAccountViewModel
-import com.shopping.shoply.authentication.presentation.screen.verify_result.VerificationResultScreen
+import com.shopping.shoply.authentication.presentation.onboarding.OnboardingScreen
+import com.shopping.shoply.authentication.presentation.sign_in.SignInScreen
+import com.shopping.shoply.authentication.presentation.sign_up.SignUpScreen
+import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountScreen
+import com.shopping.shoply.authentication.presentation.sign_up.SignUpViewModel
+import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountIntent
+import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountViewModel
+import com.shopping.shoply.authentication.presentation.verify_result.VerificationResultScreen
 import com.shopping.shoply.common.presentation.util.getActivity
 
 @Composable
@@ -41,13 +41,13 @@ fun ShoplyNavGraph(
         startDestination = if (deepLink != null) {
             NavRoutes.VerificationResult.route
         } else {
-            NavRoutes.SignUp.route
+            NavRoutes.SignIn.route
         }
     ) {
         addOnboardingScreen(navController)
         addSignupScreen(navController, isExpandedScreen)
         addVerifyAccount(navController)
-        addSignInScreen()
+        addSignInScreen(navController, isExpandedScreen)
         addVerificationResult(navController, deepLink.toString())
         addHomeScreen()
     }
@@ -80,11 +80,17 @@ fun NavGraphBuilder.addHomeScreen() {
     }
 }
 
-fun NavGraphBuilder.addSignInScreen() {
+fun NavGraphBuilder.addSignInScreen(
+    navController: NavHostController,
+    isExpandedScreen: Boolean
+) {
     composable(
         route = NavRoutes.SignIn.route
     ) {
-        SignInScreen()
+        SignInScreen(
+            navController = navController,
+            isExpandedScreen = isExpandedScreen
+        )
     }
 }
 

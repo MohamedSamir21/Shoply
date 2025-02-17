@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.verify_account
+package com.shopping.shoply.authentication.presentation.verify_account
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent

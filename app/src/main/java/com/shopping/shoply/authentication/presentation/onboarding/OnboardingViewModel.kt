@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.onboarding
+package com.shopping.shoply.authentication.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
 import com.shopping.shoply.R

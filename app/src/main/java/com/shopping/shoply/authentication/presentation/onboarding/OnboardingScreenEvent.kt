@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.screen.onboarding
+package com.shopping.shoply.authentication.presentation.onboarding
 
 sealed class OnboardingScreenEvent {
     data class Swipe(val index: Int) : OnboardingScreenEvent()

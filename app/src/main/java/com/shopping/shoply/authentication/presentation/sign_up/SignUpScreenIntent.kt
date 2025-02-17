@@ -1,9 +1,8 @@
-package com.shopping.shoply.authentication.presentation.screen.sign_up
+package com.shopping.shoply.authentication.presentation.sign_up
 
 import com.facebook.CallbackManager
 import com.facebook.login.LoginManager
-import com.shopping.shoply.authentication.presentation.screen.sign_up.model.ActivityContext
-import com.shopping.shoply.authentication.presentation.utility.UiText
+import com.shopping.shoply.authentication.presentation.model.ActivityContext
 
 sealed class SignUpScreenIntent {
     sealed class Change : SignUpScreenIntent() {

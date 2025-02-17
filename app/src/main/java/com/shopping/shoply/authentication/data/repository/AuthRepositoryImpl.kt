@@ -8,8 +8,8 @@ import com.shopping.shoply.authentication.domain.interfaces.AuthRepository
 import com.shopping.shoply.authentication.domain.model.DomainContext
 import com.shopping.shoply.authentication.domain.model.FacebookLoginManger
 import com.shopping.shoply.authentication.domain.model.User
-import com.shopping.shoply.authentication.presentation.screen.sign_up.model.ActivityContext
-import com.shopping.shoply.authentication.presentation.screen.sign_up.model.FBLoginManger
+import com.shopping.shoply.authentication.presentation.model.ActivityContext
+import com.shopping.shoply.authentication.presentation.model.FBLoginManger
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import kotlinx.coroutines.Dispatchers
