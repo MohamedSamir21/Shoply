@@ -57,7 +57,7 @@ import com.shopping.shoply.authentication.presentation.components.FormEmail
 import com.shopping.shoply.authentication.presentation.components.FormPassword
 import com.shopping.shoply.authentication.presentation.components.FormTextField
 import com.shopping.shoply.authentication.presentation.components.GoogleButton
-import com.shopping.shoply.authentication.presentation.components.RoundedShoplyButton
+import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.authentication.presentation.model.ActivityContext
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
@@ -234,7 +234,7 @@ private fun Form(
     if (state.isSigningUp) {
         CircularProgressIndicator()
     } else {
-        RoundedShoplyButton(
+        ShoplyButton(
             label = stringResource(R.string.sign_up),
             modifier = if (isExpandedScreen)
                 Modifier

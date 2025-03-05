@@ -55,5 +55,11 @@
     <string name="forgot_password">Forgot Password</string>
     <string name="didn_no_have_account">Didn’t have an account yet?</string>
     <string name="invalid_credentials">Invalid Credentials</string>
+    <string name="back_arrow">Back Arrow</string>
+    <string name="guiding_message">Don’t worry it sometimes happens. Please select which method you want you use to reset your password</string>
+    <string name="your_email">Your email</string>
+    <string name="your_phone">Your phone</string>
+    <string name="checked_circle">Checked Circle</string>
+    <string name="next">Next</string>
 
 </resources>

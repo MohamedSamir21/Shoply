@@ -16,6 +16,7 @@ import androidx.navigation.navDeepLink
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.shopping.shoply.authentication.presentation.onboarding.OnboardingScreen
+import com.shopping.shoply.authentication.presentation.reset_password.forgot_password.ForgotPasswordScreen
 import com.shopping.shoply.authentication.presentation.sign_in.SignInScreen
 import com.shopping.shoply.authentication.presentation.sign_up.SignUpScreen
 import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountScreen
@@ -41,19 +42,34 @@ fun ShoplyNavGraph(
         startDestination = if (deepLink != null) {
             NavRoutes.VerificationResult.route
         } else {
-            NavRoutes.SignIn.route
+            NavRoutes.ForgotPassword.route
         }
     ) {
         addOnboardingScreen(navController)
         addSignupScreen(navController, isExpandedScreen)
-        addVerifyAccount(navController)
+        addVerifyAccountScreen(navController)
         addSignInScreen(navController, isExpandedScreen)
-        addVerificationResult(navController, deepLink.toString())
+        addVerificationResultScreen(navController, deepLink.toString())
         addHomeScreen()
+        addForgotPasswordScreen(navController, isExpandedScreen)
     }
 }
 
-fun NavGraphBuilder.addVerificationResult(
+fun NavGraphBuilder.addForgotPasswordScreen(
+    navController: NavHostController,
+    isExpandedScreen: Boolean
+) {
+    composable(
+        route = NavRoutes.ForgotPassword.route
+    ) {
+        ForgotPasswordScreen(
+            navController = navController,
+            isExpandedScreen = isExpandedScreen
+        )
+    }
+}
+
+fun NavGraphBuilder.addVerificationResultScreen(
     navController: NavHostController,
     deepLink: String
 ) {
@@ -121,7 +137,7 @@ private fun NavGraphBuilder.addSignupScreen(
     }
 }
 
-private fun NavGraphBuilder.addVerifyAccount(
+private fun NavGraphBuilder.addVerifyAccountScreen(
     navController: NavHostController
 ) {
     composable(

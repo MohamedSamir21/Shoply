@@ -6,14 +6,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.shopping.shoply.R
 
 @Composable
-fun RoundedShoplyButton(
+fun ShoplyButton(
     modifier: Modifier = Modifier,
     label: String = stringResource(R.string.button),
+    shape: Shape = ButtonDefaults.shape,
     enable: Boolean = true,
     onClick: () -> Unit,
 ) {
@@ -23,6 +25,7 @@ fun RoundedShoplyButton(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
+        shape = shape,
         enabled = enable,
         onClick = onClick
     ) {
@@ -33,5 +36,5 @@ fun RoundedShoplyButton(
 @Preview
 @Composable
 private fun RoundedShoplyButtonPreview() {
-    RoundedShoplyButton { }
+    ShoplyButton { }
 }

@@ -45,7 +45,7 @@ import com.shopping.shoply.authentication.presentation.components.FacebookButton
 import com.shopping.shoply.authentication.presentation.components.FormEmail
 import com.shopping.shoply.authentication.presentation.components.FormPassword
 import com.shopping.shoply.authentication.presentation.components.GoogleButton
-import com.shopping.shoply.authentication.presentation.components.RoundedShoplyButton
+import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -224,7 +224,7 @@ fun SignInContent(
             if (state.isSigningIn) {
                 CircularProgressIndicator()
             } else {
-                RoundedShoplyButton(
+                ShoplyButton(
                     modifier = if (!isExpandedScreen) {
                         Modifier.fillMaxWidth()
                     } else Modifier,
