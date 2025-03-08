@@ -9,12 +9,10 @@ import com.shopping.shoply.authentication.presentation.reset_password.forgot_pas
 fun getRestMethods(): List<RestMethod> = listOf(
     RestMethod(
         name = UiText.StringResource(R.string.email),
-        message = UiText.StringResource(R.string.your_email),
         icon = Icons.Outlined.Email
     ),
     RestMethod(
         name = UiText.StringResource(R.string.phone_number),
-        message = UiText.StringResource(R.string.your_phone),
         icon = Icons.Outlined.Phone
     )
 )

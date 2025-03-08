@@ -19,4 +19,5 @@ interface AuthRepository {
 
     suspend fun resendVerificationEmailLink(): Result<Unit, DataError>
     suspend fun verifyEmail(deepLink: String): Result<Unit, DataError>
+    suspend fun getUserInfo(): Result<User, DataError>
 }

@@ -35,6 +35,7 @@ import com.shopping.shoply.authentication.presentation.components.ContinueToHome
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
+import com.shopping.shoply.common.presentation.util.hidePartOfEmailWithStars
 
 @Composable
 fun VerifyAccountScreen(
@@ -191,17 +192,10 @@ fun SendVerificationLinkText(
 private fun EmailText(
     email: String
 ) {
-    val usernamePart = email.substringBefore("@")
-    val domainPart = email.substringAfter("@")
-    val userNamePartWithHalfStars =
-        usernamePart.replaceRange(
-            0,
-            usernamePart.length / 2,
-            "*".repeat(usernamePart.length / 2)
-        )
+    val emailWithStars = hidePartOfEmailWithStars(email)
 
     Text(
-        text = userNamePartWithHalfStars.plus("@").plus(domainPart),
+        text = emailWithStars,
         style = MaterialTheme.typography.bodyMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface

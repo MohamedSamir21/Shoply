@@ -1,5 +1,6 @@
 package com.shopping.shoply.authentication.presentation.reset_password.forgot_password
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -32,8 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -43,12 +46,13 @@ import com.shopping.shoply.authentication.presentation.reset_password.forgot_pas
 import com.shopping.shoply.authentication.presentation.utility.getRestMethods
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
+private const val TAG = "ForgotPasswordScreen"
 @Composable
 fun ForgotPasswordScreen(
     navController: NavController,
     isExpandedScreen: Boolean
 ) {
-    val viewModel: ForgotPasswordViewModel = viewModel()
+    val viewModel: ForgotPasswordViewModel = hiltViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     ForgotPasswordContent(
@@ -86,7 +90,7 @@ private fun ForgotPasswordContent(
             ResetMethodCard(
                 modifier = Modifier.padding(10.dp),
                 methodName = restMethod.name.asString(),
-                methodMessage = restMethod.message.asString(),
+                methodMessage = restMethod.message,
                 methodIcon = restMethod.icon,
                 checked = index == selectedRestMethodIndex,
                 onChecked = onResetMethodChecked
@@ -116,7 +120,7 @@ private fun ForgotPasswordContent(
 private fun ResetMethodCard(
     modifier: Modifier = Modifier,
     methodName: String,
-    methodMessage: String,
+    methodMessage: String?,
     checked: Boolean,
     onChecked: () -> Unit,
     methodIcon: ImageVector
@@ -182,16 +186,22 @@ private fun ResetMethodCard(
             }
         )
         Spacer(Modifier.height(5.dp))
-        Text(
-            modifier = Modifier.padding(start = 20.dp, bottom = 20.dp),
-            text = methodMessage,
-            style = MaterialTheme.typography.titleMedium,
-            color = if (isInDarkTheme) {
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(.8f)
-            } else {
-                MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = .5f)
-            }
-        )
+        if (methodMessage != null) {
+            Text(
+                modifier = Modifier.padding(start = 20.dp, end = 10.dp, bottom = 20.dp),
+                text = methodMessage,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (isInDarkTheme) {
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(.8f)
+                } else {
+                    MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = .5f)
+                },
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
+            )
+        } else {
+            Spacer(Modifier.height(10.dp))
+        }
     }
 }
 

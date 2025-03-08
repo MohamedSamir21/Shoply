@@ -42,7 +42,7 @@ fun ShoplyNavGraph(
         startDestination = if (deepLink != null) {
             NavRoutes.VerificationResult.route
         } else {
-            NavRoutes.ForgotPassword.route
+            NavRoutes.SignIn.route
         }
     ) {
         addOnboardingScreen(navController)

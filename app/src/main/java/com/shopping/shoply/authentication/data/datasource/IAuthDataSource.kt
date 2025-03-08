@@ -9,4 +9,5 @@ interface IAuthDataSource {
     suspend fun signIn(user: User): Result<Unit, DataError>
     suspend fun resendVerificationEmailLink(): Result<Unit, DataError>
     suspend fun verifyEmail(deepLink: String): Result<Unit, DataError>
+    suspend fun getUserInfo(): Result<User, DataError>
 }

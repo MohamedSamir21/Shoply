@@ -59,4 +59,8 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun verifyEmail(deepLink: String): Result<Unit, DataError> {
         return authDataSource.verifyEmail(deepLink)
     }
+
+    override suspend fun getUserInfo(): Result<User, DataError> {
+        return authDataSource.getUserInfo()
+    }
 }

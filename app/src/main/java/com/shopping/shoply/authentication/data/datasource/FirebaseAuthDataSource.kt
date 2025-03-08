@@ -258,6 +258,53 @@ class FirebaseAuthDataSource @Inject constructor(
             .set(user)
     }
 
+    override suspend fun getUserInfo(): Result<User, DataError> {
+        val currentFirebaseUser = auth.currentUser
+        return if (currentFirebaseUser != null) {
+            var (email, phoneNumber) = getAuthMethod(currentFirebaseUser)
+            val firestoreUser = getUserInfoFromFirestore(currentFirebaseUser)
+            if (firestoreUser != null) { // Fill in with Info saved in Firestore
+                if (email.isNullOrEmpty())
+                    email = firestoreUser.email
+                if (phoneNumber.isNullOrEmpty())
+                    phoneNumber = firestoreUser.phoneNumber
+            }
+            if (email == null && phoneNumber == null) {
+                return Result.Error(
+                    error = DataError.Authentication.UNKNOWN
+                )
+            }
+            Log.d(TAG,"getUserInfo: $email, $phoneNumber")
+            return Result.Success(
+                User(
+                    email = email.toString(),
+                    phoneNumber = phoneNumber.toString()
+                )
+            )
+        } else {
+            Result.Error(
+                DataError.Authentication.UNKNOWN
+            )
+        }
+    }
+
+    private fun getAuthMethod(currentUser: FirebaseUser): Pair<String?, String?> {
+        val email = currentUser.email
+        val phoneNumber = currentUser.phoneNumber
+        Log.d(TAG, "email: $email \n phoneNumber: $phoneNumber")
+        return Pair(email, phoneNumber)
+    }
+
+    private suspend fun getUserInfoFromFirestore(currentUser: FirebaseUser): User? {
+        val user = firestore.collection("users")
+            .document(currentUser.uid)
+            .get()
+            .await()
+            .toObject(User::class.java)
+        Log.d(TAG, "user: $user")
+        return user
+    }
+
     companion object {
         const val USER_COLLECTION_NAME = "users"
     }

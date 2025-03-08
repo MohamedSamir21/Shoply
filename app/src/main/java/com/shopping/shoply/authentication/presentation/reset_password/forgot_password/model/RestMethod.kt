@@ -5,6 +5,6 @@ import com.shopping.shoply.authentication.presentation.utility.UiText
 
 data class RestMethod(
     val name: UiText,
-    val message: UiText,
+    val message: String? = null,
     val icon: ImageVector
 )
