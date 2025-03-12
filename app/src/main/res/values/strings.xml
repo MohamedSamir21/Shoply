@@ -56,10 +56,16 @@
     <string name="didn_no_have_account">Didn’t have an account yet?</string>
     <string name="invalid_credentials">Invalid Credentials</string>
     <string name="back_arrow">Back Arrow</string>
-    <string name="guiding_message">Don’t worry it sometimes happens. Please select which method you want you use to reset your password</string>
+    <string name="forgot_password_guiding_message">Don’t worry it sometimes happens. Please select which method you want you use to reset your password</string>
     <string name="your_email">Your email</string>
     <string name="your_phone">Your phone</string>
     <string name="checked_circle">Checked Circle</string>
     <string name="next">Next</string>
+    <string name="enter_email_guiding_message">Please, enter your email so that we can send you an email link to reset your password.</string>
+    <string name="method_name">Method Name</string>
+    <string name="method_message">Method Message</string>
+    <string name="label">label</string>
+    <string name="enter">Enter</string>
+    <string name="email_does_not_exist">Email doesn\'t exist</string>
 
 </resources>

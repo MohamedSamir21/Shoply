@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.facebook.CallbackManager
 import com.facebook.login.LoginManager
 import com.shopping.shoply.authentication.domain.model.User
-import com.shopping.shoply.authentication.domain.usecase.CheckInputsFilledUseCase
+import com.shopping.shoply.authentication.domain.usecase.validate.CheckInputsFilledUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignInUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithFacebookUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithGoogleUseCase

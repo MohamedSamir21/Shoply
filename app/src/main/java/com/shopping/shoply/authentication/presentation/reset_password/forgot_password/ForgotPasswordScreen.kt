@@ -1,6 +1,5 @@
 package com.shopping.shoply.authentication.presentation.reset_password.forgot_password
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -18,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,7 +36,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton
@@ -251,7 +248,7 @@ private fun CheckedCircleIcon() {
 @Composable
 private fun GuidingMessageText() {
     Text(
-        text = stringResource(R.string.guiding_message),
+        text = stringResource(R.string.forgot_password_guiding_message),
         modifier = Modifier.padding(start = 20.dp),
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.tertiary

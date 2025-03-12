@@ -7,6 +7,7 @@ sealed interface DataError : Error {
         WEAK_PASSWORD,
         WRONG_PASSWORD,
         INVALID_EMAIL,
+        EMAIL_DOES_NOT_EXIST,
         USER_DISABLED,
         ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL,
         EMAIL_ALREADY_IN_USE,

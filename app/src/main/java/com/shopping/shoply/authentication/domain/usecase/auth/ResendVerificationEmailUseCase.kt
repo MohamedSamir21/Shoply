@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.domain.usecase
+package com.shopping.shoply.authentication.domain.usecase.auth
 
 import com.shopping.shoply.authentication.domain.interfaces.AuthRepository
 import com.shopping.shoply.common.domain.DataError

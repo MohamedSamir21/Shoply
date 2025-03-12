@@ -33,9 +33,9 @@ fun FormTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    leadingIcon: ImageVector,
-    trailingIcon: ImageVector,
-    onTrailingIconClicked: () -> Unit,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
+    onTrailingIconClicked: () -> Unit = {},
     showSupportingText: Boolean = true,
     supportingText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -59,23 +59,27 @@ fun FormTextField(
         label = {
             Text(text = label)
         },
-        leadingIcon = {
-            Icon(
-                imageVector = leadingIcon,
-                contentDescription = "",
-                tint = focusColor
-            )
-        },
-        trailingIcon = {
-            if (hasFocus) {
+        leadingIcon = if (leadingIcon != null) {
+            {
                 Icon(
-                    imageVector = trailingIcon,
+                    imageVector = leadingIcon,
                     contentDescription = "",
-                    modifier = Modifier.clickable { onTrailingIconClicked() },
                     tint = focusColor
                 )
             }
-        },
+        } else null,
+        trailingIcon = if (hasFocus) {
+            if (trailingIcon != null) {
+                {
+                    Icon(
+                        imageVector = trailingIcon,
+                        contentDescription = "",
+                        modifier = Modifier.clickable { onTrailingIconClicked() },
+                        tint = focusColor
+                    )
+                }
+            } else null
+        } else null,
         supportingText = {
             if (showSupportingText) {
                 Text(

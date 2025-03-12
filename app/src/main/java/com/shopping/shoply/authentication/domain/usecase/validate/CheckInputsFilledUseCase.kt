@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.domain.usecase
+package com.shopping.shoply.authentication.domain.usecase.validate
 
 import com.shopping.shoply.authentication.domain.model.User
 import javax.inject.Inject

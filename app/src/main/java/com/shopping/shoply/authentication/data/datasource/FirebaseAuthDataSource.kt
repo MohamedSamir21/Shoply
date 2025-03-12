@@ -274,7 +274,7 @@ class FirebaseAuthDataSource @Inject constructor(
                     error = DataError.Authentication.UNKNOWN
                 )
             }
-            Log.d(TAG,"getUserInfo: $email, $phoneNumber")
+            Log.d(TAG, "getUserInfo: $email, $phoneNumber")
             return Result.Success(
                 User(
                     email = email.toString(),
@@ -296,13 +296,48 @@ class FirebaseAuthDataSource @Inject constructor(
     }
 
     private suspend fun getUserInfoFromFirestore(currentUser: FirebaseUser): User? {
-        val user = firestore.collection("users")
+        val user = firestore.collection(USER_COLLECTION_NAME)
             .document(currentUser.uid)
             .get()
             .await()
             .toObject(User::class.java)
         Log.d(TAG, "user: $user")
         return user
+    }
+
+    override suspend fun checkIfEmailExists(
+        email: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        val query = firestore.collection(USER_COLLECTION_NAME).whereEqualTo("email", email).limit(1)
+        try {
+            withTimeout(5000L) {
+                query.get().addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        onComplete(Result.Success(Unit))
+                    } else {
+                        onComplete(Result.Error(DataError.Authentication.EMAIL_DOES_NOT_EXIST))
+                    }
+                }.addOnFailureListener {
+                    onComplete(Result.Error(DataError.Authentication.UNKNOWN))
+                }
+            }
+        } catch (ex: Exception) {
+            return onComplete(Result.Error(DataError.Unknown))
+        }
+    }
+
+    override suspend fun sendPasswordRestEmail(
+        email: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        auth.sendPasswordResetEmail(email).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                onComplete(Result.Success(Unit))
+            } else {
+                onComplete(Result.Error(DataError.Unknown))
+            }
+        }
     }
 
     companion object {

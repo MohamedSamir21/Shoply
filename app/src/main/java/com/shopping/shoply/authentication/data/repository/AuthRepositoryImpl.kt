@@ -63,4 +63,18 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun getUserInfo(): Result<User, DataError> {
         return authDataSource.getUserInfo()
     }
+
+    override suspend fun checkIfEmailExists(
+        email: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        authDataSource.checkIfEmailExists(email, onComplete)
+    }
+
+    override suspend fun sendPasswordResetEmail(
+        email: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        authDataSource.sendPasswordRestEmail(email, onComplete)
+    }
 }

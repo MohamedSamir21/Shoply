@@ -4,7 +4,7 @@ import android.os.CountDownTimer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopping.shoply.R
-import com.shopping.shoply.authentication.domain.usecase.ResendVerificationEmailUseCase
+import com.shopping.shoply.authentication.domain.usecase.auth.ResendVerificationEmailUseCase
 import com.shopping.shoply.authentication.domain.usecase.count_down.FormatCountDownTimeUseCase
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.utility.asUiText
