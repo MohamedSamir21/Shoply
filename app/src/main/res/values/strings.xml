@@ -34,8 +34,8 @@
     <string name="verify_your_account">Verify Your Account</string>
     <string name="resend_code">Resend code</string>
     <string name="ok">OK</string>
-    <string name="send_verification_link_again">send verification link again</string>
-    <string name="check_the_verification_email_link_sent_to">Check the verification email link sent to</string>
+    <string name="send_link_again">Send link again in</string>
+    <string name="check_email_link_sent_to">Check the email link sent to</string>
     <string name="continue_to_home">Continue to home</string>
     <string name="resend">Resend</string>
     <string name="send_verification_link_again_in">Send verification link again in</string>
@@ -67,5 +67,7 @@
     <string name="label">label</string>
     <string name="enter">Enter</string>
     <string name="email_does_not_exist">Email doesn\'t exist</string>
+    <string name="proceed">Proceed</string>
+    <string name="send_email_link">Send Email Link</string>
 
 </resources>
