@@ -168,25 +168,10 @@ private fun NavGraphBuilder.addVerifyAccountScreen(
     ) { navBackStack ->
 
         val email = navBackStack.arguments?.getString(NavRoutes.VerifyAccount.Args.EMAIL)
-        val viewModel: VerifyAccountViewModel = hiltViewModel()
-        val state = viewModel.state.collectAsStateWithLifecycle()
-        val countDownTime = state.value.countDownTime
-        val countDownFinished = state.value.countDownFinished
-        val sendEmailLinkSuccess = state.value.sendEmailLinkSuccessMessage
-        val sendEmailLinkError = state.value.sendEmailLinkError
 
         VerifyAccountScreen(
             navController = navController,
-            email = email,
-            count = countDownTime,
-            countDownFinished = countDownFinished,
-            sendEmailLinkSuccess = sendEmailLinkSuccess,
-            sendEmailLinkError = sendEmailLinkError,
-            onResend = {
-                viewModel.onIntent(VerifyAccountIntent.Resend)
-            },
-            onShowEmailLinkSuccessMessage = viewModel::resetEmailLinkSuccessMessage,
-            onShowEmailLinkErrorMessage = viewModel::resetEmailLinkErrorMessage
+            email = email
         )
     }
 }
