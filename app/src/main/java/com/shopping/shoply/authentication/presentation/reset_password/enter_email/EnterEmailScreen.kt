@@ -31,7 +31,7 @@ fun EnterEmailScreen(
     LaunchedEffect(viewModel.emailVerificationResult) {
         viewModel.emailVerificationResult.collectLatest {
             navController.popBackStack()
-            navController.navigate(NavRoutes.VerifyAccount.route
+            navController.navigate(NavRoutes.SendRestLink.route
                 .replace(
                     "{email}",
                     state.email

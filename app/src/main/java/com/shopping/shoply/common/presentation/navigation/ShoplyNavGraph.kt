@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -18,12 +17,11 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.shopping.shoply.authentication.presentation.onboarding.OnboardingScreen
 import com.shopping.shoply.authentication.presentation.reset_password.enter_email.EnterEmailScreen
 import com.shopping.shoply.authentication.presentation.reset_password.forgot_password.ForgotPasswordScreen
+import com.shopping.shoply.authentication.presentation.reset_password.send_rest_link.SendResetLinkScreen
 import com.shopping.shoply.authentication.presentation.sign_in.SignInScreen
 import com.shopping.shoply.authentication.presentation.sign_up.SignUpScreen
 import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountScreen
 import com.shopping.shoply.authentication.presentation.sign_up.SignUpViewModel
-import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountIntent
-import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountViewModel
 import com.shopping.shoply.authentication.presentation.verify_result.VerificationResultScreen
 import com.shopping.shoply.common.presentation.util.getActivity
 
@@ -49,11 +47,34 @@ fun ShoplyNavGraph(
         addOnboardingScreen(navController)
         addSignupScreen(navController, isExpandedScreen)
         addVerifyAccountScreen(navController)
+        addSendRestLinkScreen(navController)
         addSignInScreen(navController, isExpandedScreen)
         addVerificationResultScreen(navController, deepLink.toString())
         addHomeScreen()
         addForgotPasswordScreen(navController, isExpandedScreen)
         addEnterEmailScreen(navController, isExpandedScreen)
+    }
+}
+
+fun NavGraphBuilder.addSendRestLinkScreen(
+    navController: NavHostController
+) {
+    composable(
+        route = NavRoutes.SendRestLink.route,
+        arguments = listOf(
+            navArgument(
+                name = NavRoutes.SendRestLink.Args.EMAIL
+            ) {
+                type = NavType.StringType
+            }
+        )
+    ) { navBackStackEntry ->
+        val email = navBackStackEntry.arguments?.getString(NavRoutes.SendRestLink.Args.EMAIL)
+
+        SendResetLinkScreen(
+            navController = navController,
+            email = email!!
+        )
     }
 }
 

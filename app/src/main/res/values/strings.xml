@@ -39,7 +39,8 @@
     <string name="continue_to_home">Continue to home</string>
     <string name="resend">Resend</string>
     <string name="send_verification_link_again_in">Send verification link again in</string>
-    <string name="new_email_link_verification">New Email Link verification has been sent successfully!!</string>
+    <string name="new_email_link_verification">New email link verification has been sent successfully!!</string>
+    <string name="new_email_password_reset_link">New email password rest link has been sent successfully!!</string>
     <string name="verifying">Verifying...</string>
     <string name="oops">Oops!</string>
     <string name="cannot_verify_you">Cannot verify you!!</string>
@@ -69,5 +70,7 @@
     <string name="email_does_not_exist">Email doesn\'t exist</string>
     <string name="proceed">Proceed</string>
     <string name="send_email_link">Send Email Link</string>
+    <string name="send_rest_link">Send Rest Link</string>
+    <string name="ok_i_will_see">Ok, I\'ll see!</string>
 
 </resources>

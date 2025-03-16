@@ -9,6 +9,11 @@ sealed class NavRoutes(val route: String) {
             const val EMAIL = "email"
         }
     }
+    data object SendRestLink: NavRoutes(route = "send_rest_link/{email}") {
+        object Args{
+            const val EMAIL = "email"
+        }
+    }
     data object VerificationResult: NavRoutes(route = "verification_result")
     data object ForgotPassword: NavRoutes(route = "forgot_password")
     data object EnterEmail: NavRoutes(route = "enter_email")
