@@ -24,15 +24,21 @@ android {
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+    signingConfigs {
+        create("tempDebug") {
+            storeFile = file("temp-debug.keystore")
+            storePassword = "android"
+            keyAlias = "tempkey"
+            keyPassword = "android"
         }
     }
+
+    buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("tempDebug")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -113,4 +119,7 @@ dependencies {
 
     // Firebase DeepLinks
     implementation(libs.firebase.dynamic.links)
+
+    // Google Lib Phone Number
+    implementation(libs.libphonenumber)
 }

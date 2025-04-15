@@ -2,6 +2,7 @@ package com.shopping.shoply.common.presentation.navigation
 
 
 import android.net.Uri
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -16,6 +17,7 @@ import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.shopping.shoply.authentication.presentation.onboarding.OnboardingScreen
 import com.shopping.shoply.authentication.presentation.reset_password.enter_email.EnterEmailScreen
+import com.shopping.shoply.authentication.presentation.reset_password.enter_phone.EnterPhoneScreen
 import com.shopping.shoply.authentication.presentation.reset_password.forgot_password.ForgotPasswordScreen
 import com.shopping.shoply.authentication.presentation.reset_password.send_rest_link.SendResetLinkScreen
 import com.shopping.shoply.authentication.presentation.sign_in.SignInScreen
@@ -41,7 +43,7 @@ fun ShoplyNavGraph(
         startDestination = if (deepLink != null) {
             NavRoutes.VerificationResult.route
         } else {
-            NavRoutes.EnterEmail.route
+            NavRoutes.EnterPhone.route
         }
     ) {
         addOnboardingScreen(navController)
@@ -53,6 +55,22 @@ fun ShoplyNavGraph(
         addHomeScreen()
         addForgotPasswordScreen(navController, isExpandedScreen)
         addEnterEmailScreen(navController, isExpandedScreen)
+        addEnterPhoneScreen(navController, isExpandedScreen)
+    }
+}
+
+
+fun NavGraphBuilder.addEnterPhoneScreen(
+    navController: NavHostController,
+    expandedScreen: Boolean
+) {
+    composable(
+        route = NavRoutes.EnterPhone.route
+    ) {
+        EnterPhoneScreen(
+            navController = navController,
+            isExpandedScreen = expandedScreen
+        )
     }
 }
 
