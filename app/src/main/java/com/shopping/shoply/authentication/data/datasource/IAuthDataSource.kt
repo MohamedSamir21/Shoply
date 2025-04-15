@@ -1,5 +1,6 @@
 package com.shopping.shoply.authentication.data.datasource
 
+import android.app.Activity
 import com.shopping.shoply.authentication.domain.model.User
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
@@ -14,8 +15,23 @@ interface IAuthDataSource {
         email: String,
         onComplete: (Result<Unit, DataError>) -> Unit
     )
+    suspend fun checkIfPhoneNumberExists(
+        phoneNumber: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    )
     suspend fun sendPasswordRestEmail(
         email: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    )
+    suspend fun sendOTPCode(
+        context: Activity,
+        countryCode: String,
+        phoneNumber: String,
+        onSent: () -> Unit,
+        onAutoVerification: (Result<Unit, DataError>) -> Unit
+    )
+    suspend fun verifyOTPCode(
+        code: String,
         onComplete: (Result<Unit, DataError>) -> Unit
     )
 }

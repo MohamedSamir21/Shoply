@@ -1,13 +1,18 @@
 package com.shopping.shoply.authentication.data.datasource
 
+import android.app.Activity
 import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
+import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shopping.shoply.BuildConfig
 import com.shopping.shoply.authentication.domain.model.User
@@ -21,6 +26,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
@@ -323,7 +329,7 @@ class FirebaseAuthDataSource @Inject constructor(
                 }
             }
         } catch (ex: Exception) {
-            return onComplete(Result.Error(DataError.Unknown))
+            onComplete(Result.Error(DataError.Unknown))
         }
     }
 
@@ -337,6 +343,94 @@ class FirebaseAuthDataSource @Inject constructor(
             } else {
                 onComplete(Result.Error(DataError.Unknown))
             }
+        }
+    }
+
+    override suspend fun checkIfPhoneNumberExists(
+        phoneNumber: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        val query =
+            firestore.collection(USER_COLLECTION_NAME).whereEqualTo("phoneNumber", phoneNumber)
+                .limit(1)
+        try {
+            withTimeout(5000L) {
+                query.get().addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        onComplete(Result.Success(Unit))
+                    } else {
+                        onComplete(Result.Error(DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST))
+                    }
+                }.addOnFailureListener {
+                    onComplete(Result.Error(DataError.Authentication.UNKNOWN))
+                }
+            }
+        } catch (e: Exception) {
+            onComplete(Result.Error(DataError.Unknown))
+        }
+    }
+
+    override suspend fun sendOTPCode(
+        context: Activity,
+        countryCode: String,
+        phoneNumber: String,
+        onSent: () -> Unit,
+        onAutoVerification: (Result<Unit, DataError>) -> Unit
+    ) {
+        val options = PhoneAuthOptions.newBuilder(auth)
+            .setPhoneNumber("+".plus(countryCode).plus(phoneNumber))
+            .setCallbacks(callbacks)
+            .setTimeout(60L, TimeUnit.SECONDS)
+            .setActivity(context)
+            .build()
+        PhoneAuthProvider.verifyPhoneNumber(options)
+        onSent()
+        onAutomaticVerification = { phoneAuthCredential ->
+            singInWithCredential(phoneAuthCredential, onAutoVerification)
+        }
+    }
+
+    override suspend fun verifyOTPCode(
+        code: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        if (verificationId != null) {
+            val credential = PhoneAuthProvider.getCredential(verificationId!!, code)
+            singInWithCredential(credential, onComplete)
+        }
+    }
+
+    private fun singInWithCredential(
+        credential: PhoneAuthCredential,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        auth.signInWithCredential(credential).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                onComplete(Result.Success(Unit))
+            } else {
+                onComplete(Result.Error(DataError.Authentication.UNKNOWN))
+            }
+        }
+    }
+
+    private var verificationId: String? = null
+    private var onAutomaticVerification: ((PhoneAuthCredential) -> Unit) = {}
+
+    private val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        override fun onVerificationCompleted(credentail: PhoneAuthCredential) {
+            onAutomaticVerification(credentail)
+        }
+
+        override fun onVerificationFailed(exception: FirebaseException) {
+            Log.e(TAG, exception.message.toString())
+        }
+
+        override fun onCodeSent(
+            id: String,
+            token: PhoneAuthProvider.ForceResendingToken
+        ) {
+            verificationId = id
+            Log.d(TAG, "OTP sent")
         }
     }
 

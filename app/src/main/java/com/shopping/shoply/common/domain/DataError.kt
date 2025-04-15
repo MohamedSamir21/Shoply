@@ -8,6 +8,7 @@ sealed interface DataError : Error {
         WRONG_PASSWORD,
         INVALID_EMAIL,
         EMAIL_DOES_NOT_EXIST,
+        PHONE_NUMBER_DOES_NOT_EXIST,
         USER_DISABLED,
         ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL,
         EMAIL_ALREADY_IN_USE,

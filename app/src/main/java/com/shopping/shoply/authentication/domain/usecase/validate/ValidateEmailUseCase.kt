@@ -1,6 +1,6 @@
 package com.shopping.shoply.authentication.domain.usecase.validate
 
-import com.shopping.shoply.authentication.domain.interfaces.EmailValidator
+import com.shopping.shoply.authentication.domain.interfaces.validator.EmailValidator
 import com.shopping.shoply.authentication.domain.model.ValidationResult
 import javax.inject.Inject
 

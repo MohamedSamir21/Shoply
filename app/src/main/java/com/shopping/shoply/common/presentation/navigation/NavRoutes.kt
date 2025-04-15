@@ -1,23 +1,32 @@
 package com.shopping.shoply.common.presentation.navigation
 
 sealed class NavRoutes(val route: String) {
-    data object Onboarding: NavRoutes(route = "onboarding")
-    data object SignIn: NavRoutes(route = "sign_in")
-    data object SignUp: NavRoutes(route = "sign_up")
-    data object VerifyAccount: NavRoutes(route = "verify_account/{email}") {
+    data object Onboarding : NavRoutes(route = "onboarding")
+    data object SignIn : NavRoutes(route = "sign_in")
+    data object SignUp : NavRoutes(route = "sign_up")
+    data object VerifyAccount : NavRoutes(route = "verify_account/{email}") {
         object Args {
             const val EMAIL = "email"
         }
     }
-    data object SendRestLink: NavRoutes(route = "send_rest_link/{email}") {
-        object Args{
+
+    data object SendRestLink : NavRoutes(route = "send_rest_link/{email}") {
+        object Args {
             const val EMAIL = "email"
         }
     }
-    data object VerificationResult: NavRoutes(route = "verification_result")
-    data object ForgotPassword: NavRoutes(route = "forgot_password")
-    data object EnterEmail: NavRoutes(route = "enter_email")
-    data object VerifyPhone: NavRoutes(route = "verify_phone")
-    data object ResetPassword: NavRoutes(route = "reset_password")
-    data object Home: NavRoutes("home")
+
+    data object OTPCodeVerification : NavRoutes(route = "otp_verification/{already_verified}") {
+        object Args {
+            const val ALREADY_VERIFIED = "already_verified"
+        }
+    }
+
+    data object VerificationResult : NavRoutes(route = "verification_result")
+    data object ForgotPassword : NavRoutes(route = "forgot_password")
+    data object EnterEmail : NavRoutes(route = "enter_email")
+    data object EnterPhone : NavRoutes(route = "enter_phone")
+    data object VerifyPhone : NavRoutes(route = "verify_phone")
+    data object ResetPassword : NavRoutes(route = "reset_password")
+    data object Home : NavRoutes("home")
 }

@@ -1,6 +1,6 @@
 package com.shopping.shoply.authentication.domain.usecase.validate
 
-import com.shopping.shoply.authentication.domain.interfaces.PhoneValidator
+import com.shopping.shoply.authentication.domain.interfaces.validator.PhoneValidator
 import com.shopping.shoply.authentication.domain.model.ValidationResult
 import javax.inject.Inject
 

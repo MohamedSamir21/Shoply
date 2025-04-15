@@ -1,7 +1,7 @@
 package com.shopping.shoply.authentication.presentation.utility
 
 import android.util.Patterns
-import com.shopping.shoply.authentication.domain.interfaces.EmailValidator
+import com.shopping.shoply.authentication.domain.interfaces.validator.EmailValidator
 import java.util.regex.Pattern
 import javax.inject.Inject
 

@@ -1,7 +1,7 @@
 package com.shopping.shoply.authentication.presentation.utility
 
 import android.util.Patterns
-import com.shopping.shoply.authentication.domain.interfaces.PhoneValidator
+import com.shopping.shoply.authentication.domain.interfaces.validator.PhoneValidator
 import java.util.regex.Pattern
 import javax.inject.Inject
 

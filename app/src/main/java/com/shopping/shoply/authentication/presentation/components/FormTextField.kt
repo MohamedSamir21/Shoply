@@ -14,11 +14,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,17 +35,19 @@ fun FormTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    label: String? = null,
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     onTrailingIconClicked: () -> Unit = {},
     showSupportingText: Boolean = true,
     supportingText: String? = null,
+    requestFocus: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     shape: Shape = OutlinedTextFieldDefaults.shape,
     colors: TextFieldColors = TextFieldDefaults.colors()
 ) {
+    val focusRequester = remember { FocusRequester() }
     var hasFocus by remember {
         mutableStateOf(false)
     }
@@ -51,13 +56,21 @@ fun FormTextField(
     else
         MaterialTheme.colorScheme.tertiary
 
+    if (requestFocus) {
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
+    }
+
     OutlinedTextField(
         value = value,
         onValueChange = {
             onValueChange(it)
         },
         label = {
-            Text(text = label)
+            label?.let {
+                Text(text = it)
+            }
         },
         leadingIcon = if (leadingIcon != null) {
             {
@@ -95,9 +108,11 @@ fun FormTextField(
         singleLine = true,
         keyboardOptions = keyboardOptions,
         visualTransformation = visualTransformation,
-        modifier = modifier.onFocusChanged {
-            hasFocus = it.isFocused
-        },
+        modifier = modifier
+            .focusRequester(focusRequester)
+            .onFocusChanged {
+                hasFocus = it.isFocused
+            },
         shape = shape,
         colors = colors
     )

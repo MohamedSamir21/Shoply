@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.domain.interfaces
+package com.shopping.shoply.authentication.domain.interfaces.repoistory
 
 import com.facebook.CallbackManager
 import com.shopping.shoply.authentication.domain.model.DomainContext
@@ -24,8 +24,23 @@ interface AuthRepository {
         email: String,
         onComplete: (Result<Unit, DataError>) -> Unit
     )
+    suspend fun checkIfPhoneNumberExists(
+        phoneNumber: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    )
     suspend fun sendPasswordResetEmail(
         email: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    )
+    suspend fun sendOTPCode(
+        domainContext: DomainContext,
+        countryCode: String,
+        phoneNumber: String,
+        onSent: () -> Unit,
+        onAutoVerification: (Result<Unit, DataError>) -> Unit
+    )
+    suspend fun verifyOTPCode(
+        code: String,
         onComplete: (Result<Unit, DataError>) -> Unit
     )
 }

@@ -4,14 +4,19 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.shopping.shoply.authentication.data.datasource.FacebookAuthDataSource
 import com.shopping.shoply.authentication.data.datasource.FirebaseAuthDataSource
 import com.shopping.shoply.authentication.data.datasource.GoogleAuthDataSource
 import com.shopping.shoply.authentication.data.datasource.IAuthDataSource
+import com.shopping.shoply.authentication.data.datasource.country_info.LocaleDataSource
+import com.shopping.shoply.authentication.data.datasource.country_info.TelephonyManagerDataSource
 import com.shopping.shoply.authentication.data.repository.AuthRepositoryImpl
-import com.shopping.shoply.authentication.domain.interfaces.AuthRepository
-import com.shopping.shoply.authentication.domain.interfaces.EmailValidator
-import com.shopping.shoply.authentication.domain.interfaces.PhoneValidator
+import com.shopping.shoply.authentication.data.repository.CountryInfoRepositoryImpl
+import com.shopping.shoply.authentication.domain.interfaces.repoistory.AuthRepository
+import com.shopping.shoply.authentication.domain.interfaces.repoistory.CountryInfoRepository
+import com.shopping.shoply.authentication.domain.interfaces.validator.EmailValidator
+import com.shopping.shoply.authentication.domain.interfaces.validator.PhoneValidator
 import com.shopping.shoply.authentication.domain.usecase.count_down.FormatCountDownTimeUseCase
 import com.shopping.shoply.authentication.presentation.utility.EmailValidatorUtil
 import com.shopping.shoply.authentication.presentation.utility.PhoneValidatorUtil
@@ -71,6 +76,27 @@ object AuthModule {
     @Singleton
     fun provideFormatCountDownTimeUseCase() = FormatCountDownTimeUseCase()
 
+    @Provides
+    @Singleton
+    fun provideCountryInfoRepository(
+        telephonyManagerDataSource: TelephonyManagerDataSource,
+        localeDataSource: LocaleDataSource,
+        phoneNumberUtil: PhoneNumberUtil
+    ): CountryInfoRepository =
+        CountryInfoRepositoryImpl(telephonyManagerDataSource, localeDataSource, phoneNumberUtil)
+
+    @Provides
+    @Singleton
+    fun provideTelephonyManagerDataSource(): TelephonyManagerDataSource =
+        TelephonyManagerDataSource()
+
+    @Provides
+    @Singleton
+    fun provideLocaleDataSource(): LocaleDataSource = LocaleDataSource()
+
+    @Provides
+    @Singleton
+    fun providePhoneNumberUtil(): PhoneNumberUtil = PhoneNumberUtil.getInstance()
 }
 
 @Module

@@ -9,6 +9,7 @@ fun DataError.asUiText(): UiText {
         DataError.Authentication.WRONG_PASSWORD -> UiText.StringResource(R.string.wrong_password)
         DataError.Authentication.INVALID_EMAIL -> UiText.StringResource(R.string.enter_valid_email)
         DataError.Authentication.EMAIL_DOES_NOT_EXIST -> UiText.StringResource(R.string.email_does_not_exist)
+        DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST -> UiText.StringResource(R.string.phone_number_does_not_exist)
         DataError.Authentication.USER_DISABLED -> UiText.StringResource(R.string.disabled_user)
         DataError.Authentication.ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL -> UiText.StringResource(R.string.account_with_different_credentials)
         DataError.Authentication.EMAIL_ALREADY_IN_USE -> UiText.StringResource(R.string.already_email_exits)

@@ -4,7 +4,7 @@ import com.facebook.CallbackManager
 import com.shopping.shoply.authentication.data.datasource.FacebookAuthDataSource
 import com.shopping.shoply.authentication.data.datasource.GoogleAuthDataSource
 import com.shopping.shoply.authentication.data.datasource.IAuthDataSource
-import com.shopping.shoply.authentication.domain.interfaces.AuthRepository
+import com.shopping.shoply.authentication.domain.interfaces.repoistory.AuthRepository
 import com.shopping.shoply.authentication.domain.model.DomainContext
 import com.shopping.shoply.authentication.domain.model.FacebookLoginManger
 import com.shopping.shoply.authentication.domain.model.User
@@ -12,6 +12,7 @@ import com.shopping.shoply.authentication.presentation.model.ActivityContext
 import com.shopping.shoply.authentication.presentation.model.FBLoginManger
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
+import com.shopping.shoply.common.presentation.util.getActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -76,5 +77,36 @@ class AuthRepositoryImpl @Inject constructor(
         onComplete: (Result<Unit, DataError>) -> Unit
     ) {
         authDataSource.sendPasswordRestEmail(email, onComplete)
+    }
+
+    override suspend fun checkIfPhoneNumberExists(
+        phoneNumber: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        authDataSource.checkIfPhoneNumberExists(phoneNumber, onComplete)
+    }
+
+    override suspend fun sendOTPCode(
+        domainContext: DomainContext,
+        countryCode: String,
+        phoneNumber: String,
+        onSent: () -> Unit,
+        onAutoVerification: (Result<Unit, DataError>) -> Unit
+    ) {
+        val activityContext = domainContext as ActivityContext
+        authDataSource.sendOTPCode(
+            context = activityContext.context.getActivity(),
+            countryCode = countryCode,
+            phoneNumber = phoneNumber,
+            onSent = onSent,
+            onAutoVerification = onAutoVerification
+        )
+    }
+
+    override suspend fun verifyOTPCode(
+        code: String,
+        onComplete: (Result<Unit, DataError>) -> Unit
+    ) {
+        authDataSource.verifyOTPCode(code, onComplete)
     }
 }

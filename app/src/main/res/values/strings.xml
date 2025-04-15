@@ -63,14 +63,21 @@
     <string name="checked_circle">Checked Circle</string>
     <string name="next">Next</string>
     <string name="enter_email_guiding_message">Please, enter your email so that we can send you an email link to reset your password.</string>
+    <string name="enter_phone_guiding_message">Please, enter your phone number so that we can send you an OTP Code to reset your password.</string>
     <string name="method_name">Method Name</string>
     <string name="method_message">Method Message</string>
     <string name="label">label</string>
     <string name="enter">Enter</string>
     <string name="email_does_not_exist">Email doesn\'t exist</string>
+    <string name="phone_number_does_not_exist">Phone number doesn\'t exist</string>
     <string name="proceed">Proceed</string>
     <string name="send_email_link">Send Email Link</string>
     <string name="send_rest_link">Send Rest Link</string>
     <string name="ok_i_will_see">Ok, I\'ll see!</string>
+    <string name="standard_rates_apply">*standard rates apply</string>
+    <string name="down_arrow">Down Arrow</string>
+    <string name="cancel">Cancel</string>
+    <string name="search">Search</string>
+    <string name="verification_code">Verification Code</string>
 
 </resources>
