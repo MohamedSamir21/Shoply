@@ -6,8 +6,8 @@ import java.util.Locale
 class LocaleDataSource {
     fun getISOCountryCodes(): List<String> {
         val twoLettersIsoCountryCodes = Locale.getISOCountries()
-        val notIsrael = { isoCode: String -> isoCode != "IL" }
-        return twoLettersIsoCountryCodes.filter(notIsrael).toList()
+        val notIL = { isoCode: String -> isoCode != "IL" }
+        return twoLettersIsoCountryCodes.filter(notIL).toList()
     }
 
     fun getCountryName(isoCountryCode: ISOCountryCode): String {
