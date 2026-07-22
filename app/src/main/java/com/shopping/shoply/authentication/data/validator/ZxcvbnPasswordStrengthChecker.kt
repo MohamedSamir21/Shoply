@@ -15,7 +15,7 @@ import javax.inject.Singleton
  *
  * This class is the **single seam** in the app where the zxcvbn library is touched. It is the
  * concrete, data-layer implementation of the domain port [PasswordStrengthChecker] — mirroring how
- * [EmailValidatorUtil] implements `EmailValidator`. By translating zxcvbn's raw `0..4` integer score
+ * [RegexEmailValidator] implements `EmailValidator`. By translating zxcvbn's raw `0..4` integer score
  * into the domain's [PasswordStrength] enum here, neither the domain nor the presentation layer ever
  * import or depend on zxcvbn. Swapping the estimator later (or faking it in a test) means replacing
  * only this one file.
