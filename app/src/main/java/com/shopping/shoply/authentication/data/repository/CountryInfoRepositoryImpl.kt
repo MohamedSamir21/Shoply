@@ -1,10 +1,10 @@
 package com.shopping.shoply.authentication.data.repository
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.shopping.shoply.authentication.data.datasource.country_info.LocaleDataSource
-import com.shopping.shoply.authentication.data.datasource.country_info.TelephonyManagerDataSource
-import com.shopping.shoply.authentication.data.mappers.toDomainISOCountryCode
-import com.shopping.shoply.authentication.data.mappers.toList
+import com.shopping.shoply.authentication.data.datasource.countryinfo.LocaleDataSource
+import com.shopping.shoply.authentication.data.datasource.countryinfo.TelephonyManagerDataSource
+import com.shopping.shoply.authentication.data.mapper.toDomainISOCountryCode
+import com.shopping.shoply.authentication.data.mapper.toList
 import com.shopping.shoply.authentication.domain.interfaces.repository.CountryInfoRepository
 import com.shopping.shoply.authentication.domain.model.ISOCountryCode
 import com.shopping.shoply.common.di.DefaultDispatcher
@@ -50,10 +50,10 @@ class CountryInfoRepositoryImpl @Inject constructor(
     /** Returns the international calling code for [isoCountryCode] (e.g. `EG` -> `20`). */
     override suspend fun getCountryCode(isoCountryCode: ISOCountryCode): Int =
         withContext(defaultDispatcher) {
-            phoneNumberUtil.getCountryCodeForRegion(isoCountryCode.code.uppercase())
+            phoneNumberUtil.getCountryCodeForRegion(isoCountryCode.symbol.uppercase())
         }
 
-    /** Returns the English display name for [isoCountryCode]. */
+    /** Returns the English display name for [isoCountryCode] (e.g `EG` -> `Egypt`). */
     override suspend fun getCountryName(isoCountryCode: ISOCountryCode): String =
         withContext(defaultDispatcher) {
             localeDataSource.getCountryName(isoCountryCode)
@@ -64,7 +64,7 @@ class CountryInfoRepositoryImpl @Inject constructor(
         isoCountryCode: ISOCountryCode
     ): String = withContext(defaultDispatcher) {
         val examplePhoneNumber = phoneNumberUtil.getExampleNumberForType(
-            isoCountryCode.code.uppercase(),
+            isoCountryCode.symbol.uppercase(),
             PhoneNumberUtil.PhoneNumberType.MOBILE
         ) ?: return@withContext ""
         phoneNumberUtil.format(

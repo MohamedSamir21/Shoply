@@ -2,8 +2,8 @@ package com.shopping.shoply.authentication.data.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.shopping.shoply.authentication.data.datasource.country_info.LocaleDataSource
-import com.shopping.shoply.authentication.data.datasource.country_info.TelephonyManagerDataSource
+import com.shopping.shoply.authentication.data.datasource.countryinfo.LocaleDataSource
+import com.shopping.shoply.authentication.data.datasource.countryinfo.TelephonyManagerDataSource
 import com.shopping.shoply.authentication.domain.model.ISOCountryCode
 import io.mockk.every
 import io.mockk.mockk

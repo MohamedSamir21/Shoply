@@ -1,6 +1,6 @@
 package com.shopping.shoply.authentication.domain.usecase.auth
 
-import com.shopping.shoply.authentication.domain.interfaces.repoistory.AuthRepository
+import com.shopping.shoply.authentication.domain.interfaces.repository.AuthRepository
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import javax.inject.Inject
@@ -8,12 +8,6 @@ import javax.inject.Inject
 class CheckIfEmailExistsUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(
-        email: String,
-        onComplete: (Result<Unit, DataError>) -> Unit
-    ) {
-        authRepository.checkIfEmailExists(
-            email, onComplete
-        )
-    }
+    suspend operator fun invoke(email: String): Result<Unit, DataError> =
+        authRepository.checkIfEmailExists(email)
 }

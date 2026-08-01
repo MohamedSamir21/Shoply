@@ -5,22 +5,28 @@ import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.i18n.phonenumbers.PhoneNumberUtil
-import com.shopping.shoply.authentication.data.datasource.FacebookAuthDataSource
-import com.shopping.shoply.authentication.data.datasource.FirebaseAuthDataSource
-import com.shopping.shoply.authentication.data.datasource.GoogleAuthDataSource
-import com.shopping.shoply.authentication.data.datasource.IAuthDataSource
-import com.shopping.shoply.authentication.data.datasource.country_info.LocaleDataSource
-import com.shopping.shoply.authentication.data.datasource.country_info.TelephonyManagerDataSource
+import com.shopping.shoply.authentication.data.datasource.auth.FacebookAuthDataSource
+import com.shopping.shoply.authentication.data.datasource.auth.FirebaseAuthDataSource
+import com.shopping.shoply.authentication.data.datasource.auth.GoogleAuthDataSource
+import com.shopping.shoply.authentication.data.datasource.auth.AuthDataSource
+import com.shopping.shoply.authentication.data.datasource.countryinfo.LocaleDataSource
+import com.shopping.shoply.authentication.data.datasource.countryinfo.TelephonyManagerDataSource
 import com.shopping.shoply.authentication.data.repository.AuthRepositoryImpl
 import com.shopping.shoply.authentication.data.repository.CountryInfoRepositoryImpl
-import com.shopping.shoply.authentication.domain.interfaces.repoistory.AuthRepository
-import com.shopping.shoply.authentication.domain.interfaces.repoistory.CountryInfoRepository
+import com.shopping.shoply.authentication.domain.interfaces.repository.AuthRepository
+import com.shopping.shoply.authentication.domain.interfaces.repository.CountryInfoRepository
 import com.shopping.shoply.authentication.domain.interfaces.validator.EmailValidator
 import com.shopping.shoply.authentication.domain.interfaces.validator.PhoneValidator
-import com.shopping.shoply.authentication.domain.usecase.count_down.FormatCountDownTimeUseCase
-import com.shopping.shoply.authentication.presentation.utility.EmailValidatorUtil
-import com.shopping.shoply.authentication.presentation.utility.PhoneValidatorUtil
+import com.shopping.shoply.authentication.domain.usecase.countdown.FormatCountDownTimeUseCase
+import com.shopping.shoply.authentication.data.validator.RegexEmailValidator
+import com.shopping.shoply.authentication.data.validator.LibphonenumberPhoneValidator
+import com.shopping.shoply.authentication.data.validator.ZxcvbnPasswordStrengthChecker
+import com.shopping.shoply.authentication.domain.interfaces.validator.PasswordStrengthChecker
+import com.shopping.shoply.common.di.DefaultDispatcher
+import com.shopping.shoply.common.platform.ActivityProvider
+import com.shopping.shoply.common.platform.CurrentActivityProvider
 import dagger.Binds
+import kotlinx.coroutines.CoroutineDispatcher
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,25 +58,8 @@ object AuthModule {
         )
     }
 
-    @Provides
-    @Singleton
-    fun provideGoogleAuthDataSource(
-        credentialManager: CredentialManager,
-        firebaseAuth: FirebaseAuth
-    ): GoogleAuthDataSource {
-        return GoogleAuthDataSource(
-            credentialManager,
-            firebaseAuth
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideFacebookAuthDataSource(
-        firebaseAuth: FirebaseAuth
-    ): FacebookAuthDataSource {
-        return FacebookAuthDataSource(firebaseAuth)
-    }
+    // GoogleAuthDataSource & FacebookAuthDataSource have @Inject constructors, so Hilt
+    // builds them directly — and picks up the new ActivityProvider dependency for free.
 
     @Provides
     @Singleton
@@ -81,14 +70,15 @@ object AuthModule {
     fun provideCountryInfoRepository(
         telephonyManagerDataSource: TelephonyManagerDataSource,
         localeDataSource: LocaleDataSource,
-        phoneNumberUtil: PhoneNumberUtil
+        phoneNumberUtil: PhoneNumberUtil,
+        @DefaultDispatcher defaultDispatcher: CoroutineDispatcher
     ): CountryInfoRepository =
-        CountryInfoRepositoryImpl(telephonyManagerDataSource, localeDataSource, phoneNumberUtil)
-
-    @Provides
-    @Singleton
-    fun provideTelephonyManagerDataSource(): TelephonyManagerDataSource =
-        TelephonyManagerDataSource()
+        CountryInfoRepositoryImpl(
+            telephonyManagerDataSource,
+            localeDataSource,
+            phoneNumberUtil,
+            defaultDispatcher
+        )
 
     @Provides
     @Singleton
@@ -104,14 +94,28 @@ object AuthModule {
 abstract class AuthBindingsModule {
 
     @Binds
-    abstract fun provideAuthDataSource(firebaseAuthDataSource: FirebaseAuthDataSource): IAuthDataSource
+    @Singleton
+    abstract fun provideAuthDataSource(firebaseAuthDataSource: FirebaseAuthDataSource): AuthDataSource
 
     @Binds
     abstract fun provideAuthRepository(authRepositoryImpl: AuthRepositoryImpl): AuthRepository
 
     @Binds
-    abstract fun provideEmailValidator(emailValidatorUtil: EmailValidatorUtil): EmailValidator
+    abstract fun provideEmailValidator(emailValidatorUtil: RegexEmailValidator): EmailValidator
 
     @Binds
-    abstract fun providePhoneValidator(phoneValidatorUtil: PhoneValidatorUtil): PhoneValidator
+    abstract fun providePhoneValidator(phoneValidatorUtil: LibphonenumberPhoneValidator): PhoneValidator
+
+    // @Singleton here matches the class scope: the dictionary-loading checker is built once
+    // and shared, unlike the cheap stateless validators above.
+    @Binds
+    @Singleton
+    abstract fun providePasswordStrengthChecker(
+        impl: ZxcvbnPasswordStrengthChecker
+    ): PasswordStrengthChecker
+
+    // Binds the lifecycle-tracking implementation to the neutral ActivityProvider port.
+    @Binds
+    @Singleton
+    abstract fun provideActivityProvider(impl: CurrentActivityProvider): ActivityProvider
 }

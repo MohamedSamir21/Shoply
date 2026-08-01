@@ -1,112 +1,75 @@
 package com.shopping.shoply.authentication.data.repository
 
-import com.facebook.CallbackManager
-import com.shopping.shoply.authentication.data.datasource.FacebookAuthDataSource
-import com.shopping.shoply.authentication.data.datasource.GoogleAuthDataSource
-import com.shopping.shoply.authentication.data.datasource.IAuthDataSource
-import com.shopping.shoply.authentication.domain.interfaces.repoistory.AuthRepository
-import com.shopping.shoply.authentication.domain.model.DomainContext
-import com.shopping.shoply.authentication.domain.model.FacebookLoginManger
+import com.shopping.shoply.authentication.data.datasource.auth.FacebookAuthDataSource
+import com.shopping.shoply.authentication.data.datasource.auth.GoogleAuthDataSource
+import com.shopping.shoply.authentication.data.datasource.auth.AuthDataSource
+import com.shopping.shoply.authentication.domain.interfaces.repository.AuthRepository
 import com.shopping.shoply.authentication.domain.model.User
-import com.shopping.shoply.authentication.presentation.model.ActivityContext
-import com.shopping.shoply.authentication.presentation.model.FBLoginManger
-import com.shopping.shoply.common.domain.DataError
-import com.shopping.shoply.common.domain.Result
-import com.shopping.shoply.common.presentation.util.getActivity
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
-    private val authDataSource: IAuthDataSource,
+    private val authDataSource: AuthDataSource,
     private val googleAuthDataSource: GoogleAuthDataSource,
     private val facebookAuthDataSource: FacebookAuthDataSource
 ) : AuthRepository {
 
-    override suspend fun signUp(user: User): Result<Unit, DataError> {
-        return withContext(Dispatchers.IO) {
-            authDataSource.signUp(user)
-        }
-    }
+    // Pure delegator: each data source owns its own threading, so the repository
+    // doesn't pick dispatchers.
+    override suspend fun signUp(user: User, password: String) =
+        authDataSource.signUp(user, password)
 
-    override suspend fun signIn(user: User): Result<Unit, DataError> {
-        return authDataSource.signIn(user)
-    }
 
-    override suspend fun signUpWithGoogle(domainContext: DomainContext): Result<Unit, DataError> {
-        return withContext(Dispatchers.IO) {
-            val activityContext = domainContext as ActivityContext
-            googleAuthDataSource.signUpWithGoogle(activityContext.context)
-        }
-    }
+    override suspend fun signIn(email: String, password: String) =
+        authDataSource.signIn(email, password)
 
-    override suspend fun signUpWithFacebook(
-        facebookLoginManger: FacebookLoginManger,
-        callbackManager: CallbackManager,
-        onComplete: (Result<Unit, DataError>) -> Unit
-    ) {
-        val fbLoginManger = facebookLoginManger as FBLoginManger
-        facebookAuthDataSource.signUpWithFacebook(
-            fbLoginManger.loginManager,
-            callbackManager,
-            onComplete
-        )
-    }
 
-    override suspend fun resendVerificationEmailLink(): Result<Unit, DataError> {
-        return authDataSource.resendVerificationEmailLink()
-    }
+    override suspend fun signUpWithGoogle() = googleAuthDataSource.signUpWithGoogle()
 
-    override suspend fun verifyEmail(deepLink: String): Result<Unit, DataError> {
-        return authDataSource.verifyEmail(deepLink)
-    }
 
-    override suspend fun getUserInfo(): Result<User, DataError> {
-        return authDataSource.getUserInfo()
-    }
+    override suspend fun signUpWithFacebook() = facebookAuthDataSource.signUpWithFacebook()
 
-    override suspend fun checkIfEmailExists(
-        email: String,
-        onComplete: (Result<Unit, DataError>) -> Unit
-    ) {
-        authDataSource.checkIfEmailExists(email, onComplete)
-    }
 
-    override suspend fun sendPasswordResetEmail(
-        email: String,
-        onComplete: (Result<Unit, DataError>) -> Unit
-    ) {
-        authDataSource.sendPasswordRestEmail(email, onComplete)
-    }
+    override suspend fun resendVerificationEmailLink() =
+        authDataSource.resendVerificationEmailLink()
 
-    override suspend fun checkIfPhoneNumberExists(
-        phoneNumber: String,
-        onComplete: (Result<Unit, DataError>) -> Unit
-    ) {
-        authDataSource.checkIfPhoneNumberExists(phoneNumber, onComplete)
-    }
 
-    override suspend fun sendOTPCode(
-        domainContext: DomainContext,
+    override suspend fun refreshVerificationStatus() = authDataSource.refreshVerificationStatus()
+
+
+    override suspend fun getUserInfo() = authDataSource.getUserInfo()
+
+    override suspend fun checkIfEmailExists(email: String) =
+        authDataSource.checkIfEmailExists(email)
+
+
+    override suspend fun sendPasswordResetEmail(email: String) =
+        authDataSource.sendPasswordResetEmail(email)
+
+
+    override suspend fun checkIfPhoneNumberExists(phoneNumber: String) =
+        authDataSource.checkIfPhoneNumberExists(phoneNumber)
+
+
+    override suspend fun markPhoneNumberVerified() = authDataSource.markPhoneNumberVerified()
+
+
+    override fun sendOTPCode(
         countryCode: String,
         phoneNumber: String,
-        onSent: () -> Unit,
-        onAutoVerification: (Result<Unit, DataError>) -> Unit
-    ) {
-        val activityContext = domainContext as ActivityContext
-        authDataSource.sendOTPCode(
-            context = activityContext.context.getActivity(),
+        link: Boolean
+    ) = authDataSource.sendOTPCode(
             countryCode = countryCode,
             phoneNumber = phoneNumber,
-            onSent = onSent,
-            onAutoVerification = onAutoVerification
+            link = link
         )
-    }
 
-    override suspend fun verifyOTPCode(
-        code: String,
-        onComplete: (Result<Unit, DataError>) -> Unit
-    ) {
-        authDataSource.verifyOTPCode(code, onComplete)
-    }
+    override suspend fun verifyOTPCode(code: String) = authDataSource.verifyOTPCode(code)
+
+
+    override suspend fun linkPhoneNumber(code: String) = authDataSource.linkPhoneNumber(code)
+
+
+    override suspend fun updatePassword(newPassword: String) =
+        authDataSource.updatePassword(newPassword)
+
 }

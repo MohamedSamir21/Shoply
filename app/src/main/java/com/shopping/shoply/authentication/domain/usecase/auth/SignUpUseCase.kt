@@ -1,6 +1,6 @@
 package com.shopping.shoply.authentication.domain.usecase.auth
 
-import com.shopping.shoply.authentication.domain.interfaces.repoistory.AuthRepository
+import com.shopping.shoply.authentication.domain.interfaces.repository.AuthRepository
 import com.shopping.shoply.authentication.domain.model.User
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
@@ -9,7 +9,6 @@ import javax.inject.Inject
 class SignUpUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
-    suspend operator fun invoke(user: User): Result<Unit, DataError> {
-        return authRepository.signUp(user)
-    }
+    suspend operator fun invoke(user: User, password: String): Result<Unit, DataError> =
+        authRepository.signUp(user, password)
 }

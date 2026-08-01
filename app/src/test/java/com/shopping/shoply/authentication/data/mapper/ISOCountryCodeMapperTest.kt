@@ -20,7 +20,7 @@ class ISOCountryCodeMapperTest {
     fun `wraps region code`(code: String) {
         val wrapped = code.toDomainISOCountryCode()
 
-        assertThat(wrapped.code).isEqualTo(code)
+        assertThat(wrapped.symbol).isEqualTo(code)
     }
 
     @Test

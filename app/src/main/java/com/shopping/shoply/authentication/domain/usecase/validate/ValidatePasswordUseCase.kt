@@ -1,23 +1,20 @@
 package com.shopping.shoply.authentication.domain.usecase.validate
 
-import android.util.Log
-import com.shopping.shoply.authentication.domain.model.ValidationResult
+import com.shopping.shoply.authentication.domain.model.ValidationError
+import com.shopping.shoply.common.domain.Result
 import javax.inject.Inject
 
-private const val TAG = "ValidatePasswordUseCase"
-
+// No android.util.Log here: domain stays framework-free so it can be unit-tested on the JVM.
 class ValidatePasswordUseCase @Inject constructor() {
-    operator fun invoke(password: String): ValidationResult {
+    operator fun invoke(password: String): Result<Unit, ValidationError> {
         if (password.length < 8) {
-            return ValidationResult(error = "Your password must be at least 8 letters")
+            return Result.Error(ValidationError.PASSWORD_TOO_SHORT)
         }
         val containsLetters = password.any { it.isLetter() }
         val containsDigits = password.any { it.isDigit() }
-        Log.d(TAG, containsDigits.toString())
-        if (!(containsLetters && containsDigits)){
-            Log.d(TAG, "not contains digits or letters")
-            return ValidationResult(error = "Your password must contain at least one letter and at least one digit")
+        if (!(containsLetters && containsDigits)) {
+            return Result.Error(ValidationError.PASSWORD_MISSING_LETTER_OR_DIGIT)
         }
-        return ValidationResult(data = password)
+        return Result.Success(Unit)
     }
 }
