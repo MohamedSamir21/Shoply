@@ -2,22 +2,19 @@ package com.shopping.shoply.authentication.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.shopping.shoply.R
+import com.shopping.shoply.common.presentation.theme.ShoplyIcons
+import com.shopping.shoply.common.presentation.theme.ShoplyShapes
+import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
 @Composable
 fun FormEmail(
@@ -27,16 +24,16 @@ fun FormEmail(
     showSupportingText: Boolean = true,
     errorMessage: String?,
     onClear: () -> Unit,
-    colors: TextFieldColors = TextFieldDefaults.colors(),
-    shape: Shape = OutlinedTextFieldDefaults.shape
+    colors: TextFieldColors = shoplyTextFieldColors(),
+    shape: Shape = ShoplyShapes.field
 ) {
     FormTextField(
         value = email,
         onValueChange = { onEmailChanged(it) },
         onTrailingIconClicked = onClear,
         label = stringResource(R.string.email),
-        leadingIcon = ImageVector.vectorResource(id = R.drawable.ic_email),
-        trailingIcon = Icons.Outlined.Clear,
+        leadingIcon = ShoplyIcons.At,
+        trailingIcon = ShoplyIcons.XCircle,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
@@ -49,14 +46,16 @@ fun FormEmail(
     )
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun FormEmailPreview() {
-    FormEmail(
-        modifier = Modifier.background(MaterialTheme.colorScheme.surface),
-        email = stringResource(R.string.user_gmail_com),
-        onEmailChanged = {},
-        onClear = {},
-        errorMessage = null
-    )
+    ShoplyTheme {
+        FormEmail(
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
+            email = stringResource(R.string.user_gmail_com),
+            onEmailChanged = {},
+            onClear = {},
+            errorMessage = null
+        )
+    }
 }

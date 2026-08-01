@@ -1,31 +1,33 @@
 package com.shopping.shoply.common.presentation.navigation
 
 
-import android.net.Uri
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.navArgument
-import androidx.navigation.navDeepLink
+import androidx.compose.ui.window.DialogProperties
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.shopping.shoply.authentication.presentation.onboarding.OnboardingScreen
-import com.shopping.shoply.authentication.presentation.reset_password.enter_email.EnterEmailScreen
-import com.shopping.shoply.authentication.presentation.reset_password.enter_phone.EnterPhoneScreen
-import com.shopping.shoply.authentication.presentation.reset_password.forgot_password.ForgotPasswordScreen
-import com.shopping.shoply.authentication.presentation.reset_password.send_rest_link.SendResetLinkScreen
-import com.shopping.shoply.authentication.presentation.sign_in.SignInScreen
-import com.shopping.shoply.authentication.presentation.sign_up.SignUpScreen
-import com.shopping.shoply.authentication.presentation.verify_account.VerifyAccountScreen
-import com.shopping.shoply.authentication.presentation.sign_up.SignUpViewModel
-import com.shopping.shoply.authentication.presentation.verify_result.VerificationResultScreen
-import com.shopping.shoply.common.presentation.util.getActivity
+import com.shopping.shoply.authentication.presentation.result.ResultPurpose
+import com.shopping.shoply.authentication.presentation.result.ResultScreen
+import com.shopping.shoply.authentication.presentation.splash.SplashScreen
+import com.shopping.shoply.authentication.presentation.resetpassword.enteremail.EnterEmailScreen
+import com.shopping.shoply.authentication.presentation.resetpassword.enterphone.EnterPhoneScreen
+import com.shopping.shoply.authentication.presentation.resetpassword.createpassword.CreateNewPasswordScreen
+import com.shopping.shoply.authentication.presentation.resetpassword.forgotpassword.ForgotPasswordScreen
+import com.shopping.shoply.authentication.presentation.resetpassword.otpverification.OTPVerificationScreen
+import com.shopping.shoply.authentication.presentation.resetpassword.sendresetlink.SendResetLinkScreen
+import com.shopping.shoply.authentication.presentation.signin.SignInScreen
+import com.shopping.shoply.authentication.presentation.signup.SignUpScreen
+import com.shopping.shoply.authentication.presentation.verifyaccount.VerifyAccountScreen
+import com.shopping.shoply.authentication.presentation.signup.SignUpViewModel
 
 @Composable
 fun ShoplyNavGraph(
@@ -36,26 +38,70 @@ fun ShoplyNavGraph(
         WindowWidthSizeClass.COMPACT -> false
         else -> true
     }
-    val deepLink = extractDeepLink()
 
     NavHost(
         navController = navController,
-        startDestination = if (deepLink != null) {
-            NavRoutes.VerificationResult.route
-        } else {
-            NavRoutes.EnterPhone.route
-        }
+        startDestination = NavRoutes.Splash.route
     ) {
+        addSplashScreen(navController)
+        addResultScreen(navController)
         addOnboardingScreen(navController)
         addSignupScreen(navController, isExpandedScreen)
         addVerifyAccountScreen(navController)
-        addSendRestLinkScreen(navController)
+        addSendResetLinkScreen(navController)
         addSignInScreen(navController, isExpandedScreen)
-        addVerificationResultScreen(navController, deepLink.toString())
         addHomeScreen()
         addForgotPasswordScreen(navController, isExpandedScreen)
         addEnterEmailScreen(navController, isExpandedScreen)
         addEnterPhoneScreen(navController, isExpandedScreen)
+        addOTPVerificationScreen(navController, isExpandedScreen)
+        addCreateNewPasswordScreen(navController, isExpandedScreen)
+    }
+}
+
+fun NavGraphBuilder.addCreateNewPasswordScreen(
+    navController: NavHostController,
+    isExpandedScreen: Boolean
+) {
+    composable(
+        route = NavRoutes.ResetPassword.route
+    ) {
+        CreateNewPasswordScreen(
+            navController = navController,
+            isExpandedScreen = isExpandedScreen
+        )
+    }
+}
+
+fun NavGraphBuilder.addOTPVerificationScreen(
+    navController: NavHostController,
+    expandedScreen: Boolean
+) {
+
+    composable(
+        route = NavRoutes.OTPCodeVerification.route,
+        arguments = listOf(
+            navArgument(
+                name = NavRoutes.OTPCodeVerification.Args.COUNTRY_CODE
+            ) {
+                type = NavType.StringType
+            },
+            navArgument(
+                name = NavRoutes.OTPCodeVerification.Args.PHONE_NUMBER_WITH_COUNTRY_CODE
+            ) {
+                type = NavType.StringType
+            },
+            navArgument(
+                name = NavRoutes.OTPCodeVerification.Args.PURPOSE
+            ) {
+                type = NavType.StringType
+            }
+        )
+    ) {
+        OTPVerificationScreen(
+            navController = navController,
+            expandedScreen = expandedScreen
+        )
     }
 }
 
@@ -74,20 +120,20 @@ fun NavGraphBuilder.addEnterPhoneScreen(
     }
 }
 
-fun NavGraphBuilder.addSendRestLinkScreen(
+fun NavGraphBuilder.addSendResetLinkScreen(
     navController: NavHostController
 ) {
     composable(
-        route = NavRoutes.SendRestLink.route,
+        route = NavRoutes.SendResetLink.route,
         arguments = listOf(
             navArgument(
-                name = NavRoutes.SendRestLink.Args.EMAIL
+                name = NavRoutes.SendResetLink.Args.EMAIL
             ) {
                 type = NavType.StringType
             }
         )
     ) { navBackStackEntry ->
-        val email = navBackStackEntry.arguments?.getString(NavRoutes.SendRestLink.Args.EMAIL)
+        val email = navBackStackEntry.arguments?.getString(NavRoutes.SendResetLink.Args.EMAIL)
 
         SendResetLinkScreen(
             navController = navController,
@@ -124,25 +170,6 @@ fun NavGraphBuilder.addForgotPasswordScreen(
     }
 }
 
-fun NavGraphBuilder.addVerificationResultScreen(
-    navController: NavHostController,
-    deepLink: String
-) {
-    composable(
-        route = NavRoutes.VerificationResult.route,
-        deepLinks = listOf(
-            navDeepLink {
-                uriPattern = DeepLinks.VERIFICATION_RESULT_ROUTE
-            }
-        )
-    ) {
-        VerificationResultScreen(
-            navHostController = navController,
-            deepLink = deepLink
-        )
-    }
-}
-
 fun NavGraphBuilder.addHomeScreen() {
     composable(
         route = NavRoutes.Home.route
@@ -161,6 +188,53 @@ fun NavGraphBuilder.addSignInScreen(
         SignInScreen(
             navController = navController,
             isExpandedScreen = isExpandedScreen
+        )
+    }
+}
+
+private fun NavGraphBuilder.addSplashScreen(
+    navController: NavHostController
+) {
+    composable(route = NavRoutes.Splash.route) {
+        SplashScreen(navController = navController)
+    }
+}
+
+private fun NavGraphBuilder.addResultScreen(
+    navController: NavHostController
+) {
+    // Rendered as a dialog so it floats over the screen that launched it; the card
+    // animates in with a spring "pop" (see ResultScreen). usePlatformDefaultWidth =
+    // false lets the card own its width and the scrim span the whole screen.
+    dialog(
+        route = NavRoutes.Result.route,
+        arguments = listOf(
+            navArgument(NavRoutes.Result.Args.PURPOSE) { type = NavType.StringType }
+        ),
+        dialogProperties = DialogProperties(usePlatformDefaultWidth = false)
+    ) { backStackEntry ->
+        val purposeName = backStackEntry.arguments?.getString(NavRoutes.Result.Args.PURPOSE)
+        val purpose = runCatching { ResultPurpose.valueOf(purposeName.orEmpty()) }
+            .getOrDefault(ResultPurpose.VERIFY_FAILED)
+
+        ResultScreen(
+            purpose = purpose,
+            onContinue = {
+                when (purpose) {
+                    ResultPurpose.PASSWORD_RESET -> navController.navigate(NavRoutes.SignIn.route) {
+                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+
+                    ResultPurpose.EMAIL_VERIFIED -> navController.navigate(NavRoutes.Home.route) {
+                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+
+                    ResultPurpose.VERIFY_FAILED -> navController.popBackStack()
+                }
+            },
+            onClose = { navController.popBackStack() }
         )
     }
 }
@@ -196,29 +270,10 @@ private fun NavGraphBuilder.addVerifyAccountScreen(
     navController: NavHostController
 ) {
     composable(
-        route = NavRoutes.VerifyAccount.route,
-        arguments = listOf(
-            navArgument(
-                name = NavRoutes.VerifyAccount.Args.EMAIL
-            ) {
-                type = NavType.StringType
-            }
-        )
-    ) { navBackStack ->
-
-        val email = navBackStack.arguments?.getString(NavRoutes.VerifyAccount.Args.EMAIL)
-
+        route = NavRoutes.VerifyAccount.route
+    ) {
         VerifyAccountScreen(
-            navController = navController,
-            email = email
+            navController = navController
         )
     }
-}
-
-@Composable
-private fun extractDeepLink(): Uri? {
-    val context = LocalContext.current
-    val activity = context.getActivity()
-    val deepLink = activity.intent.data
-    return deepLink
 }

@@ -1,10 +1,7 @@
 package com.shopping.shoply.authentication.presentation.components
 
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -15,8 +12,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.shopping.shoply.R
+import com.shopping.shoply.common.presentation.theme.ShoplyIcons
+import com.shopping.shoply.common.presentation.theme.ShoplyShapes
+import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
 @Composable
 fun FormPassword(
@@ -25,10 +25,11 @@ fun FormPassword(
     showPassword: Boolean,
     onPasswordChanged: (String) -> Unit,
     showSupportingText: Boolean = true,
+    label: String = stringResource(R.string.password),
     errorMessage: String?,
     onVisibilityChanged: (Boolean) -> Unit,
-    shape: Shape = TextFieldDefaults.shape,
-    colors: TextFieldColors = TextFieldDefaults.colors()
+    shape: Shape = ShoplyShapes.field,
+    colors: TextFieldColors = shoplyTextFieldColors()
 ) {
     val visibilityIcon = ImageVector.vectorResource(
         id = if (showPassword) {
@@ -42,8 +43,8 @@ fun FormPassword(
         value = password,
         onValueChange = { onPasswordChanged(it) },
         onTrailingIconClicked = { onVisibilityChanged(showPassword) },
-        label = stringResource(R.string.password),
-        leadingIcon = Icons.Outlined.Lock,
+        label = label,
+        leadingIcon = ShoplyIcons.Lock,
         trailingIcon = visibilityIcon,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Password,
@@ -58,14 +59,16 @@ fun FormPassword(
     )
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun FormPasswordPreview() {
-    FormPassword(
-        password = "password",
-        showPassword = false,
-        errorMessage = null,
-        onPasswordChanged = {},
-        onVisibilityChanged = {}
-    )
+    ShoplyTheme {
+        FormPassword(
+            password = "password",
+            showPassword = false,
+            errorMessage = null,
+            onPasswordChanged = {},
+            onVisibilityChanged = {}
+        )
+    }
 }
