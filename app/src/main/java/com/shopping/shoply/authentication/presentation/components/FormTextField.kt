@@ -40,6 +40,7 @@ fun FormTextField(
     leadingIcon: ImageVector? = null,
     leadingContent: (@Composable () -> Unit)? = null,
     trailingIcon: ImageVector? = null,
+    trailingIconContentDescription: String = "",
     onTrailingIconClicked: () -> Unit = {},
     enabled: Boolean = true,
     showSupportingText: Boolean = true,
@@ -76,7 +77,7 @@ fun FormTextField(
                 {
                     Icon(
                         imageVector = it,
-                        contentDescription = null,
+                        contentDescription = trailingIconContentDescription,
                         modifier = Modifier.clickable { onTrailingIconClicked() },
                     )
                 }

@@ -46,6 +46,9 @@ fun FormPassword(
         label = label,
         leadingIcon = ShoplyIcons.Lock,
         trailingIcon = visibilityIcon,
+        trailingIconContentDescription = if (showPassword) stringResource(R.string.visibility_on) else stringResource(
+            R.string.visibility_off
+        ),
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Next

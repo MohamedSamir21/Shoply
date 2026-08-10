@@ -1,7 +1,6 @@
 package com.shopping.shoply.authentication.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,9 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.shopping.shoply.R
+import com.shopping.shoply.authentication.presentation.Description
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyIcons
@@ -71,21 +73,23 @@ fun EnterMethodComponent(
                     .weight(1f)
                     .padding(start = ShoplyDimens.space2),
                 value = methodValue,
-                label = inputLabel,
                 onValueChange = onMethodValueChange,
+                label = inputLabel,
                 showSupportingText = errorMessage != null,
                 supportingText = errorMessage?.asString(),
-                keyboardOptions = keyboardOptions
+                keyboardOptions = keyboardOptions,
             )
             if (isExpandedScreen) {
                 Spacer(Modifier.width(ShoplyDimens.space4))
                 ShoplyIconButton(
-                    modifier = Modifier.align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically),
                     icon = ShoplyIcons.ArrowRight,
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
+                    contentDescription = stringResource(R.string.expanded_next),
                     onClick = onNext
                 )
             }
@@ -98,7 +102,9 @@ fun EnterMethodComponent(
             contentAlignment = Alignment.Center
         ) {
             if (isVerifyingValue) {
-                LinearProgressIndicator()
+                val linearProgress = Description.LINEAR_PROGRESS.asString()
+                LinearProgressIndicator(
+                    Modifier.semantics { contentDescription = linearProgress })
             } else if (!isExpandedScreen) {
                 ShoplyButton(
                     modifier = Modifier.fillMaxWidth(),

@@ -67,7 +67,6 @@
     <string name="forgot_password">Forgot Password</string>
     <string name="didn_no_have_account">Didn’t have an account yet?</string>
     <string name="invalid_credentials">Invalid Credentials</string>
-    <string name="back_arrow">Back Arrow</string>
     <string name="forgot_password_guiding_message">Don’t worry it sometimes happens. Please select which method you want you use to reset your password</string>
     <string name="your_email">Your email</string>
     <string name="your_phone">Your phone</string>
@@ -123,5 +122,8 @@
     <string name="get_a_fast_and_reliable_delivery_service">Get a fast and reliable delivery service</string>
     <string name="flexible_payment">Flexible payment</string>
     <string name="pay_in_versatile_and_secure_payment_methods">Pay in versatile and secure payment methods</string>
-
+    <string name="visibility_on">Visibility On</string>
+    <string name="visibility_off">Visibility Off</string>
+    <string name="expanded_next">Expanded Next</string>
+    <string name="linear_progress">Linear Progress</string>
 </resources>
