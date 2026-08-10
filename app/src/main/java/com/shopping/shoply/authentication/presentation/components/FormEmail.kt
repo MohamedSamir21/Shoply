@@ -16,6 +16,10 @@ import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyShapes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
+/**
+ * [FormTextField] preset for email entry — at-sign leading icon, clear affordance on the
+ * trailing side, and an email keyboard that advances to the next field.
+ */
 @Composable
 fun FormEmail(
     modifier: Modifier = Modifier,

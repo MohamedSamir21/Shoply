@@ -40,8 +40,10 @@ import com.shopping.shoply.authentication.domain.model.CountryInfo
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyShapes
 
-// Reusable country calling-code picker: an inline display button plus a full-screen searchable
-// list shown in a Dialog. State-agnostic (plain lambdas) so any screen can drive it.
+/**
+ * Reusable country calling-code picker: an inline display button plus a full-screen searchable
+ * list shown in a `Dialog`. State-agnostic (plain lambdas) so any screen can drive it.
+ */
 @Composable
 fun CountryCodePicker(
     modifier: Modifier = Modifier,

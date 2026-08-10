@@ -31,6 +31,11 @@ private const val TOTAL_SEGMENTS = 4
 internal const val STRENGTH_SEGMENT_FILLED_TAG = "strength_segment_filled"
 internal const val STRENGTH_SEGMENT_EMPTY_TAG = "strength_segment_empty"
 
+/**
+ * Four-segment password strength bar with a tier label beneath it. Segments fill left-to-right
+ * as the estimate improves; [PasswordStrength.NONE] renders nothing, so the meter fades in only
+ * once the user starts typing.
+ */
 @Composable
 fun PasswordStrengthMeter(
     strength: PasswordStrength,

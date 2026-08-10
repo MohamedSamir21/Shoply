@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.shopping.shoply.R
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
+/** Google sign-in affordance — the brand icon bound to a [SocialButton]. */
 @Composable
 fun GoogleButton(
     modifier: Modifier = Modifier,

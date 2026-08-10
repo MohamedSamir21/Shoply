@@ -18,6 +18,14 @@ import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyShapes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
+/**
+ * [FormTextField] preset for password entry — lock leading icon, a trailing eye that toggles
+ * masking, and a password keyboard that advances to the next field.
+ *
+ * [onVisibilityChanged] receives the **current** value of [showPassword], not its negation:
+ * inverting it is the caller's job. Both call sites hold the flag in a ViewModel, which flips it
+ * on receipt.
+ */
 @Composable
 fun FormPassword(
     modifier: Modifier = Modifier,

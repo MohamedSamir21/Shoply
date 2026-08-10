@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
+/** Icon-only action button — thin wrapper over M3 [IconButton] that requires a labelled icon. */
 @Composable
 fun ShoplyIconButton(
     modifier: Modifier = Modifier,

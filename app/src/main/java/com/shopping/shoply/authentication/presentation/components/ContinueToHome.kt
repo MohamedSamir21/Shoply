@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shopping.shoply.R
 
+/** "Continue to home" button closing the success screens — soft primary-container fill. */
 @Composable
 fun ContinueToHome(
     modifier: Modifier = Modifier,

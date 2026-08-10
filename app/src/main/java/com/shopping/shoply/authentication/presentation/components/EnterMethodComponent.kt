@@ -30,6 +30,16 @@ import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
+/**
+ * Shared body of the "enter your email" and "enter your phone" reset-password screens: top bar,
+ * guiding message, one input and a submit affordance.
+ *
+ * [isExpandedScreen] picks the submit affordance — an arrow button inline with the input on wide
+ * layouts, a full-width button pinned to the bottom otherwise. [menuButton] is the slot the phone
+ * screen fills with the country picker; the email screen leaves it empty. While
+ * [isVerifyingValue] is true a progress indicator replaces the bottom button, and [errorMessage]
+ * is the only thing that reveals the input's supporting line.
+ */
 @Composable
 fun EnterMethodComponent(
     modifier: Modifier = Modifier,
