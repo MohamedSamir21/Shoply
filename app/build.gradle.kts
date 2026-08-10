@@ -96,6 +96,13 @@ dependencies {
     testImplementation(libs.turbine)                // collect/await Flow emissions in tests
     testImplementation(libs.truth)                  // assertThat(...).isEqualTo(...) assertions
     testImplementation(libs.robolectric)            // real Android framework on the JVM (Patterns, etc.)
+
+    // --- Compose UI tests on the JVM (Robolectric) ---
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.ui.test.junit4) // createComposeRule + semantics finders/actions
+    testImplementation(libs.junit)                   // JUnit4 API — Compose's test rule is a JUnit4 Rule
+    testRuntimeOnly(libs.junit.vintage.engine)       // runs JUnit4 tests on the JUnit Platform, beside Jupiter
+    testImplementation(libs.androidx.junit)          // AndroidJUnit4 runner: resolves to Robolectric on the JVM
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

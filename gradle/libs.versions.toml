@@ -36,8 +36,7 @@ turbine = "1.1.0"                 # ergonomic Flow testing (for callbackFlow-bas
 truth = "1.4.4"                   # Google Truth assertions (assertThat(x).isEqualTo(y)) — same as CS 61B
 robolectric = "4.13"             # runs the real Android framework on the JVM (needed for android.util.Patterns)
 # --- Docs ---
-dokka = "1.9.20"
-junitJupiter = "5.14.0"                  # KDoc -> HTML generator (Dokka v1, matches Kotlin 1.9.21)
+dokka = "1.9.20"                  # KDoc -> HTML generator (Dokka v1, matches Kotlin 1.9.21)
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -89,7 +88,8 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
