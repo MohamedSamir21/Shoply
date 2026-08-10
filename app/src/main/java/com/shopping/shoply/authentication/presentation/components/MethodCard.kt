@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -21,16 +23,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyShapes
+import com.shopping.shoply.common.presentation.theme.ShoplyTheme
+
+internal const val METHOD_CARD_TAG = "method_card"
 
 /**
  * Selectable contact-method card (reset-password chooser). Mirrors the handoff
- * `MethodCard` (ui_kits/auth/shoply-screens-2.jsx).
+ * `MethodCard`.
  */
 @Composable
 fun MethodCard(
@@ -50,7 +59,12 @@ fun MethodCard(
         shape = ShoplyShapes.card,
         color = container,
         border = BorderStroke(2.dp, borderColor),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(METHOD_CARD_TAG)
+            // Announces the choice to screen readers, and lets tests assert selection on the
+            // card itself rather than inferring it from the decorative check icon.
+            .semantics { this.selected = selected },
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = ShoplyDimens.space4),
@@ -110,6 +124,7 @@ fun MethodCard(
                 contentAlignment = Alignment.Center,
             ) {
                 if (selected) {
+                    // Decorative: the card's `selected` semantics carry the meaning.
                     Icon(
                         imageVector = ShoplyIcons.Check,
                         contentDescription = null,
@@ -118,6 +133,31 @@ fun MethodCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun MethodCardPreview() {
+    ShoplyTheme {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            MethodCard(
+                icon = Icons.Default.ThumbUp,
+                kind = "Email",
+                value = "user@gmail.com",
+                selected = true,
+                onClick = {}
+            )
+            MethodCard(
+                icon = Icons.Default.ThumbUp,
+                kind = "phone",
+                value = "+2001027392816",
+                selected = false,
+                onClick = {}
+            )
         }
     }
 }

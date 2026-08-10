@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,11 @@ import com.shopping.shoply.authentication.domain.model.PasswordStrength
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
 private const val TOTAL_SEGMENTS = 4
+
+// Test tags: the segments are text-free boxes, so the semantics tree has nothing else
+// to find them by. Inert metadata at runtime.
+internal const val STRENGTH_SEGMENT_FILLED_TAG = "strength_segment_filled"
+internal const val STRENGTH_SEGMENT_EMPTY_TAG = "strength_segment_empty"
 
 @Composable
 fun PasswordStrengthMeter(
@@ -35,17 +41,26 @@ fun PasswordStrengthMeter(
         val filledSegments = strength.filledSegments()
         val barColor = strength.color()
 
-        Column(modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp)
+        ) {
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 repeat(TOTAL_SEGMENTS) { index ->
+                    val filled = index < filledSegments
                     val segmentColor =
-                        if (index < filledSegments) barColor
+                        if (filled) barColor
                         else MaterialTheme.colorScheme.onSurface.copy(alpha = .15f)
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(4.dp)
                             .background(segmentColor, RoundedCornerShape(2.dp))
+                            .testTag(
+                                if (filled) STRENGTH_SEGMENT_FILLED_TAG
+                                else STRENGTH_SEGMENT_EMPTY_TAG
+                            )
                     )
                 }
             }

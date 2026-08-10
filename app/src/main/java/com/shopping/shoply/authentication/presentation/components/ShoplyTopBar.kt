@@ -10,12 +10,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
 /**
  * Auth app-bar — optional back chevron on the left, centered 19/700 title.
  * Mirrors the handoff `TopBar` (ui_kits/auth/shoply-ui.jsx).
  */
+
 @Composable
 fun ShoplyTopBar(
     title: String,
@@ -39,8 +42,19 @@ fun ShoplyTopBar(
             BackButton(
                 onBack = onBack,
                 iconColor = contentColor,
-                modifier = Modifier.align(Alignment.CenterStart),
+                modifier = Modifier.align(Alignment.CenterStart)
             )
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ShoplyTopBarPreview() {
+    ShoplyTheme {
+        ShoplyTopBar(
+            title = "Title",
+            onBack = {}
+        )
     }
 }
