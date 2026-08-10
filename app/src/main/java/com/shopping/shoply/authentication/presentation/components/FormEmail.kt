@@ -28,21 +28,21 @@ fun FormEmail(
     shape: Shape = ShoplyShapes.field
 ) {
     FormTextField(
+        modifier = modifier,
         value = email,
         onValueChange = { onEmailChanged(it) },
-        onTrailingIconClicked = onClear,
         label = stringResource(R.string.email),
         leadingIcon = ShoplyIcons.At,
         trailingIcon = ShoplyIcons.XCircle,
+        onTrailingIconClicked = onClear,
+        showSupportingText = showSupportingText,
+        supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Email,
             imeAction = ImeAction.Next
         ),
-        showSupportingText = showSupportingText,
-        supportingText = errorMessage,
-        modifier = modifier,
         shape = shape,
-        colors = colors
+        colors = colors,
     )
 }
 

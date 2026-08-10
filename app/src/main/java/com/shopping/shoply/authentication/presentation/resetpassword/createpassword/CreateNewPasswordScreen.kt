@@ -150,17 +150,17 @@ private fun ConfirmedPasswordField(
         modifier = modifier,
         value = confirmedPassword,
         onValueChange = { onConfirmedPasswordChanged(it) },
-        onTrailingIconClicked = { onVisibilityChanged(showPassword) },
         label = stringResource(R.string.confirm_new_password),
         leadingIcon = ShoplyIcons.Lock,
         trailingIcon = visibilityIcon,
+        onTrailingIconClicked = { onVisibilityChanged(showPassword) },
+        supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
         visualTransformation = if (showPassword) VisualTransformation.None
         else PasswordVisualTransformation(),
-        supportingText = errorMessage
     )
 }
 

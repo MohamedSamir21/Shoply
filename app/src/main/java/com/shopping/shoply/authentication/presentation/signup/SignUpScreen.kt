@@ -304,18 +304,18 @@ private fun FormUsername(
     onClear: () -> Unit
 ) {
     FormTextField(
+        modifier = modifier,
         value = username,
         onValueChange = onUsernameChanged,
-        onTrailingIconClicked = onClear,
         label = stringResource(R.string.username),
-        trailingIcon = ShoplyIcons.XCircle,
         leadingIcon = ShoplyIcons.User,
+        trailingIcon = ShoplyIcons.XCircle,
+        onTrailingIconClicked = onClear,
+        supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Next
         ),
-        supportingText = errorMessage,
-        modifier = modifier
     )
 }
 
@@ -329,18 +329,18 @@ private fun FormPhoneNumber(
     countryLeading: @Composable () -> Unit
 ) {
     FormTextField(
+        modifier = modifier,
         value = phoneNumber,
         onValueChange = onPhoneNumberChanged,
-        onTrailingIconClicked = onPhoneNumberCleared,
         label = stringResource(R.string.phone_number),
         leadingContent = countryLeading,
         trailingIcon = ShoplyIcons.XCircle,
+        onTrailingIconClicked = onPhoneNumberCleared,
+        supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Phone,
             imeAction = ImeAction.Next
         ),
-        supportingText = errorMessage,
-        modifier = modifier
     )
 }
 
@@ -358,19 +358,19 @@ private fun FormConfirmedPassword(
     )
 
     FormTextField(
+        modifier = modifier,
         value = confirmedPassword,
         onValueChange = onConfirmedPasswordChanged,
-        onTrailingIconClicked = { onVisibilityChanged(showPassword) },
         label = stringResource(R.string.confirmed_password),
         leadingIcon = ShoplyIcons.Lock,
         trailingIcon = visibilityIcon,
+        onTrailingIconClicked = { onVisibilityChanged(showPassword) },
+        supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Password,
             imeAction = ImeAction.Done
         ),
         visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-        supportingText = errorMessage,
-        modifier = modifier
     )
 }
 
