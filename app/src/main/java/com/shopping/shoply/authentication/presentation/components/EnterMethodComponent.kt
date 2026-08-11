@@ -36,9 +36,11 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
  *
  * [isExpandedScreen] picks the submit affordance — an arrow button inline with the input on wide
  * layouts, a full-width button pinned to the bottom otherwise. [menuButton] is the slot the phone
- * screen fills with the country picker; the email screen leaves it empty. While
- * [isVerifyingValue] is true a progress indicator replaces the bottom button, and [errorMessage]
- * is the only thing that reveals the input's supporting line.
+ * screen fills with the country picker; the email screen leaves it empty.
+ *
+ * While [isVerifyingValue] is true neither affordance can submit again — a progress indicator
+ * takes the bottom button's place, and the inline arrow, which stays on screen, is disabled.
+ * [errorMessage] is the only thing that reveals the input's supporting line.
  */
 @Composable
 fun EnterMethodComponent(
@@ -100,6 +102,9 @@ fun EnterMethodComponent(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     contentDescription = stringResource(R.string.expanded_next),
+                    // The compact layout hides its button behind the progress indicator while
+                    // verifying; this one stays on screen, so it has to be disabled instead.
+                    enabled = !isVerifyingValue,
                     onClick = onNext
                 )
             }

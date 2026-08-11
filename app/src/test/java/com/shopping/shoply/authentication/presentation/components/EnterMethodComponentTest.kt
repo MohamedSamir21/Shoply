@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -126,9 +127,33 @@ class EnterMethodComponentTest {
         setEnterMethodComponent(isVerifyingValue = true)
 
         composeRule.onNodeWithContentDescription(linearProgressText()).assertIsDisplayed()
-        // The progress indicator replaces the button rather than sitting beside it — that is
-        // what stops a second submit while the first is still in flight.
+        // The progress indicator takes the button's place rather than sitting beside it, so the
+        // compact layout cannot submit twice.
         composeRule.onNodeWithText(nextText()).assertDoesNotExist()
+    }
+
+    @Test
+    fun `disables the arrow button while verifying`() {
+        setEnterMethodComponent(isExpandedScreen = true, isVerifyingValue = true)
+
+        // The expanded layout keeps its arrow on screen next to the input, so unlike the compact
+        // layout it cannot rely on the button disappearing to prevent a second submit.
+        composeRule.onNodeWithContentDescription(expandedNextText()).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `ignores clicks on the arrow button while verifying`() {
+        var clicked = 0
+
+        setEnterMethodComponent(
+            isExpandedScreen = true,
+            isVerifyingValue = true,
+            onNext = { clicked++ }
+        )
+
+        composeRule.onNodeWithContentDescription(expandedNextText()).performClick()
+
+        assertThat(clicked).isEqualTo(0)
     }
 
     @Test
