@@ -80,7 +80,7 @@ fun EnterPhoneScreen(
 }
 
 @Composable
-private fun EnterPhoneContent(
+internal fun EnterPhoneContent(
     modifier: Modifier = Modifier,
     isExpandedScreen: Boolean,
     methodName: String = stringResource(R.string.phone_number),
