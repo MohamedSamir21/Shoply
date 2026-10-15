@@ -39,6 +39,7 @@ fun FormEmail(
         leadingIcon = ShoplyIcons.At,
         trailingIcon = ShoplyIcons.XCircle,
         onTrailingIconClicked = onClear,
+        trailingIconContentDescription = stringResource(R.string.clear_email),
         showSupportingText = showSupportingText,
         supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(

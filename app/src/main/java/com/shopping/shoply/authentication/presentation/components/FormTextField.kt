@@ -1,12 +1,12 @@
 package com.shopping.shoply.authentication.presentation.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -75,11 +75,10 @@ fun FormTextField(
             },
             trailingIcon = trailingIcon?.let {
                 {
-                    Icon(
-                        imageVector = it,
-                        contentDescription = trailingIconContentDescription,
-                        modifier = Modifier.clickable { onTrailingIconClicked() },
-                    )
+                    // IconButton (not a clickable Icon) for the 48dp touch target and button role.
+                    IconButton(onClick = onTrailingIconClicked) {
+                        Icon(imageVector = it, contentDescription = trailingIconContentDescription)
+                    }
                 }
             },
             isError = isError,

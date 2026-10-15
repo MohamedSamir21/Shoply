@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -23,7 +22,6 @@ import dagger.hilt.android.EntryPointAccessors
 fun FacebookButton(
     modifier: Modifier = Modifier,
     label: String = stringResource(R.string.facebook),
-    textColor: Color = Color.Unspecified,
     compact: Boolean = false,
     permissions: List<String> = listOf("email", "public_profile", "ads_read"),
     onClick: () -> Unit

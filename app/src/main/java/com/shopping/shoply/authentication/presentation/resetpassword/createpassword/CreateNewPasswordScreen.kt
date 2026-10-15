@@ -154,6 +154,9 @@ private fun ConfirmedPasswordField(
         leadingIcon = ShoplyIcons.Lock,
         trailingIcon = visibilityIcon,
         onTrailingIconClicked = { onVisibilityChanged(showPassword) },
+        trailingIconContentDescription = stringResource(
+            if (showPassword) R.string.visibility_on else R.string.visibility_off
+        ),
         supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Password,

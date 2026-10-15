@@ -56,6 +56,7 @@ fun Dots(
 @Composable
 fun CircleFab(
     icon: ImageVector,
+    contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     size: androidx.compose.ui.unit.Dp = 64.dp,
@@ -70,7 +71,7 @@ fun CircleFab(
             .size(size),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(imageVector = icon, contentDescription = null)
+            Icon(imageVector = icon, contentDescription = contentDescription)
         }
     }
 }

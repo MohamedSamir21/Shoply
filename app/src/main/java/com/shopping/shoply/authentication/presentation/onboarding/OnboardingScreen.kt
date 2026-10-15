@@ -153,6 +153,7 @@ fun OnboardingContent(
                 Dots(count = state.onboardings.size, index = page)
                 CircleFab(
                     icon = if (isLast) ShoplyIcons.Check else ShoplyIcons.ArrowRight,
+                    contentDescription = stringResource(if (isLast) R.string.get_started else R.string.next),
                     onClick = { if (isLast) onFinish() else onForward() },
                 )
             }

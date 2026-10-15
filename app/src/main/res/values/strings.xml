@@ -9,6 +9,10 @@
     <string name="create_account">Create Account</string>
     <string name="promo_text">Enjoy the best products with high quality ever on the globe</string>
     <string name="clear">Clear</string>
+    <string name="clear_email">Clear email</string>
+    <string name="clear_username">Clear username</string>
+    <string name="clear_phone_number">Clear phone number</string>
+    <string name="get_started">Get started</string>
     <string name="required">required</string>
     <string name="username">Username</string>
     <string name="email">Email</string>

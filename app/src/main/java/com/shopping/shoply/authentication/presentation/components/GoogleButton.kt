@@ -2,7 +2,6 @@ package com.shopping.shoply.authentication.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -15,7 +14,6 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 fun GoogleButton(
     modifier: Modifier = Modifier,
     label: String = stringResource(R.string.google),
-    textColor: Color = Color.Unspecified,
     compact: Boolean = false,
     onClick: () -> Unit
 ) {

@@ -17,7 +17,7 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 fun ShoplyIconButton(
     modifier: Modifier = Modifier,
     icon: ImageVector,
-    contentDescription: String = "",
+    contentDescription: String,
     colors: IconButtonColors = IconButtonDefaults.iconButtonColors(),
     enabled: Boolean = true,
     onClick: () -> Unit
@@ -40,7 +40,8 @@ fun ShoplyIconButton(
 fun ShoplyIconButtonPreview() {
     ShoplyTheme {
         ShoplyIconButton(
-            icon = Icons.Default.ThumbUp
+            icon = Icons.Default.ThumbUp,
+            contentDescription = "Like"
         ) { }
     }
 }

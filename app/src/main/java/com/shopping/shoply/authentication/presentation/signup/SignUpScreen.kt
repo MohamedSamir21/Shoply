@@ -311,6 +311,7 @@ private fun FormUsername(
         leadingIcon = ShoplyIcons.User,
         trailingIcon = ShoplyIcons.XCircle,
         onTrailingIconClicked = onClear,
+        trailingIconContentDescription = stringResource(R.string.clear_username),
         supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Text,
@@ -336,6 +337,7 @@ private fun FormPhoneNumber(
         leadingContent = countryLeading,
         trailingIcon = ShoplyIcons.XCircle,
         onTrailingIconClicked = onPhoneNumberCleared,
+        trailingIconContentDescription = stringResource(R.string.clear_phone_number),
         supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Phone,
@@ -365,6 +367,9 @@ private fun FormConfirmedPassword(
         leadingIcon = ShoplyIcons.Lock,
         trailingIcon = visibilityIcon,
         onTrailingIconClicked = { onVisibilityChanged(showPassword) },
+        trailingIconContentDescription = stringResource(
+            if (showPassword) R.string.visibility_on else R.string.visibility_off
+        ),
         supportingText = errorMessage,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Password,
