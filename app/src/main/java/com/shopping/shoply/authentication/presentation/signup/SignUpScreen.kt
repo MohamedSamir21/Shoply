@@ -121,10 +121,14 @@ fun SignUpScreen(
 }
 
 @Composable
-private fun SignUpContent(
+internal fun SignUpContent(
     isExpandedScreen: Boolean,
     state: SignUpScreenState,
-    onEvent: (SignUpScreenIntent) -> Unit
+    onEvent: (SignUpScreenIntent) -> Unit,
+    // A slot so screen tests can swap in plain buttons: the real Facebook button needs Hilt and
+    // the Facebook SDK, which a JVM UI test doesn't have.
+    socialButtons: @Composable (onFacebookClick: () -> Unit, onGoogleClick: () -> Unit) -> Unit =
+        { onFacebookClick, onGoogleClick -> SignUpAlternativesRow(onFacebookClick, onGoogleClick) }
 ) {
     Column(
         modifier = Modifier
@@ -152,13 +156,9 @@ private fun SignUpContent(
             Spacer(Modifier.height(ShoplyDimens.space5))
             ContinueWithRow()
             Spacer(Modifier.height(ShoplyDimens.space4))
-            SignUpAlternativesRow(
-                onGoogleSignUpClicked = { onEvent(SignUpScreenIntent.SignUp.Google) },
-                onFacebookSignUpClicked = {
-                    onEvent(
-                        SignUpScreenIntent.SignUp.Facebook
-                    )
-                }
+            socialButtons(
+                { onEvent(SignUpScreenIntent.SignUp.Facebook) },
+                { onEvent(SignUpScreenIntent.SignUp.Google) }
             )
             AlreadyHaveAccountRow(
                 onSignInClicked = { onEvent(SignUpScreenIntent.SignIn) }
@@ -381,8 +381,8 @@ private fun FormConfirmedPassword(
 
 @Composable
 private fun SignUpAlternativesRow(
-    onGoogleSignUpClicked: () -> Unit,
-    onFacebookSignUpClicked: (SignUpScreenIntent.SignUp.Facebook) -> Unit
+    onFacebookSignUpClicked: () -> Unit,
+    onGoogleSignUpClicked: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -392,7 +392,7 @@ private fun SignUpAlternativesRow(
         FacebookButton(
             modifier = Modifier.weight(1f),
             compact = true,
-            onClick = { onFacebookSignUpClicked(SignUpScreenIntent.SignUp.Facebook) }
+            onClick = onFacebookSignUpClicked
         )
         GoogleButton(
             modifier = Modifier.weight(1f),

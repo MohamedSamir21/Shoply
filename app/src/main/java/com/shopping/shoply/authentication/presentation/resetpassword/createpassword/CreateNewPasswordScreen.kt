@@ -73,7 +73,7 @@ fun CreateNewPasswordScreen(
 }
 
 @Composable
-private fun CreateNewPasswordContent(
+internal fun CreateNewPasswordContent(
     modifier: Modifier = Modifier,
     isExpandedScreen: Boolean,
     state: CreateNewPasswordState,

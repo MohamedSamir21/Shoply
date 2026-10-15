@@ -83,7 +83,7 @@ fun VerifyAccountScreen(
 }
 
 @Composable
-private fun VerifyAccountContent(
+internal fun VerifyAccountContent(
     modifier: Modifier = Modifier,
     email: String?,
     count: String,

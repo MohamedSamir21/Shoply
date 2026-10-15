@@ -88,7 +88,11 @@ fun SignInContent(
     isExpandedScreen: Boolean,
     onChange: (SignInScreenIntent) -> Unit,
     onForgotPasswordClicked: () -> Unit,
-    onSignUpClicked: () -> Unit
+    onSignUpClicked: () -> Unit,
+    // A slot so screen tests can swap in plain buttons: the real Facebook button needs Hilt and
+    // the Facebook SDK, which a JVM UI test doesn't have.
+    socialButtons: @Composable (onFacebookClick: () -> Unit, onGoogleClick: () -> Unit) -> Unit =
+        { onFacebookClick, onGoogleClick -> SignInSocialButtons(onFacebookClick, onGoogleClick) }
 ) {
     val configuration = LocalConfiguration.current
     val isInLandscapeMode = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -119,16 +123,9 @@ fun SignInContent(
         )
 
         Spacer(Modifier.height(ShoplyDimens.space6))
-        FacebookButton(
-            modifier = Modifier.fillMaxWidth(),
-            label = stringResource(R.string.continue_with_facebook),
-            onClick = { onChange(SignInScreenIntent.ContinueWithFacebook) }
-        )
-        Spacer(Modifier.height(ShoplyDimens.space3))
-        GoogleButton(
-            modifier = Modifier.fillMaxWidth(),
-            label = stringResource(R.string.continue_with_google),
-            onClick = { onChange(SignInScreenIntent.ContinueWithGoogle) }
+        socialButtons(
+            { onChange(SignInScreenIntent.ContinueWithFacebook) },
+            { onChange(SignInScreenIntent.ContinueWithGoogle) }
         )
 
         if (!isInLandscapeMode) {
@@ -184,6 +181,26 @@ fun SignInContent(
             RegisterRow(onSignUpClicked = onSignUpClicked)
             Spacer(Modifier.height(ShoplyDimens.space5))
         }
+    }
+}
+
+@Composable
+private fun SignInSocialButtons(
+    onFacebookClick: () -> Unit,
+    onGoogleClick: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        FacebookButton(
+            modifier = Modifier.fillMaxWidth(),
+            label = stringResource(R.string.continue_with_facebook),
+            onClick = onFacebookClick
+        )
+        Spacer(Modifier.height(ShoplyDimens.space3))
+        GoogleButton(
+            modifier = Modifier.fillMaxWidth(),
+            label = stringResource(R.string.continue_with_google),
+            onClick = onGoogleClick
+        )
     }
 }
 

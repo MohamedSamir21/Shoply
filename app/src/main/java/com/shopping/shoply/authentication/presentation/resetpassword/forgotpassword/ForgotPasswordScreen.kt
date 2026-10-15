@@ -94,7 +94,7 @@ private fun onEmailChoice(
 }
 
 @Composable
-private fun ForgotPasswordContent(
+internal fun ForgotPasswordContent(
     modifier: Modifier = Modifier,
     isExpandedScreen: Boolean,
     resetMethods: List<ResetMethod>,

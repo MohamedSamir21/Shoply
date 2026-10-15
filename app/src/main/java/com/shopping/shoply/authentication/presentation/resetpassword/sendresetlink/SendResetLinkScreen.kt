@@ -64,7 +64,7 @@ fun SendResetLinkScreen(
 }
 
 @Composable
-private fun SendResetLinkContent(
+internal fun SendResetLinkContent(
     modifier: Modifier = Modifier,
     email: String?,
     count: String,

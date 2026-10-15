@@ -102,7 +102,7 @@ fun OTPVerificationScreen(
 }
 
 @Composable
-private fun OTPVerificationContent(
+internal fun OTPVerificationContent(
     modifier: Modifier = Modifier,
     expandedScreen: Boolean,
     state: OTPVerificationState,
