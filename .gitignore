@@ -13,3 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+.gh_token
+.gh_token.txt

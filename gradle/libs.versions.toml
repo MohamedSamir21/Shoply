@@ -14,14 +14,29 @@ kotlin = "1.9.21"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
+konsist = "0.17.3"
 espressoCore = "3.6.1"
 kotlinxCoroutinesPlayServices = "1.9.0"
+libphonenumber = "9.0.1"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
 composeBom = "2024.09.03"
 navigationCompose = "2.8.2"
 secretsGradlePlugin = "2.0.1"
 uiTextGoogleFonts = "1.7.3"
+animationGraphicsAndroid = "1.8.3"
+zxcvbn = "1.9.0"
+
+# --- Testing tutorial stack ---
+junit5 = "5.10.2"                 # JUnit Jupiter (the JUnit 5 API + engine)
+androidJunit5Plugin = "1.11.0.0"  # makes AGP run Jupiter tests on src/test (bump if sync warns about AGP)
+mockk = "1.13.13"                 # Kotlin-first mocking (handles final classes + static mocking)
+coroutinesTest = "1.9.0"          # runTest / TestDispatcher — matches kotlinx-coroutines-play-services 1.9.0
+turbine = "1.1.0"                 # ergonomic Flow testing (for callbackFlow-based APIs)
+truth = "1.4.4"                   # Google Truth assertions (assertThat(x).isEqualTo(y)) — same as CS 61B
+robolectric = "4.13"             # runs the real Android framework on the JVM (needed for android.util.Patterns)
+# --- Docs ---
+dokka = "1.9.20"                  # KDoc -> HTML generator (Dokka v1, matches Kotlin 1.9.21)
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,12 +52,12 @@ facebook-login = { module = "com.facebook.android:facebook-login", version.ref =
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-dynamic-links = { module = "com.google.firebase:firebase-dynamic-links" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
 firebase-storage = { module = "com.google.firebase:firebase-storage", version.ref = "firebaseStorage" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+konsist = { module = "com.lemonappdev:konsist", version.ref = "konsist" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -59,9 +74,26 @@ kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-cor
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+libphonenumber = { module = "com.googlecode.libphonenumber:libphonenumber", version.ref = "libphonenumber" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
+androidx-animation-graphics-android = { group = "androidx.compose.animation", name = "animation-graphics-android", version.ref = "animationGraphicsAndroid" }
+zxcvbn = { module = "com.nulab-inc:zxcvbn", version.ref = "zxcvbn" }
+
+# --- Testing tutorial stack ---
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+truth = { module = "com.google.truth:truth", version.ref = "truth" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
+junit-vintage-engine = { module = "org.junit.vintage:junit-vintage-engine", version.ref = "junit5" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-junit5 = { id = "de.mannodermaus.android-junit5", version.ref = "androidJunit5Plugin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 

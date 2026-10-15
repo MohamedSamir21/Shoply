@@ -1,6 +1,5 @@
 package com.shopping.shoply
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -18,8 +17,9 @@ fun ShoplyAppContent() {
         Surface(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
+                .fillMaxSize(),
+            // Warm off-white page so white cards/sheets read as raised above it.
+            color = MaterialTheme.colorScheme.background
         ) {
             ShoplyNavGraph(
                 navController = rememberNavController(),

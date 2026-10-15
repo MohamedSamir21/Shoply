@@ -1,10 +1,13 @@
 package com.shopping.shoply.authentication.presentation.onboarding
 
 import androidx.lifecycle.ViewModel
-import com.shopping.shoply.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/**
+ * Drives the onboarding pager: tracks the current page across swipes and forward/previous
+ * navigation, and flags the state as finished once the user moves forward past the last page.
+ */
 class OnboardingViewModel : ViewModel() {
     private val _state = MutableStateFlow(
         OnboardingScreenState(
@@ -35,32 +38,13 @@ class OnboardingViewModel : ViewModel() {
             }
 
             OnboardingScreenEvent.Previous -> {
-                if (currentPageIndex < 0)
+                if (currentPageIndex <= 0) {
                     return
+                }
                 _state.value = state.value.copy(
                     currentPageIndex = currentPageIndex - 1
                 )
             }
         }
     }
-}
-
-fun generateOnboardings(): List<Onboarding> {
-    return listOf(
-        Onboarding(
-            image = R.drawable.shopping_illustration,
-            title = "Shop From your favorite store",
-            description = "Discover a world of convenience and endless choices"
-        ),
-        Onboarding(
-            image = R.drawable.delivery_illustration,
-            title = "Get IT Delivered",
-            description = "Get a fast and reliable delivery service"
-        ),
-        Onboarding(
-            image = R.drawable.payment_illustration,
-            title = "Flexible payment",
-            description = "Pay in versatile and secure payment methods"
-        )
-    )
 }

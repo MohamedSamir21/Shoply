@@ -7,10 +7,14 @@ sealed interface DataError : Error {
         WEAK_PASSWORD,
         WRONG_PASSWORD,
         INVALID_EMAIL,
+        EMAIL_DOES_NOT_EXIST,
+        PHONE_NUMBER_DOES_NOT_EXIST,
+        PHONE_NUMBER_NOT_LINKED,
         USER_DISABLED,
         ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL,
         EMAIL_ALREADY_IN_USE,
         USER_COLLISION,
+        PHONE_NUMBER_ALREADY_IN_USE,
         UNKNOWN,
         NOT_VERIFIED,
         INVALID_CREDENTIALS,
@@ -25,6 +29,7 @@ fun String.getAuthenticationDataError(): DataError.Authentication {
         "ERROR_USER_DISABLED" -> DataError.Authentication.USER_DISABLED
         "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" -> DataError.Authentication.ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL
         "ERROR_EMAIL_ALREADY_IN_USE" -> DataError.Authentication.EMAIL_ALREADY_IN_USE
+        "ERROR_CREDENTIAL_ALREADY_IN_USE" -> DataError.Authentication.PHONE_NUMBER_ALREADY_IN_USE
         else -> DataError.Authentication.UNKNOWN
     }
 }

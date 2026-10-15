@@ -1,17 +1,22 @@
 package com.shopping.shoply
 
-import org.junit.Test
-
-import org.junit.Assert.*
+import com.google.common.truth.Truth.assertThat
+import org.junit.jupiter.api.Test
 
 /**
- * Example local unit test, which will execute on the development machine (host).
+ * Smoke test for the testing toolchain itself.
  *
- * See [testing documentation](http://d.android.com/tools/testing).
+ * If this runs and passes after a Gradle sync, three things are proven wired up:
+ *  - the **android-junit5** plugin is running **JUnit 5 (Jupiter)** tests (`org.junit.jupiter.api.Test`),
+ *  - **Google Truth** is on the test classpath (`assertThat(...)`),
+ *  - the host (JVM) test source set compiles and executes.
+ *
+ * It deliberately asserts nothing about the app — its only job is to fail loudly if the test
+ * stack is misconfigured.
  */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun `toolchain is wired up`() {
+        assertThat(2 + 2).isEqualTo(4)
     }
 }

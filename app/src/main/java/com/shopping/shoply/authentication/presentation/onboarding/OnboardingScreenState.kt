@@ -1,6 +1,7 @@
 package com.shopping.shoply.authentication.presentation.onboarding
 
 import androidx.annotation.DrawableRes
+import com.shopping.shoply.authentication.presentation.utility.UiText
 
 data class OnboardingScreenState(
     val currentPageIndex: Int = 0,
@@ -9,8 +10,8 @@ data class OnboardingScreenState(
 )
 
 data class Onboarding(
-    @DrawableRes
+    @param:DrawableRes
     val image: Int,
-    val title: String,
-    val description: String
+    val title: UiText,
+    val description: UiText
 )
