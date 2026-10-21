@@ -30,6 +30,7 @@ val lineStrongLight = Color(0xFFD3C9BE)    // outlined control border
 
 val greenLight = Color(0xFF7C9E36)         // success
 val greenSoftLight = Color(0xFFEEF2DC)
+val onGreenSoftLight = Color(0xFF55701F)   // green text on a light surface (discount badge)
 val redLight = Color(0xFFCF5740)           // error / destructive
 val redSoftLight = Color(0xFFFBE3DC)
 
@@ -54,6 +55,7 @@ val lineStrongDark = Color(0xFF46414A)
 
 val greenDark = Color(0xFF9CC04B)
 val greenSoftDark = Color(0xFF2E3A1C)
+val onGreenSoftDark = Color(0xFF9CC04B)
 val redDark = Color(0xFFE8755F)
 val redSoftDark = Color(0xFF3A201B)
 

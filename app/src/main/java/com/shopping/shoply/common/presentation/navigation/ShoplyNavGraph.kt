@@ -174,7 +174,7 @@ fun NavGraphBuilder.addHomeScreen() {
     composable(
         route = NavRoutes.Home.route
     ) {
-
+        MainShell()
     }
 }
 
