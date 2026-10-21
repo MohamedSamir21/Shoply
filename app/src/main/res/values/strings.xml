@@ -184,4 +184,15 @@
     <string name="screen_store">Store</string>
     <string name="screen_product">Product</string>
     <string name="screen_help">Help</string>
+
+    <!-- Categories -->
+    <string name="categories_title">Categories</string>
+    <string name="categories_empty_title">Nothing Here Yet</string>
+    <string name="categories_empty_message">Categories will appear once stores near you start listing products.</string>
+    <string name="categories_empty_action">Change Address</string>
+    <plurals name="categories_item_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="cd_search">Search</string>
 </resources>

@@ -3,7 +3,6 @@ package com.shopping.shoply.common.presentation.navigation
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,13 +33,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -50,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -59,6 +55,9 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.shopping.shoply.R
+import com.shopping.shoply.categories.presentation.CategoriesDestination
+import com.shopping.shoply.categories.presentation.CategoriesScreen
+import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
@@ -74,7 +73,7 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
     PROFILE("tab_profile", R.string.nav_profile, ShoplyAppIcons.User),
 }
 
-/** Screens not built yet, opened from Home as "Coming soon". The name travels in the route. */
+/** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
     SEARCH(R.string.screen_search),
     NOTIFICATIONS(R.string.screen_notifications),
@@ -88,16 +87,20 @@ private enum class Placeholder(@StringRes val title: Int) {
 }
 
 private const val HOME_ROUTE = "home_feed"
+private const val CATEGORIES_ROUTE = "categories_grid"
 private const val PLACEHOLDER_ARG = "placeholder"
-private const val PLACEHOLDER_ROUTE = "coming_soon/{$PLACEHOLDER_ARG}"
+
+// Each tab has its own placeholder route, so a "Coming soon" screen keeps its tab selected.
+private fun placeholderRoute(tab: ShellTab) = "${tab.route}/coming_soon/{$PLACEHOLDER_ARG}"
 
 /**
  * The signed-in app: a `Scaffold` with the bottom navigation (Home, Categories, Cart, Orders,
  * Profile; 80 dp tall, pill on the active tab) and its own inner `NavHost`.
  *
  * - Cart tab shows [MainShellViewModel.cartBadge]; null hides the badge.
- * - Only Home is built. The other tabs and every [HomeDestination] open [ComingSoonScreen].
- *   [HomeDestination.AllCategories] and [HomeDestination.Cart] switch to their tab instead.
+ * - Home and Categories are built. The other tabs, and every destination not built yet, open
+ *   [ComingSoonScreen]. [HomeDestination.AllCategories] and [HomeDestination.Cart] switch to their
+ *   tab instead.
  * - Tapping the current tab again does nothing; switching tabs keeps each tab's back stack
  *   (`saveState` / `restoreState`).
  *
@@ -133,7 +136,7 @@ fun MainShell(
             startDestination = ShellTab.HOME.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            // Home's tab is a small graph, so screens opened from Home keep the Home tab selected.
+            // A built tab is a small graph, so screens opened from it keep that tab selected.
             navigation(startDestination = HOME_ROUTE, route = ShellTab.HOME.route) {
                 composable(HOME_ROUTE) {
                     HomeScreen(
@@ -141,18 +144,15 @@ fun MainShell(
                         onNavigate = { navController.openFromHome(it) },
                     )
                 }
-                composable(
-                    route = PLACEHOLDER_ROUTE,
-                    arguments = listOf(navArgument(PLACEHOLDER_ARG) { type = NavType.StringType }),
-                ) { entry ->
-                    val placeholder = Placeholder.valueOf(entry.arguments?.getString(PLACEHOLDER_ARG).orEmpty())
-                    ComingSoonScreen(
-                        title = stringResource(placeholder.title),
-                        onBack = { navController.popBackStack() },
-                    )
-                }
+                comingSoon(ShellTab.HOME, navController)
             }
-            listOf(ShellTab.CATEGORIES, ShellTab.CART, ShellTab.ORDERS, ShellTab.PROFILE).forEach { tab ->
+            navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
+                composable(CATEGORIES_ROUTE) {
+                    CategoriesScreen(onNavigate = { navController.openFromCategories(it) })
+                }
+                comingSoon(ShellTab.CATEGORIES, navController)
+            }
+            listOf(ShellTab.CART, ShellTab.ORDERS, ShellTab.PROFILE).forEach { tab ->
                 composable(tab.route) { ComingSoonScreen(title = stringResource(tab.label), onBack = null) }
             }
         }
@@ -165,6 +165,33 @@ private fun NavHostController.switchTab(tab: ShellTab) {
         launchSingleTop = true
         restoreState = true
     }
+}
+
+/** The "Coming soon" destination inside [tab]'s graph. */
+private fun NavGraphBuilder.comingSoon(tab: ShellTab, navController: NavHostController) {
+    composable(
+        route = placeholderRoute(tab),
+        arguments = listOf(navArgument(PLACEHOLDER_ARG) { type = NavType.StringType }),
+    ) { entry ->
+        val placeholder = Placeholder.valueOf(entry.arguments?.getString(PLACEHOLDER_ARG).orEmpty())
+        ComingSoonScreen(
+            title = stringResource(placeholder.title),
+            onBack = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavHostController.openPlaceholder(tab: ShellTab, placeholder: Placeholder) {
+    navigate("${tab.route}/coming_soon/${placeholder.name}")
+}
+
+private fun NavHostController.openFromCategories(destination: CategoriesDestination) {
+    val placeholder = when (destination) {
+        CategoriesDestination.Search -> Placeholder.SEARCH
+        CategoriesDestination.Addresses -> Placeholder.ADDRESSES
+        is CategoriesDestination.ProductListing -> Placeholder.PRODUCTS
+    }
+    openPlaceholder(ShellTab.CATEGORIES, placeholder)
 }
 
 private fun NavHostController.openFromHome(destination: HomeDestination) {
@@ -181,7 +208,7 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
         is HomeDestination.ProductDetails -> Placeholder.PRODUCT
         HomeDestination.Help -> Placeholder.HELP
     }
-    navigate("coming_soon/${placeholder.name}")
+    openPlaceholder(ShellTab.HOME, placeholder)
 }
 
 /** The design's bottom navigation: 5 tabs, an orange pill behind the active icon, cart badge. */
@@ -296,38 +323,7 @@ fun ComingSoonScreen(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (onBack != null) {
-                val backLabel = stringResource(R.string.cd_go_back)
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 10.dp)
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .clickable(role = Role.Button, onClick = onBack)
-                        .semantics { contentDescription = backLabel },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = ShoplyAppIcons.Back,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-            }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.semantics { heading() },
-            )
-        }
+        ShoplyTopAppBar(title = title, onBack = onBack)
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
                 text = stringResource(R.string.common_coming_soon),
