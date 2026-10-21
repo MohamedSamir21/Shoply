@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 /**
  * Design-system colors that don't map cleanly onto a Material 3 [androidx.compose.material3.ColorScheme]
  * role. Accessed through [MaterialTheme.shoplyExtra].
+ *
+ * @property isDark the design swaps card shadows for a thin ring in dark mode (see [shoplyCard]).
  */
 @Immutable
 data class ShoplyExtraColors(
@@ -17,10 +19,12 @@ data class ShoplyExtraColors(
     val inkFaint: Color,
     val green: Color,
     val greenSoft: Color,
+    val onGreenSoft: Color,
     val red: Color,
     val redSoft: Color,
     val facebook: Color,
     val surfaceHi: Color,
+    val isDark: Boolean,
 )
 
 val LightShoplyExtraColors = ShoplyExtraColors(
@@ -28,10 +32,12 @@ val LightShoplyExtraColors = ShoplyExtraColors(
     inkFaint = inkFaintLight,
     green = greenLight,
     greenSoft = greenSoftLight,
+    onGreenSoft = onGreenSoftLight,
     red = redLight,
     redSoft = redSoftLight,
     facebook = facebookBlue,
     surfaceHi = surfaceHiLight,
+    isDark = false,
 )
 
 val DarkShoplyExtraColors = ShoplyExtraColors(
@@ -39,10 +45,12 @@ val DarkShoplyExtraColors = ShoplyExtraColors(
     inkFaint = inkFaintDark,
     green = greenDark,
     greenSoft = greenSoftDark,
+    onGreenSoft = onGreenSoftDark,
     red = redDark,
     redSoft = redSoftDark,
     facebook = facebookBlue,
     surfaceHi = surfaceHiDark,
+    isDark = true,
 )
 
 val LocalShoplyExtraColors = staticCompositionLocalOf { LightShoplyExtraColors }

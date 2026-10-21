@@ -130,4 +130,58 @@
     <string name="visibility_off">Visibility Off</string>
     <string name="expanded_next">Expanded Next</string>
     <string name="linear_progress">Linear Progress</string>
+
+    <!-- Home -->
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
+    <string name="home_greeting_none">Hello</string>
+    <string name="home_deliver_to">Deliver to</string>
+    <string name="home_add_address">Add delivery address</string>
+    <string name="home_search_hint">Search products or stores</string>
+    <string name="home_section_categories">Categories</string>
+    <string name="home_section_featured_stores">Featured Stores</string>
+    <string name="home_section_popular">Popular Near You</string>
+    <string name="home_section_recommended">Recommended for You</string>
+    <string name="home_empty_title">No Stores Nearby Yet</string>
+    <string name="home_empty_message">We don\'t deliver to this address yet. Try another address to see stores near you.</string>
+    <string name="home_empty_action">Change Address</string>
+    <string name="home_promo_position">Promotion %1$d of %2$d</string>
+    <string name="home_store_eta">%1$d–%2$d min</string>
+    <string name="home_product_summary">%1$s, %2$s, rated %3$s</string>
+    <string name="common_see_all">See all</string>
+    <string name="common_offline_title">You\'re Offline</string>
+    <string name="common_offline_message">Check your internet connection and try again.</string>
+    <string name="common_offline_action">Retry</string>
+    <string name="common_view">View</string>
+    <string name="common_coming_soon">Coming soon</string>
+    <string name="snackbar_wishlist_saved">Saved to wishlist</string>
+    <string name="snackbar_wishlist_removed">Removed from wishlist</string>
+    <string name="snackbar_wishlist_failed">Couldn\'t update your wishlist</string>
+    <string name="snackbar_cart_added">Added to cart</string>
+    <string name="snackbar_cart_failed">Couldn\'t add to cart</string>
+    <string name="cd_wishlist_add">Save to wishlist</string>
+    <string name="cd_wishlist_remove">Remove from wishlist</string>
+    <string name="cd_add_to_cart">Add to cart</string>
+    <string name="cd_notifications">Notifications</string>
+    <string name="cd_notifications_unread">Notifications, unread</string>
+    <string name="cd_open_wishlist">Wishlist</string>
+    <string name="cd_filters">Filters</string>
+    <string name="cd_go_back">Go back</string>
+
+    <!-- Main shell -->
+    <string name="nav_home">Home</string>
+    <string name="nav_categories">Categories</string>
+    <string name="nav_cart">Cart</string>
+    <string name="nav_orders">Orders</string>
+    <string name="nav_profile">Profile</string>
+    <string name="screen_search">Search</string>
+    <string name="screen_notifications">Notifications</string>
+    <string name="screen_wishlist">Wishlist</string>
+    <string name="screen_addresses">Addresses</string>
+    <string name="screen_products">Products</string>
+    <string name="screen_all_stores">All Stores</string>
+    <string name="screen_store">Store</string>
+    <string name="screen_product">Product</string>
+    <string name="screen_help">Help</string>
 </resources>
