@@ -6,8 +6,6 @@ import com.shopping.shoply.home.data.FirestoreHomeRepository
 import com.shopping.shoply.home.domain.repository.HomeRepository
 import com.shopping.shoply.notifications.data.FirestoreNotificationsRepository
 import com.shopping.shoply.notifications.domain.NotificationsRepository
-import com.shopping.shoply.profile.data.FirestoreProfileRepository
-import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.wishlist.data.FirestoreWishlistRepository
 import com.shopping.shoply.wishlist.domain.WishlistRepository
 import dagger.Binds
@@ -30,9 +28,6 @@ abstract class HomeDataModule {
 
     @Binds @Singleton
     abstract fun bindCartRepository(impl: FirestoreCartRepository): CartRepository
-
-    @Binds @Singleton
-    abstract fun bindProfileRepository(impl: FirestoreProfileRepository): ProfileRepository
 
     @Binds @Singleton
     abstract fun bindNotificationsRepository(impl: FirestoreNotificationsRepository): NotificationsRepository

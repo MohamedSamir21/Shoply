@@ -33,10 +33,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shopping.shoply.R
+import com.shopping.shoply.common.presentation.components.Avatar
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
-import com.shopping.shoply.common.presentation.theme.darkRing
 import com.shopping.shoply.common.presentation.theme.shoplyCard
 import com.shopping.shoply.home.domain.rules.Greeting
 import com.shopping.shoply.home.presentation.HomeState
@@ -45,7 +45,7 @@ import com.shopping.shoply.home.presentation.preview.HomePreviewData
 /**
  * Sections ①–③, always visible whatever the body shows:
  * - avatar (initials, or a person icon when null), greeting + first name, ♡ and 🔔 buttons
- *   (🔔 gets an orange dot and reads "Notifications, unread" when [HomeState.hasUnread]);
+ *   (🔔 gets an orange dot and reads "Notifications, unread" when [HomeState.hasUnreadNotifications]);
  * - "Deliver to {addressLine}" row, or "Add delivery address" when null;
  * - read-only search bar with a filter button.
  */
@@ -90,10 +90,10 @@ fun HomeHeader(
             TonalIconButton(
                 icon = ShoplyAppIcons.Bell,
                 label = stringResource(
-                    if (state.hasUnread) R.string.cd_notifications_unread else R.string.cd_notifications
+                    if (state.hasUnreadNotifications) R.string.cd_notifications_unread else R.string.cd_notifications
                 ),
                 onClick = onNotificationsClick,
-                showDot = state.hasUnread,
+                showDot = state.hasUnreadNotifications,
             )
         }
 
@@ -140,35 +140,6 @@ fun HomeHeader(
             onFiltersClick = onFiltersClick,
             modifier = Modifier.padding(start = ShoplyDimens.gutter, end = ShoplyDimens.gutter, top = 14.dp),
         )
-    }
-}
-
-/** 44 dp soft circle with the initials, or a person icon when there are none. */
-@Composable
-private fun Avatar(initials: String?) {
-    Box(
-        modifier = Modifier
-            .size(44.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .darkRing(CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (initials != null) {
-            Text(
-                text = initials,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-        } else {
-            Icon(
-                imageVector = ShoplyAppIcons.User,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(22.dp),
-            )
-        }
     }
 }
 

@@ -64,6 +64,8 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import com.shopping.shoply.help.presentation.HelpScreen
 import com.shopping.shoply.home.presentation.HomeDestination
 import com.shopping.shoply.home.presentation.HomeScreen
+import com.shopping.shoply.profile.presentation.ProfileDestination
+import com.shopping.shoply.profile.presentation.ProfileScreen
 
 /** The 5 bottom tabs. Each [route] is the root of that tab's own back stack. */
 private enum class ShellTab(val route: String, @StringRes val label: Int, val icon: ImageVector) {
@@ -85,24 +87,32 @@ private enum class Placeholder(@StringRes val title: Int) {
     STORE(R.string.screen_store),
     PRODUCT(R.string.screen_product),
     SUPPORT_CHAT(R.string.screen_support_chat),
+    EDIT_PROFILE(R.string.screen_edit_profile),
+    SETTINGS(R.string.screen_settings),
+    FAVORITE_STORES(R.string.screen_favorite_stores),
+    PAYMENT_METHODS(R.string.screen_payment_methods),
 }
 
 private const val HOME_ROUTE = "home_feed"
 private const val CATEGORIES_ROUTE = "categories_grid"
-private const val HELP_ROUTE = "help_center"
+private const val PROFILE_ROUTE = "profile_home"
 private const val PLACEHOLDER_ARG = "placeholder"
 
-// Each tab has its own placeholder route, so a "Coming soon" screen keeps its tab selected.
+// Each tab has its own placeholder and Help Center routes, so the screen keeps its tab selected
+// (one route can't sit in two tab graphs).
 private fun placeholderRoute(tab: ShellTab) = "${tab.route}/coming_soon/{$PLACEHOLDER_ARG}"
+private fun helpRoute(tab: ShellTab) = "${tab.route}/help_center"
 
 /**
  * The signed-in app: a `Scaffold` with the bottom navigation (Home, Categories, Cart, Orders,
  * Profile; 80 dp tall, pill on the active tab) and its own inner `NavHost`.
  *
  * - Cart tab shows [MainShellViewModel.cartBadge]; null hides the badge.
- * - Home, Categories and the Help Center (inside Home) are built. The other tabs, and every destination not built yet, open
- *   [ComingSoonScreen]. [HomeDestination.AllCategories] and [HomeDestination.Cart] switch to their
- *   tab instead.
+ * - Home, Categories, Profile and the Help Center (inside Home and Profile) are built. The other
+ *   tabs, and every destination not built yet, open [ComingSoonScreen].
+ *   [HomeDestination.AllCategories], [HomeDestination.Cart] and [ProfileDestination.Orders] switch
+ *   to their tab instead.
+ * - [onSignedOut] runs after Log Out is confirmed on Profile.
  * - Tapping the current tab again does nothing; switching tabs keeps each tab's back stack
  *   (`saveState` / `restoreState`).
  *
@@ -110,6 +120,7 @@ private fun placeholderRoute(tab: ShellTab) = "${tab.route}/coming_soon/{$PLACEH
  */
 @Composable
 fun MainShell(
+    onSignedOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MainShellViewModel = hiltViewModel(),
 ) {
@@ -146,12 +157,7 @@ fun MainShell(
                         onNavigate = { navController.openFromHome(it) },
                     )
                 }
-                composable(HELP_ROUTE) {
-                    HelpScreen(
-                        onBack = { navController.popBackStack() },
-                        onOpenChat = { navController.openPlaceholder(ShellTab.HOME, Placeholder.SUPPORT_CHAT) },
-                    )
-                }
+                helpCenter(ShellTab.HOME, navController)
                 comingSoon(ShellTab.HOME, navController)
             }
             navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
@@ -160,7 +166,17 @@ fun MainShell(
                 }
                 comingSoon(ShellTab.CATEGORIES, navController)
             }
-            listOf(ShellTab.CART, ShellTab.ORDERS, ShellTab.PROFILE).forEach { tab ->
+            navigation(startDestination = PROFILE_ROUTE, route = ShellTab.PROFILE.route) {
+                composable(PROFILE_ROUTE) {
+                    ProfileScreen(
+                        onNavigate = { navController.openFromProfile(it) },
+                        onSignedOut = onSignedOut,
+                    )
+                }
+                helpCenter(ShellTab.PROFILE, navController)
+                comingSoon(ShellTab.PROFILE, navController)
+            }
+            listOf(ShellTab.CART, ShellTab.ORDERS).forEach { tab ->
                 composable(tab.route) { ComingSoonScreen(title = stringResource(tab.label), onBack = null) }
             }
         }
@@ -185,6 +201,16 @@ private fun NavGraphBuilder.comingSoon(tab: ShellTab, navController: NavHostCont
         ComingSoonScreen(
             title = stringResource(placeholder.title),
             onBack = { navController.popBackStack() },
+        )
+    }
+}
+
+/** The Help Center inside [tab]'s graph; chat opens "Coming soon" in the same tab. */
+private fun NavGraphBuilder.helpCenter(tab: ShellTab, navController: NavHostController) {
+    composable(helpRoute(tab)) {
+        HelpScreen(
+            onBack = { navController.popBackStack() },
+            onOpenChat = { navController.openPlaceholder(tab, Placeholder.SUPPORT_CHAT) },
         )
     }
 }
@@ -214,9 +240,24 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
         HomeDestination.AllStores -> Placeholder.ALL_STORES
         is HomeDestination.Store -> Placeholder.STORE
         is HomeDestination.ProductDetails -> Placeholder.PRODUCT
-        HomeDestination.Help -> return navigate(HELP_ROUTE)
+        HomeDestination.Help -> return navigate(helpRoute(ShellTab.HOME))
     }
     openPlaceholder(ShellTab.HOME, placeholder)
+}
+
+private fun NavHostController.openFromProfile(destination: ProfileDestination) {
+    val placeholder = when (destination) {
+        ProfileDestination.Orders -> return switchTab(ShellTab.ORDERS)
+        ProfileDestination.Help -> return navigate(helpRoute(ShellTab.PROFILE))
+        ProfileDestination.EditProfile -> Placeholder.EDIT_PROFILE
+        ProfileDestination.Settings -> Placeholder.SETTINGS
+        ProfileDestination.Wishlist -> Placeholder.WISHLIST
+        ProfileDestination.FavoriteStores -> Placeholder.FAVORITE_STORES
+        ProfileDestination.Addresses -> Placeholder.ADDRESSES
+        ProfileDestination.Payments -> Placeholder.PAYMENT_METHODS
+        ProfileDestination.Notifications -> Placeholder.NOTIFICATIONS
+    }
+    openPlaceholder(ShellTab.PROFILE, placeholder)
 }
 
 /** The design's bottom navigation: 5 tabs, an orange pill behind the active icon, cart badge. */

@@ -116,7 +116,7 @@ class HomeViewModelTest {
             assertThat(state.firstName).isEqualTo("Mohamed")
             assertThat(state.initials).isEqualTo("MS")
             assertThat(state.addressLine).isEqualTo("Home · 24 Elm Street")
-            assertThat(state.hasUnread).isTrue()
+            assertThat(state.hasUnreadNotifications).isTrue()
             assertThat(state.wishlist).isEqualTo(setOf("id1", "id2"))
         }
     }
@@ -138,9 +138,9 @@ class HomeViewModelTest {
         val sut = createSut()
 
         sut.state.test {
-            assertThat(awaitItem().hasUnread).isFalse()
+            assertThat(awaitItem().hasUnreadNotifications).isFalse()
             fakeNotificationsRepository.unreadCount.update { 2 }
-            assertThat(awaitItem().hasUnread).isTrue()
+            assertThat(awaitItem().hasUnreadNotifications).isTrue()
         }
         assertThat(fakeHomeRepository.getFeedCalls).isEqualTo(1)
     }

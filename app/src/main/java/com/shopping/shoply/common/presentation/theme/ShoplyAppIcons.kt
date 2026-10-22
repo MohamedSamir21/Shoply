@@ -125,4 +125,43 @@ object ShoplyAppIcons {
             "M6.5 4h3l1.5 4-2 1.4a11 11 0 0 0 5 5l1.4-2 4 1.5v3a2 2 0 0 1 -2.2 2A15.5 15.5 0 0 1 4.5 6.2 2 2 0 0 1 6.5 4z",
         )
     }
+
+    // —— Profile ——
+    val Gear: ImageVector by lazy {
+        lineIcon(
+            "Gear",
+            "M12 3.5l1.6 1.9 2.4 -0.6 0.8 2.3 2.3 0.8 -0.6 2.4 1.9 1.7 -1.9 1.6 0.6 2.4 -2.3 0.8 -0.8 2.3 -2.4 -0.6" +
+                "L12 20.5l-1.6 -1.9 -2.4 0.6 -0.8 -2.3 -2.3 -0.8 0.6 -2.4L3.5 12l1.9 -1.7 -0.6 -2.4 2.3 -0.8 0.8 -2.3 2.4 0.6z",
+            circle(12f, 12f, 3f),
+        )
+    }
+    val Edit: ImageVector by lazy {
+        lineIcon(
+            "Edit",
+            "M4.5 19.5l1 -4L15.8 5.2a2 2 0 0 1 2.9 0l0.1 0.1a2 2 0 0 1 0 2.9L8.5 18.5z",
+            "M13.5 7.5l3 3",
+        )
+    }
+    val Store: ImageVector by lazy {
+        lineIcon(
+            "Store",
+            "M4 9.5l1.5 -5h13l1.5 5",
+            "M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0",
+            "M5.5 12v8h13v-8M10 20v-4.5h4V20",
+        )
+    }
+    val Card: ImageVector by lazy {
+        lineIcon("Card", rect(3f, 5.5f, 18f, 13f, 2.6f), "M3 10h18M7 15h3")
+    }
+    val Help: ImageVector by lazy {
+        lineIcon("Help", circle(12f, 12f, 8.5f), "M9.6 9.6a2.5 2.5 0 0 1 4.8 0.9c0 1.7 -2.4 2.1 -2.4 3.6M12 17v0.01")
+    }
+    val Logout: ImageVector by lazy {
+        lineIcon(
+            "Logout",
+            "M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1 -2 2H14",
+            "M10 8l-4 4 4 4M6 12h9",
+            autoMirror = true,
+        )
+    }
 }
