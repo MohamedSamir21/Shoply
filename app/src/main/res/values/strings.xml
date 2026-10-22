@@ -183,7 +183,7 @@
     <string name="screen_all_stores">All Stores</string>
     <string name="screen_store">Store</string>
     <string name="screen_product">Product</string>
-    <string name="screen_help">Help</string>
+    <string name="screen_support_chat">Support Chat</string>
 
     <!-- Categories -->
     <string name="categories_title">Categories</string>
@@ -195,4 +195,32 @@
         <item quantity="other">%d items</item>
     </plurals>
     <string name="cd_search">Search</string>
+
+    <!-- Help Center -->
+    <string name="help_title">Help Center</string>
+    <string name="help_intro">How can we help? Search our answers or get in touch.</string>
+    <string name="help_search_hint">Search help articles</string>
+    <string name="help_popular_questions">Popular Questions</string>
+    <string name="help_no_match">No answers match “%1$s”. Try contacting us below.</string>
+    <string name="help_contact_us">Contact Us</string>
+    <string name="help_chat">Chat with Us</string>
+    <string name="help_chat_sub">Usually replies in 2 minutes</string>
+    <string name="help_email">Email Support</string>
+    <string name="help_email_address" translatable="false">support@shoply.app</string>
+    <string name="help_call">Call Us</string>
+    <string name="help_call_sub">%1$s · 8 AM – 10 PM</string>
+    <string name="help_phone_number" translatable="false">+1 800 555 0199</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_expanded">Expanded</string>
+    <string name="cd_collapsed">Collapsed</string>
+    <string name="help_faq_order_status_q">Where is my order?</string>
+    <string name="help_faq_order_status_a">Open Orders and tap Track Order to see live status and your courier’s estimated arrival.</string>
+    <string name="help_faq_installments_q">How do installments work?</string>
+    <string name="help_faq_installments_a">Choose Pay in Installments at checkout and pick 3 or 6 months. The first payment is taken today and the rest monthly, with no interest or fees.</string>
+    <string name="help_faq_returns_q">How do I return an item?</string>
+    <string name="help_faq_returns_a">Most items can be returned within 14 days. Open the order, tap Get Help and choose Return an item.</string>
+    <string name="help_faq_change_address_q">Can I change my delivery address?</string>
+    <string name="help_faq_change_address_a">You can change it until the store confirms your order. After that, contact us and we’ll do our best to help.</string>
+    <string name="help_faq_payment_methods_q">Which payment methods can I use?</string>
+    <string name="help_faq_payment_methods_a">Visa, Mastercard, cash on delivery and installments. Saved cards are encrypted.</string>
 </resources>
