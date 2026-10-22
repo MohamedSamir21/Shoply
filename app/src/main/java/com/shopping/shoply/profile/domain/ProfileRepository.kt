@@ -1,5 +1,6 @@
 package com.shopping.shoply.profile.domain
 
+import com.shopping.shoply.profile.domain.model.Account
 import com.shopping.shoply.profile.domain.model.DeliveryAddress
 import kotlinx.coroutines.flow.Flow
 
@@ -14,4 +15,7 @@ interface ProfileRepository {
 
     /** The address marked as primary, or null when the user has none (UI shows "Add delivery address"). */
     fun observePrimaryAddress(): Flow<DeliveryAddress?>
+
+    /** Name, email and phone for the Profile tab. */
+    fun observeAccount(): Flow<Account>
 }

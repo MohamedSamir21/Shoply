@@ -223,4 +223,23 @@
     <string name="help_faq_change_address_a">You can change it until the store confirms your order. After that, contact us and we’ll do our best to help.</string>
     <string name="help_faq_payment_methods_q">Which payment methods can I use?</string>
     <string name="help_faq_payment_methods_a">Visa, Mastercard, cash on delivery and installments. Saved cards are encrypted.</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_group_account">Account</string>
+    <string name="profile_group_preferences">Preferences</string>
+    <string name="profile_group_support">Support</string>
+    <string name="profile_my_orders">My Orders</string>
+    <string name="profile_notifications_new">%1$d new</string>
+    <string name="profile_settings_sub">Theme, language, alerts</string>
+    <string name="profile_log_out">Log Out</string>
+    <string name="profile_version">Shoply %1$s</string>
+    <string name="profile_logout_title">Log Out?</string>
+    <string name="profile_logout_message">You’ll need to sign in again to see your cart and orders.</string>
+    <string name="cd_settings">Settings</string>
+    <string name="cd_edit_profile">Edit profile</string>
+    <string name="screen_edit_profile">Edit Profile</string>
+    <string name="screen_settings">Settings</string>
+    <string name="screen_favorite_stores">Favorite Stores</string>
+    <string name="screen_payment_methods">Payment Methods</string>
 </resources>

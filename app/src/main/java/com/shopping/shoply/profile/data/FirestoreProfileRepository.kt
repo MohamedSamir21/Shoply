@@ -5,13 +5,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.shopping.shoply.common.data.firestore.liveSnapshots
 import com.shopping.shoply.common.data.firestore.string
 import com.shopping.shoply.profile.domain.ProfileRepository
+import com.shopping.shoply.profile.domain.model.Account
 import com.shopping.shoply.profile.domain.model.DeliveryAddress
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-/** Name from the existing `users/{uid}` profile document; addresses from `users/{uid}/addresses`. */
+/** Name, email and phone from the existing `users/{uid}` profile document; addresses from `users/{uid}/addresses`. */
 class FirestoreProfileRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth,
@@ -31,6 +32,17 @@ class FirestoreProfileRepository @Inject constructor(
             .map { snapshot ->
                 snapshot.documents.firstOrNull()?.let { DeliveryAddress(it.string("label"), it.string("line1")) }
             }
+    }
+
+    override fun observeAccount(): Flow<Account> {
+        val uid = auth.currentUser?.uid ?: return flowOf(Account(name = "", email = "", phone = null))
+        return user(uid).liveSnapshots().map {
+            Account(
+                name = it.string("username"),
+                email = it.string("email"),
+                phone = it.string("phoneNumber").ifBlank { null },
+            )
+        }
     }
 
     private fun user(uid: String) = firestore.collection("users").document(uid)

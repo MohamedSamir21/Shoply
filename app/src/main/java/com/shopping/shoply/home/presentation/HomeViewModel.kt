@@ -78,7 +78,7 @@ class HomeViewModel @Inject constructor(
             greeting = greeting,
             firstName = firstName,
             initials = initials,
-            hasUnread = unread > 0,
+            hasUnreadNotifications = unread > 0,
             addressLine = address?.toLine(),
             body = body,
             wishlist = wishlist,

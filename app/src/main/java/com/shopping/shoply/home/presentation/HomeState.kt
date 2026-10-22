@@ -17,7 +17,7 @@ data class HomeState(
     val greeting: Greeting = Greeting.MORNING,
     val firstName: String = "",
     val initials: String? = null,
-    val hasUnread: Boolean = false,
+    val hasUnreadNotifications: Boolean = false,
     val addressLine: String? = null,
     val body: HomeBody = HomeBody.Loading,
     val wishlist: Set<String> = emptySet(),

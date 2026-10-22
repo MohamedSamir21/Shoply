@@ -125,7 +125,7 @@ internal object HomePreviewData {
         greeting = Greeting.MORNING,
         firstName = "Mohamed",
         initials = "MS",
-        hasUnread = true,
+        hasUnreadNotifications = true,
         addressLine = "Home · 24 Elm Street",
     )
 
@@ -134,7 +134,7 @@ internal object HomePreviewData {
         greeting = Greeting.EVENING,
         firstName = "there",
         initials = null,
-        hasUnread = false,
+        hasUnreadNotifications = false,
         addressLine = null,
     )
 

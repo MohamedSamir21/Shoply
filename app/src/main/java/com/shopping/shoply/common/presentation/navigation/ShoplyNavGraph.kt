@@ -50,7 +50,7 @@ fun ShoplyNavGraph(
         addVerifyAccountScreen(navController)
         addSendResetLinkScreen(navController)
         addSignInScreen(navController, isExpandedScreen)
-        addHomeScreen()
+        addHomeScreen(navController)
         addForgotPasswordScreen(navController, isExpandedScreen)
         addEnterEmailScreen(navController, isExpandedScreen)
         addEnterPhoneScreen(navController, isExpandedScreen)
@@ -170,11 +170,19 @@ fun NavGraphBuilder.addForgotPasswordScreen(
     }
 }
 
-fun NavGraphBuilder.addHomeScreen() {
+fun NavGraphBuilder.addHomeScreen(navController: NavHostController) {
     composable(
         route = NavRoutes.Home.route
     ) {
-        MainShell()
+        MainShell(
+            // Signed out: back to Sign In with nothing behind it.
+            onSignedOut = {
+                navController.navigate(NavRoutes.SignIn.route) {
+                    popUpTo(navController.graph.id) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        )
     }
 }
 
