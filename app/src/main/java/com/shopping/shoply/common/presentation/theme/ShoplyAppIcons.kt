@@ -105,4 +105,24 @@ object ShoplyAppIcons {
     val Split: ImageVector by lazy {
         lineIcon("Split", circle(12f, 12f, 8.5f), "M12 3.5V12h8.5M12 12l-6 6")
     }
+
+    // —— Lists, search and contact ——
+    val ChevronRight: ImageVector by lazy {
+        lineIcon("ChevronRight", "M9.5 6l6 6-6 6", autoMirror = true)
+    }
+    val Close: ImageVector by lazy {
+        lineIcon("Close", "M7 7l10 10M17 7L7 17")
+    }
+    val Chat: ImageVector by lazy {
+        lineIcon("Chat", "M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2H10l-5.5 4z")
+    }
+    val Mail: ImageVector by lazy {
+        lineIcon("Mail", rect(3f, 5f, 18f, 14f, 3.2f), "M5 8l6.2 4.3a1.5 1.5 0 0 0 1.6 0L19 8")
+    }
+    val Phone: ImageVector by lazy {
+        lineIcon(
+            "Phone",
+            "M6.5 4h3l1.5 4-2 1.4a11 11 0 0 0 5 5l1.4-2 4 1.5v3a2 2 0 0 1 -2.2 2A15.5 15.5 0 0 1 4.5 6.2 2 2 0 0 1 6.5 4z",
+        )
+    }
 }

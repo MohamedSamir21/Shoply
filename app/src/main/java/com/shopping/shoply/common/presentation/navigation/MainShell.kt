@@ -61,6 +61,7 @@ import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
+import com.shopping.shoply.help.presentation.HelpScreen
 import com.shopping.shoply.home.presentation.HomeDestination
 import com.shopping.shoply.home.presentation.HomeScreen
 
@@ -83,11 +84,12 @@ private enum class Placeholder(@StringRes val title: Int) {
     ALL_STORES(R.string.screen_all_stores),
     STORE(R.string.screen_store),
     PRODUCT(R.string.screen_product),
-    HELP(R.string.screen_help),
+    SUPPORT_CHAT(R.string.screen_support_chat),
 }
 
 private const val HOME_ROUTE = "home_feed"
 private const val CATEGORIES_ROUTE = "categories_grid"
+private const val HELP_ROUTE = "help_center"
 private const val PLACEHOLDER_ARG = "placeholder"
 
 // Each tab has its own placeholder route, so a "Coming soon" screen keeps its tab selected.
@@ -98,7 +100,7 @@ private fun placeholderRoute(tab: ShellTab) = "${tab.route}/coming_soon/{$PLACEH
  * Profile; 80 dp tall, pill on the active tab) and its own inner `NavHost`.
  *
  * - Cart tab shows [MainShellViewModel.cartBadge]; null hides the badge.
- * - Home and Categories are built. The other tabs, and every destination not built yet, open
+ * - Home, Categories and the Help Center (inside Home) are built. The other tabs, and every destination not built yet, open
  *   [ComingSoonScreen]. [HomeDestination.AllCategories] and [HomeDestination.Cart] switch to their
  *   tab instead.
  * - Tapping the current tab again does nothing; switching tabs keeps each tab's back stack
@@ -142,6 +144,12 @@ fun MainShell(
                     HomeScreen(
                         snackbarHostState = snackbarHostState,
                         onNavigate = { navController.openFromHome(it) },
+                    )
+                }
+                composable(HELP_ROUTE) {
+                    HelpScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenChat = { navController.openPlaceholder(ShellTab.HOME, Placeholder.SUPPORT_CHAT) },
                     )
                 }
                 comingSoon(ShellTab.HOME, navController)
@@ -206,7 +214,7 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
         HomeDestination.AllStores -> Placeholder.ALL_STORES
         is HomeDestination.Store -> Placeholder.STORE
         is HomeDestination.ProductDetails -> Placeholder.PRODUCT
-        HomeDestination.Help -> Placeholder.HELP
+        HomeDestination.Help -> return navigate(HELP_ROUTE)
     }
     openPlaceholder(ShellTab.HOME, placeholder)
 }
