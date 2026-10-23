@@ -242,4 +242,15 @@
     <string name="screen_settings">Settings</string>
     <string name="screen_favorite_stores">Favorite Stores</string>
     <string name="screen_payment_methods">Payment Methods</string>
+
+    <!-- Wishlist -->
+    <plurals name="wishlist_saved_count">
+        <item quantity="one">%d saved item</item>
+        <item quantity="other">%d saved items</item>
+    </plurals>
+    <string name="wishlist_empty_title">Your Wishlist Is Empty</string>
+    <string name="wishlist_empty_message">Tap the heart on any product to save it here for later.</string>
+    <string name="wishlist_empty_action">Explore Products</string>
+    <string name="wishlist_move_to_cart">Move to Cart</string>
+    <string name="snackbar_cart_moved">Moved to cart</string>
 </resources>

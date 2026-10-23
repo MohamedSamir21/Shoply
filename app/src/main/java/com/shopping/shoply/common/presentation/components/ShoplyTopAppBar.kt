@@ -3,6 +3,7 @@ package com.shopping.shoply.common.presentation.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +41,7 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
  * - [onBack] null hides the back button (tab roots have nowhere to go back to).
  * - [centered] true centres the title over the whole bar (M3 center-aligned); false puts it at the
  *   start, lined up with the 24 dp screen gutter when there is no back button.
+ * - [subtitle] adds a small grey line under the title (e.g. "3 saved items").
  */
 @Composable
 fun ShoplyTopAppBar(
@@ -47,6 +49,7 @@ fun ShoplyTopAppBar(
     modifier: Modifier = Modifier,
     onBack: (() -> Unit)? = null,
     centered: Boolean = true,
+    subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     Box(
@@ -58,6 +61,7 @@ fun ShoplyTopAppBar(
         if (centered) {
             TopBarTitle(
                 title = title,
+                subtitle = subtitle,
                 textAlign = TextAlign.Center,
                 // Clear of a 44 dp button on either side.
                 modifier = Modifier
@@ -78,6 +82,7 @@ fun ShoplyTopAppBar(
             } else {
                 TopBarTitle(
                     title = title,
+                    subtitle = subtitle,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .weight(1f)
@@ -115,18 +120,36 @@ fun TopBarIconButton(
 }
 
 @Composable
-private fun TopBarTitle(title: String, textAlign: TextAlign, modifier: Modifier = Modifier) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleLarge,
-        fontSize = 19.sp,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onBackground,
-        textAlign = textAlign,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier.semantics { heading() },
-    )
+private fun TopBarTitle(title: String, subtitle: String?, textAlign: TextAlign, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontSize = 19.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = textAlign,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .fillMaxWidth()
+                .semantics { heading() },
+        )
+        if (subtitle != null) {
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = textAlign,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 1.dp),
+            )
+        }
+    }
 }
 
 /** Tab root: title at the start, one action. */
@@ -148,7 +171,18 @@ fun ShoplyTopAppBarStartPreview() {
 fun ShoplyTopAppBarCenteredPreview() {
     ShoplyTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            ShoplyTopAppBar(title = "Wishlist", onBack = {})
+            ShoplyTopAppBar(title = "Help Center", onBack = {})
+        }
+    }
+}
+
+/** Pushed screen with a subtitle under the centred title. */
+@PreviewLightDark
+@Composable
+fun ShoplyTopAppBarSubtitlePreview() {
+    ShoplyTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ShoplyTopAppBar(title = "Wishlist", subtitle = "3 saved items", onBack = {})
         }
     }
 }
