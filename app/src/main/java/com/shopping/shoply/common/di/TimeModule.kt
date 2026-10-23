@@ -1,6 +1,7 @@
 package com.shopping.shoply.common.di
 
 import com.shopping.shoply.common.domain.time.CurrentHourProvider
+import com.shopping.shoply.common.domain.time.StartOfDayProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,4 +15,14 @@ object TimeModule {
     @Provides
     fun provideCurrentHourProvider(): CurrentHourProvider =
         CurrentHourProvider { Calendar.getInstance().get(Calendar.HOUR_OF_DAY) }
+
+    @Provides
+    fun provideStartOfDayProvider(): StartOfDayProvider = StartOfDayProvider {
+        Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
 }
