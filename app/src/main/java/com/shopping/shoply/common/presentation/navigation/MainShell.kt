@@ -66,6 +66,8 @@ import com.shopping.shoply.home.presentation.HomeDestination
 import com.shopping.shoply.home.presentation.HomeScreen
 import com.shopping.shoply.profile.presentation.ProfileDestination
 import com.shopping.shoply.profile.presentation.ProfileScreen
+import com.shopping.shoply.wishlist.presentation.WishlistDestination
+import com.shopping.shoply.wishlist.presentation.WishlistScreen
 
 /** The 5 bottom tabs. Each [route] is the root of that tab's own back stack. */
 private enum class ShellTab(val route: String, @StringRes val label: Int, val icon: ImageVector) {
@@ -80,7 +82,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 private enum class Placeholder(@StringRes val title: Int) {
     SEARCH(R.string.screen_search),
     NOTIFICATIONS(R.string.screen_notifications),
-    WISHLIST(R.string.screen_wishlist),
     ADDRESSES(R.string.screen_addresses),
     PRODUCTS(R.string.screen_products),
     ALL_STORES(R.string.screen_all_stores),
@@ -102,13 +103,14 @@ private const val PLACEHOLDER_ARG = "placeholder"
 // (one route can't sit in two tab graphs).
 private fun placeholderRoute(tab: ShellTab) = "${tab.route}/coming_soon/{$PLACEHOLDER_ARG}"
 private fun helpRoute(tab: ShellTab) = "${tab.route}/help_center"
+private fun wishlistRoute(tab: ShellTab) = "${tab.route}/wishlist"
 
 /**
  * The signed-in app: a `Scaffold` with the bottom navigation (Home, Categories, Cart, Orders,
  * Profile; 80 dp tall, pill on the active tab) and its own inner `NavHost`.
  *
  * - Cart tab shows [MainShellViewModel.cartBadge]; null hides the badge.
- * - Home, Categories, Profile and the Help Center (inside Home and Profile) are built. The other
+ * - Home, Categories, Profile, and the Help Center and Wishlist (inside Home and Profile) are built. The other
  *   tabs, and every destination not built yet, open [ComingSoonScreen].
  *   [HomeDestination.AllCategories], [HomeDestination.Cart] and [ProfileDestination.Orders] switch
  *   to their tab instead.
@@ -158,6 +160,7 @@ fun MainShell(
                     )
                 }
                 helpCenter(ShellTab.HOME, navController)
+                wishlist(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
             }
             navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
@@ -174,6 +177,7 @@ fun MainShell(
                     )
                 }
                 helpCenter(ShellTab.PROFILE, navController)
+                wishlist(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
             listOf(ShellTab.CART, ShellTab.ORDERS).forEach { tab ->
@@ -215,6 +219,31 @@ private fun NavGraphBuilder.helpCenter(tab: ShellTab, navController: NavHostCont
     }
 }
 
+/** The Wishlist inside [tab]'s graph; a product opens "Coming soon" in the same tab. */
+private fun NavGraphBuilder.wishlist(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(wishlistRoute(tab)) {
+        WishlistScreen(
+            snackbarHostState = snackbarHostState,
+            onBack = { navController.popBackStack() },
+            onNavigate = { destination ->
+                when (destination) {
+                    is WishlistDestination.Product -> navController.openPlaceholder(tab, Placeholder.PRODUCT)
+                    WishlistDestination.Cart -> navController.switchTab(ShellTab.CART)
+                    WishlistDestination.ExploreProducts ->
+                        // Inside Home, go back to the feed; switching to the tab you're in would
+                        // restore this same back stack.
+                        if (tab == ShellTab.HOME) navController.popBackStack(HOME_ROUTE, inclusive = false)
+                        else navController.switchTab(ShellTab.HOME)
+                }
+            },
+        )
+    }
+}
+
 private fun NavHostController.openPlaceholder(tab: ShellTab, placeholder: Placeholder) {
     navigate("${tab.route}/coming_soon/${placeholder.name}")
 }
@@ -234,7 +263,7 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
         HomeDestination.Cart -> return switchTab(ShellTab.CART)
         is HomeDestination.Search -> Placeholder.SEARCH
         HomeDestination.Notifications -> Placeholder.NOTIFICATIONS
-        HomeDestination.Wishlist -> Placeholder.WISHLIST
+        HomeDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.HOME))
         HomeDestination.Addresses -> Placeholder.ADDRESSES
         is HomeDestination.ProductListing -> Placeholder.PRODUCTS
         HomeDestination.AllStores -> Placeholder.ALL_STORES
@@ -251,7 +280,7 @@ private fun NavHostController.openFromProfile(destination: ProfileDestination) {
         ProfileDestination.Help -> return navigate(helpRoute(ShellTab.PROFILE))
         ProfileDestination.EditProfile -> Placeholder.EDIT_PROFILE
         ProfileDestination.Settings -> Placeholder.SETTINGS
-        ProfileDestination.Wishlist -> Placeholder.WISHLIST
+        ProfileDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.PROFILE))
         ProfileDestination.FavoriteStores -> Placeholder.FAVORITE_STORES
         ProfileDestination.Addresses -> Placeholder.ADDRESSES
         ProfileDestination.Payments -> Placeholder.PAYMENT_METHODS
