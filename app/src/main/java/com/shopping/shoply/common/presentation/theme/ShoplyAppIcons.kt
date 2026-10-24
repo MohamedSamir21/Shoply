@@ -164,4 +164,16 @@ object ShoplyAppIcons {
             autoMirror = true,
         )
     }
+
+    // —— Notifications ——
+    val Tag: ImageVector by lazy {
+        lineIcon(
+            "Tag",
+            "M3.8 12.6V4.8a1 1 0 0 1 1 -1h7.8l7.6 7.6a1.4 1.4 0 0 1 0 2l-5.8 5.8a1.4 1.4 0 0 1 -2 0z",
+            circle(8.3f, 8.3f, 1.5f),
+        )
+    }
+    val Package: ImageVector by lazy {
+        lineIcon("Package", "M12 3.5l8 4v9l-8 4-8-4v-9z", "M4 7.5l8 4 8-4M12 11.5v9")
+    }
 }

@@ -184,6 +184,7 @@
     <string name="screen_store">Store</string>
     <string name="screen_product">Product</string>
     <string name="screen_support_chat">Support Chat</string>
+    <string name="screen_order_details">Order Details</string>
 
     <!-- Categories -->
     <string name="categories_title">Categories</string>
@@ -253,4 +254,15 @@
     <string name="wishlist_empty_action">Explore Products</string>
     <string name="wishlist_move_to_cart">Move to Cart</string>
     <string name="snackbar_cart_moved">Moved to cart</string>
+
+    <!-- Notifications -->
+    <string name="notifications_mark_all_read">Mark all read</string>
+    <string name="notifications_today">Today</string>
+    <string name="notifications_earlier">Earlier</string>
+    <string name="notifications_yesterday">Yesterday</string>
+    <string name="notifications_empty_title">No Notifications Yet</string>
+    <string name="notifications_empty_message">We\'ll let you know about your orders, offers and price drops here.</string>
+    <string name="notifications_empty_action">Back to Home</string>
+    <string name="snackbar_notifications_mark_all_failed">Couldn\'t mark notifications as read</string>
+    <string name="cd_notification_unread">Unread</string>
 </resources>
