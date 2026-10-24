@@ -2,6 +2,7 @@ package com.shopping.shoply.catalog.domain
 
 import com.shopping.shoply.catalog.domain.model.Category
 import com.shopping.shoply.catalog.domain.model.Product
+import com.shopping.shoply.catalog.domain.model.Store
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 
@@ -23,4 +24,17 @@ interface CatalogRepository {
      * @return the same errors as [getCategories].
      */
     suspend fun getProducts(ids: Set<String>): Result<List<Product>, DataError>
+
+    /**
+     * One product. One-shot read.
+     *
+     * @return the same errors as [getCategories]; a missing product is [DataError.Unknown].
+     */
+    suspend fun getProduct(id: String): Result<Product, DataError>
+
+    /** One store. Same errors as [getProduct]. */
+    suspend fun getStore(id: String): Result<Store, DataError>
+
+    /** Up to [limit] products of [categoryId], in display order. Same errors as [getCategories]. */
+    suspend fun getProductsInCategory(categoryId: String, limit: Int): Result<List<Product>, DataError>
 }

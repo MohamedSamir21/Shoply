@@ -49,4 +49,6 @@ fun DocumentSnapshot.toProduct() = Product(
         ColorOption(name = it["name"] as? String ?: "", hex = it["hex"] as? String ?: "")
     },
     sizes = (get("sizes") as? List<String>).orEmpty(),
+    description = string("description"),
+    categoryId = string("categoryId"),
 )

@@ -6,6 +6,8 @@ package com.shopping.shoply.catalog.domain.model
  * @property oldPriceCents the price before a discount; null when the product isn't discounted.
  * @property colors available colours in display order; may be empty.
  * @property sizes available sizes in display order (e.g. S, M, L); may be empty.
+ * @property description shown on the product page; may be empty.
+ * @property categoryId the [Category] it belongs to; finds similar products.
  */
 data class Product(
     val id: String,
@@ -18,6 +20,8 @@ data class Product(
     val reviewCount: Int,
     val colors: List<ColorOption>,
     val sizes: List<String>,
+    val description: String = "",
+    val categoryId: String = "",
 )
 
 /** A colour choice. [hex] is "#RRGGBB", used for the swatch. */

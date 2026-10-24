@@ -176,4 +176,18 @@ object ShoplyAppIcons {
     val Package: ImageVector by lazy {
         lineIcon("Package", "M12 3.5l8 4v9l-8 4-8-4v-9z", "M4 7.5l8 4 8-4M12 11.5v9")
     }
+
+    // —— Product details ——
+    val Share: ImageVector by lazy {
+        lineIcon(
+            "Share",
+            circle(17.5f, 5.5f, 2.3f),
+            circle(6.5f, 12f, 2.3f),
+            circle(17.5f, 18.5f, 2.3f),
+            "M8.5 10.8l7-4M8.5 13.2l7 4",
+        )
+    }
+    val Minus: ImageVector by lazy {
+        lineIcon("Minus", "M5.5 12h13")
+    }
 }

@@ -1,12 +1,15 @@
 package com.shopping.shoply.catalog.data
 
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shopping.shoply.catalog.data.mapper.toCategory
 import com.shopping.shoply.catalog.data.mapper.toProduct
+import com.shopping.shoply.catalog.data.mapper.toStore
 import com.shopping.shoply.catalog.domain.CatalogRepository
 import com.shopping.shoply.catalog.domain.model.Category
 import com.shopping.shoply.catalog.domain.model.Product
+import com.shopping.shoply.catalog.domain.model.Store
 import com.shopping.shoply.common.data.firestore.toReadError
 import com.shopping.shoply.common.di.IoDispatcher
 import com.shopping.shoply.common.domain.DataError
@@ -60,6 +63,47 @@ class FirestoreCatalogRepository @Inject constructor(
                         .flatten()
                 }
                 Result.Success(products)
+            }
+        } catch (e: Throwable) {
+            Result.Error(e.toReadError())
+        }
+    }
+
+    override suspend fun getProduct(id: String): Result<Product, DataError> =
+        readDocument("products", id) { it.toProduct() }
+
+    override suspend fun getStore(id: String): Result<Store, DataError> =
+        readDocument("stores", id) { it.toStore() }
+
+    override suspend fun getProductsInCategory(categoryId: String, limit: Int): Result<List<Product>, DataError> =
+        withContext(ioDispatcher) {
+            try {
+                withTimeout(TIMEOUT_MS.milliseconds) {
+                    // Sorted here: whereEqualTo + orderBy on another field would need a composite index.
+                    val snapshot = firestore.collection("products")
+                        .whereEqualTo("categoryId", categoryId)
+                        .get().await()
+                    val products = snapshot.documents
+                        .sortedBy { it.getLong("order") ?: Long.MAX_VALUE }
+                        .take(limit)
+                        .map { it.toProduct() }
+                    Result.Success(products)
+                }
+            } catch (e: Throwable) {
+                Result.Error(e.toReadError())
+            }
+        }
+
+    // A document that doesn't exist is DataError.Unknown.
+    private suspend fun <T> readDocument(
+        collection: String,
+        id: String,
+        map: (DocumentSnapshot) -> T,
+    ): Result<T, DataError> = withContext(ioDispatcher) {
+        try {
+            withTimeout(TIMEOUT_MS.milliseconds) {
+                val snapshot = firestore.collection(collection).document(id).get().await()
+                if (snapshot.exists()) Result.Success(map(snapshot)) else Result.Error(DataError.Unknown)
             }
         } catch (e: Throwable) {
             Result.Error(e.toReadError())
