@@ -1,0 +1,132 @@
+name: PR Quiz
+
+# Grades the multiple-choice quiz embedded in a PR description (created by the
+# `pr-quiz` Claude Code skill). Publishes a commit status named "PR Quiz" on the
+# PR head commit -- make it a required status check to block merging.
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  issue_comment:
+    types: [created] # comment "/quiz" on a PR to re-grade manually
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+concurrency:
+  group: pr-quiz-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  grade:
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event.issue.pull_request && startsWith(github.event.comment.body, '/quiz'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            // ---- Config ----------------------------------------------------
+            const ALLOW_AUTHOR = true;   // false: ticks made by the PR author are reset
+            const REQUIRE_QUIZ = true;   // true: PRs without a quiz fail the check
+            const REVEAL_WRONG = false;  // true: say which question numbers are wrong
+            const STATUS_CONTEXT = 'PR Quiz';
+            // -----------------------------------------------------------------
+
+            const START = '<!-- pr-quiz:start -->';
+            const END = '<!-- pr-quiz:end -->';
+            const KEY_RE = /<!-- pr-quiz-key:([A-Za-z0-9+/=]+) -->/;
+            const HEADER_RE = /^#{1,6}\s*Q(\d+)\./;
+            const OPTION_RE = /^(\s*[-*] )\[([ xX])\] \*\*([A-Z])\.\*\*/;
+
+            const number = context.payload.pull_request?.number ?? context.payload.issue.number;
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: number });
+            let body = pr.body ?? '';
+
+            const setStatus = async (state, description) => {
+              await github.rest.repos.createCommitStatus({
+                ...context.repo, sha: pr.head.sha, state,
+                context: STATUS_CONTEXT, description: description.slice(0, 140),
+              });
+              if (state === 'success') core.info(description); else core.setFailed(description);
+            };
+
+            const quizBlock = (text) => {
+              const s = text.indexOf(START), e = text.indexOf(END);
+              return s >= 0 && e > s ? { s, e, block: text.slice(s, e) } : null;
+            };
+            const tickedAnswers = (block) => {
+              const ticked = {}; let q = null;
+              for (const line of block.split('\n')) {
+                const h = line.match(HEADER_RE);
+                if (h) { q = h[1]; ticked[q] = []; continue; }
+                const o = line.match(OPTION_RE);
+                if (o && q && o[2] !== ' ') ticked[q].push(o[3]);
+              }
+              return ticked;
+            };
+            const untick = (block) => block.replace(new RegExp(OPTION_RE.source, 'gm'),
+              (m, pre, _x, letter) => `${pre}[ ] **${letter}.**`);
+            const saveBlock = async (q, newBlock) => {
+              body = body.slice(0, q.s) + newBlock + body.slice(q.e);
+              await github.rest.pulls.update({ ...context.repo, pull_number: number, body });
+            };
+
+            let quiz = quizBlock(body);
+            const keyMatch = body.match(KEY_RE);
+            if (!quiz) {
+              await setStatus(REQUIRE_QUIZ ? 'failure' : 'success', 'No quiz found on this PR');
+              return;
+            }
+            if (!keyMatch) {
+              await setStatus('error', 'Quiz answer key is missing or corrupted');
+              return;
+            }
+
+            // New commits may change the right answers: reset every tick.
+            if (context.eventName === 'pull_request' && context.payload.action === 'synchronize') {
+              const reset = untick(quiz.block);
+              if (reset !== quiz.block) { await saveBlock(quiz, reset); quiz = quizBlock(body); }
+            }
+
+            // Optionally reject ticks made by the PR author.
+            if (!ALLOW_AUTHOR && context.payload.action === 'edited'
+                && context.payload.sender.login === pr.user.login) {
+              const before = quizBlock(context.payload.changes?.body?.from ?? '');
+              const changed = JSON.stringify(tickedAnswers(before?.block ?? ''))
+                !== JSON.stringify(tickedAnswers(quiz.block));
+              if (changed) {
+                await saveBlock(quiz, untick(quiz.block));
+                await setStatus('failure', 'Quiz must be answered by a reviewer, not the PR author');
+                return;
+              }
+            }
+
+            let key;
+            try {
+              key = JSON.parse(Buffer.from(keyMatch[1], 'base64').toString('utf8')).answers;
+            } catch (err) {
+              await setStatus('error', 'Quiz answer key is corrupted');
+              return;
+            }
+
+            const ticked = tickedAnswers(quiz.block);
+            const ids = Object.keys(key);
+            const total = ids.length;
+            const answered = ids.filter((id) => ticked[id]?.length).length;
+            if (answered < total) {
+              await setStatus('failure', `${answered}/${total} questions answered`);
+              return;
+            }
+
+            const norm = (xs) => [...xs].sort().join(',');
+            const wrong = ids.filter((id) => norm(ticked[id]) !== norm(key[id]));
+            if (wrong.length) {
+              const which = REVEAL_WRONG ? ` (Q${wrong.join(', Q')})` : '';
+              await setStatus('failure', `${wrong.length} of ${total} answers wrong${which}`);
+              return;
+            }
+            await setStatus('success', `Passed: ${total}/${total} correct`);
