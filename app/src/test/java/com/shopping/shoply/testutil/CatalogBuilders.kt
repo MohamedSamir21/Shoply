@@ -26,7 +26,9 @@ fun aProduct(
     reviewCount: Int = 10,
     colors: List<ColorOption> = listOf(ColorOption("Sand", "#D8CAB6"), ColorOption("Charcoal", "#3A3735")),
     sizes: List<String> = listOf("S", "M", "L"),
-) = Product(id, name, storeId, icon, priceCents, oldPriceCents, rating, reviewCount, colors, sizes)
+    description: String = "About $id",
+    categoryId: String = "electronics",
+) = Product(id, name, storeId, icon, priceCents, oldPriceCents, rating, reviewCount, colors, sizes, description, categoryId)
 
 fun aStore(
     id: String = "store1",

@@ -182,7 +182,6 @@
     <string name="screen_products">Products</string>
     <string name="screen_all_stores">All Stores</string>
     <string name="screen_store">Store</string>
-    <string name="screen_product">Product</string>
     <string name="screen_support_chat">Support Chat</string>
     <string name="screen_order_details">Order Details</string>
 
@@ -265,4 +264,27 @@
     <string name="notifications_empty_action">Back to Home</string>
     <string name="snackbar_notifications_mark_all_failed">Couldn\'t mark notifications as read</string>
     <string name="cd_notification_unread">Unread</string>
+
+    <!-- Product details -->
+    <string name="product_in_stock">In stock</string>
+    <plurals name="product_reviews">
+        <item quantity="one">%1$d review</item>
+        <item quantity="other">%1$d reviews</item>
+    </plurals>
+    <string name="product_save_percent">Save %1$d%%</string>
+    <string name="product_installments">or 3 payments of %1$s with installments</string>
+    <string name="product_color">Color</string>
+    <string name="product_size">Size</string>
+    <string name="product_description">Description</string>
+    <string name="product_read_more">Read more</string>
+    <string name="product_show_less">Show less</string>
+    <string name="product_delivery_title">Delivery in %1$d–%2$d min</string>
+    <string name="product_delivery_note">Free on orders over $35 · Easy 14-day returns</string>
+    <string name="product_similar">You May Also Like</string>
+    <string name="product_add_to_cart">Add to Cart</string>
+    <string name="product_image_counter">%1$d/%2$d</string>
+    <string name="product_share_text">%1$s for %2$s on Shoply</string>
+    <string name="cd_share">Share</string>
+    <string name="cd_quantity_decrease">Decrease quantity</string>
+    <string name="cd_quantity_increase">Increase quantity</string>
 </resources>

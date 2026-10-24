@@ -7,15 +7,22 @@ import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import kotlinx.coroutines.flow.MutableStateFlow
 
-/** Set [totalQuantity] directly to drive the cart badge. */
+/**
+ * Set [totalQuantity] directly to drive the cart badge. [gate] keeps an add pending (checks the
+ * ignored second tap).
+ */
 class FakeCartRepository(
     var result: Result<Unit, DataError> = Result.Success(Unit),
 ) : CartRepository {
     val totalQuantity = MutableStateFlow(0)
+    val gate = Gate()
     val addCalls = mutableListOf<Triple<Product, Variant, Int>>()
 
     override fun observeTotalQuantity() = totalQuantity
 
-    override suspend fun add(product: Product, variant: Variant, quantity: Int) =
-        result.also { addCalls += Triple(product, variant, quantity) }
+    override suspend fun add(product: Product, variant: Variant, quantity: Int): Result<Unit, DataError> {
+        addCalls += Triple(product, variant, quantity)
+        gate.pass()
+        return result
+    }
 }
