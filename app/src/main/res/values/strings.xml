@@ -287,4 +287,33 @@
     <string name="cd_share">Share</string>
     <string name="cd_quantity_decrease">Decrease quantity</string>
     <string name="cd_quantity_increase">Increase quantity</string>
+
+    <!-- Cart -->
+    <string name="screen_cart">My Cart</string>
+    <string name="screen_checkout">Checkout</string>
+    <plurals name="cart_item_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="cart_swipe_hint">Swipe left on an item to remove it</string>
+    <string name="cart_remove">Remove</string>
+    <string name="cart_promo_title">Promo Code</string>
+    <string name="cart_promo_placeholder">Enter code, e.g. SHOPLY10</string>
+    <string name="cart_promo_apply">Apply</string>
+    <string name="cart_promo_invalid">This code isn’t valid. Check it and try again.</string>
+    <string name="cart_promo_applied">applied · %1$d%% off</string>
+    <string name="cart_subtotal">Subtotal</string>
+    <string name="cart_delivery">Delivery</string>
+    <string name="cart_delivery_free">Free</string>
+    <string name="cart_promo_row">Promo (%1$s)</string>
+    <string name="cart_total">Total</string>
+    <string name="cart_checkout">Checkout</string>
+    <string name="cart_empty_title">Your Cart Is Empty</string>
+    <string name="cart_empty_message">Browse stores near you and add something you like.</string>
+    <string name="cart_empty_action">Start Shopping</string>
+    <string name="snackbar_cart_removed">Removed from cart</string>
+    <string name="snackbar_cart_update_failed">Couldn\'t update your cart</string>
+    <string name="snackbar_promo_failed">Couldn\'t check the code. Try again.</string>
+    <string name="cd_cart_remove_item">Remove item</string>
+    <string name="cd_promo_code">Promo code</string>
 </resources>

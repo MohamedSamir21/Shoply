@@ -1,14 +1,19 @@
 package com.shopping.shoply.cart.data
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.shopping.shoply.cart.domain.CartRepository
+import com.shopping.shoply.cart.domain.model.CartItem
+import com.shopping.shoply.catalog.data.mapper.catalogIconOf
 import com.shopping.shoply.catalog.domain.model.Product
 import com.shopping.shoply.catalog.domain.model.Variant
 import com.shopping.shoply.common.data.firestore.int
 import com.shopping.shoply.common.data.firestore.liveSnapshots
+import com.shopping.shoply.common.data.firestore.long
+import com.shopping.shoply.common.data.firestore.string
 import com.shopping.shoply.common.data.firestore.writeForCurrentUser
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
@@ -47,6 +52,30 @@ class FirestoreCartRepository @Inject constructor(
                 SetOptions.merge(),
             )
         }
+
+    override fun observeItems(): Flow<List<CartItem>> {
+        val uid = auth.currentUser?.uid ?: return flowOf(emptyList())
+        return cart(uid).orderBy("addedAt").liveSnapshots()
+            .map { snapshot -> snapshot.documents.map { it.toCartItem() } }
+    }
+
+    override suspend fun setQuantity(itemId: String, quantity: Int): Result<Unit, DataError> =
+        auth.writeForCurrentUser { uid -> cart(uid).document(itemId).update("quantity", quantity.toLong()) }
+
+    override suspend fun remove(itemId: String): Result<Unit, DataError> =
+        auth.writeForCurrentUser { uid -> cart(uid).document(itemId).delete() }
+
+    private fun DocumentSnapshot.toCartItem() = CartItem(
+        id = id,
+        productId = string("productId"),
+        name = string("name"),
+        icon = catalogIconOf(getString("icon")),
+        storeId = string("storeId"),
+        priceCents = long("priceCents"),
+        color = getString("color"),
+        size = getString("size"),
+        quantity = int("quantity"),
+    )
 
     private fun cart(uid: String) = firestore.collection("users").document(uid).collection("cart")
 
