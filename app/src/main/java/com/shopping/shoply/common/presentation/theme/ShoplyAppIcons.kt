@@ -190,4 +190,19 @@ object ShoplyAppIcons {
     val Minus: ImageVector by lazy {
         lineIcon("Minus", "M5.5 12h13")
     }
+
+    // —— Cart ——
+    val Trash: ImageVector by lazy {
+        lineIcon(
+            "Trash",
+            "M4.5 7h15M9.5 7V5.2c0 -0.4 0.3 -0.7 0.7 -0.7h3.6c0.4 0 0.7 0.3 0.7 0.7V7",
+            "M6.5 7l0.8 12a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5 -1.4l0.8 -12M10 11v5.5M14 11v5.5",
+        )
+    }
+    val Info: ImageVector by lazy {
+        lineIcon("Info", circle(12f, 12f, 8.5f), "M12 11v5.5M12 7.8v0.01")
+    }
+    val CheckCircle: ImageVector by lazy {
+        lineIcon("CheckCircle", circle(12f, 12f, 8.5f), "M8.3 12.3l2.5 2.5 5 -5.3")
+    }
 }

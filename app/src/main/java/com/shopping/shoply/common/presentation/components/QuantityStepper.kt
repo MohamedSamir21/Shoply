@@ -30,6 +30,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shopping.shoply.R
@@ -39,8 +41,9 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import com.shopping.shoply.common.presentation.theme.shoplyExtra
 
 /**
- * The design's quantity stepper: − value +, 44 dp tall. − is disabled at [min], + at [max];
- * + is orange while enabled.
+ * The design's quantity stepper: − value +, 44 dp tall ([compact]: 34 dp, for list rows). − is
+ * disabled at [min], + at [max]; + is orange while enabled. With [onRemove], − becomes a red trash
+ * button at [min] instead of disabling.
  */
 @Composable
 fun QuantityStepper(
@@ -50,30 +53,45 @@ fun QuantityStepper(
     modifier: Modifier = Modifier,
     min: Int = 1,
     max: Int = 20,
+    compact: Boolean = false,
+    onRemove: (() -> Unit)? = null,
 ) {
     val shape = RoundedCornerShape(12.dp)
+    val size = if (compact) StepperSize.Compact else StepperSize.Regular
     Row(
         modifier = modifier
-            .height(44.dp)
+            .height(size.height)
             .background(MaterialTheme.colorScheme.surfaceVariant, shape)
             .border(1.4.dp, MaterialTheme.colorScheme.outlineVariant, shape),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        StepButton(
-            icon = ShoplyAppIcons.Minus,
-            label = stringResource(R.string.cd_quantity_decrease),
-            enabled = value > min,
-            enabledTint = MaterialTheme.colorScheme.onSurface,
-            onClick = onDecrease,
-        )
+        if (onRemove != null && value <= min) {
+            StepButton(
+                icon = ShoplyAppIcons.Trash,
+                label = stringResource(R.string.cd_cart_remove_item),
+                enabled = true,
+                enabledTint = MaterialTheme.shoplyExtra.red,
+                size = size,
+                onClick = onRemove,
+            )
+        } else {
+            StepButton(
+                icon = ShoplyAppIcons.Minus,
+                label = stringResource(R.string.cd_quantity_decrease),
+                enabled = value > min,
+                enabledTint = MaterialTheme.colorScheme.onSurface,
+                size = size,
+                onClick = onDecrease,
+            )
+        }
         Text(
             text = value.toString(),
-            fontSize = 15.5.sp,
+            fontSize = size.fontSize,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier
-                .widthIn(min = 26.dp)
+                .widthIn(min = size.valueWidth)
                 .semantics { liveRegion = LiveRegionMode.Polite },
         )
         StepButton(
@@ -81,6 +99,7 @@ fun QuantityStepper(
             label = stringResource(R.string.cd_quantity_increase),
             enabled = value < max,
             enabledTint = MaterialTheme.colorScheme.primary,
+            size = size,
             onClick = onIncrease,
         )
     }
@@ -92,11 +111,12 @@ private fun StepButton(
     label: String,
     enabled: Boolean,
     enabledTint: Color,
+    size: StepperSize,
     onClick: () -> Unit,
 ) {
     Box(
         modifier = Modifier
-            .width(42.dp)
+            .width(size.buttonWidth)
             .fillMaxHeight()
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .semantics { contentDescription = label },
@@ -106,9 +126,20 @@ private fun StepButton(
             imageVector = icon,
             contentDescription = null,
             tint = if (enabled) enabledTint else MaterialTheme.shoplyExtra.inkFaint,
-            modifier = Modifier.size(19.dp),
+            modifier = Modifier.size(size.iconSize),
         )
     }
+}
+
+private enum class StepperSize(
+    val height: Dp,
+    val buttonWidth: Dp,
+    val iconSize: Dp,
+    val valueWidth: Dp,
+    val fontSize: TextUnit,
+) {
+    Regular(height = 44.dp, buttonWidth = 42.dp, iconSize = 19.dp, valueWidth = 26.dp, fontSize = 15.5.sp),
+    Compact(height = 34.dp, buttonWidth = 32.dp, iconSize = 17.dp, valueWidth = 20.dp, fontSize = 14.sp),
 }
 
 /** At the minimum (− disabled), in range, and at the maximum (+ disabled). */
@@ -121,6 +152,27 @@ fun QuantityStepperPreview() {
                 QuantityStepper(value = 1, onDecrease = {}, onIncrease = {})
                 QuantityStepper(value = 3, onDecrease = {}, onIncrease = {}, modifier = Modifier.padding(start = 12.dp))
                 QuantityStepper(value = 20, onDecrease = {}, onIncrease = {}, modifier = Modifier.padding(start = 12.dp))
+            }
+        }
+    }
+}
+
+/** Compact, as in a cart row: trash at 1 (with onRemove), and in range. */
+@PreviewLightDark
+@Composable
+fun QuantityStepperCompactPreview() {
+    ShoplyTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Row(modifier = Modifier.padding(ShoplyDimens.gutter)) {
+                QuantityStepper(value = 1, onDecrease = {}, onIncrease = {}, compact = true, onRemove = {})
+                QuantityStepper(
+                    value = 2,
+                    onDecrease = {},
+                    onIncrease = {},
+                    compact = true,
+                    onRemove = {},
+                    modifier = Modifier.padding(start = 12.dp),
+                )
             }
         }
     }

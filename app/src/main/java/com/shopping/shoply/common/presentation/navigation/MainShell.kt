@@ -55,6 +55,8 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.shopping.shoply.R
+import com.shopping.shoply.cart.presentation.CartDestination
+import com.shopping.shoply.cart.presentation.CartScreen
 import com.shopping.shoply.categories.presentation.CategoriesDestination
 import com.shopping.shoply.categories.presentation.CategoriesScreen
 import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
@@ -96,11 +98,13 @@ private enum class Placeholder(@StringRes val title: Int) {
     SETTINGS(R.string.screen_settings),
     FAVORITE_STORES(R.string.screen_favorite_stores),
     PAYMENT_METHODS(R.string.screen_payment_methods),
+    CHECKOUT(R.string.screen_checkout),
 }
 
 private const val HOME_ROUTE = "home_feed"
 private const val CATEGORIES_ROUTE = "categories_grid"
 private const val PROFILE_ROUTE = "profile_home"
+private const val CART_ROUTE = "cart_items"
 private const val PLACEHOLDER_ARG = "placeholder"
 
 // Each tab has its own placeholder and Help Center routes, so the screen keeps its tab selected
@@ -116,9 +120,9 @@ private fun productRoute(tab: ShellTab) = "${tab.route}/product/{$PRODUCT_ID_ARG
  * Profile; 80 dp tall, pill on the active tab) and its own inner `NavHost`.
  *
  * - Cart tab shows [MainShellViewModel.cartBadge]; null hides the badge.
- * - Home, Categories, Profile, and the Help Center, Wishlist, Notifications and Product Details (inside Home and
- *   Profile) are built. The other
- *   tabs, and every destination not built yet, open [ComingSoonScreen].
+ * - Home, Categories, Cart, Profile, and the Help Center, Wishlist, Notifications and Product Details
+ *   (inside the tabs that open them) are built. Orders, and every destination not built yet, open
+ *   [ComingSoonScreen].
  *   [HomeDestination.AllCategories], [HomeDestination.Cart] and [ProfileDestination.Orders] switch
  *   to their tab instead.
  * - [onSignedOut] runs after Log Out is confirmed on Profile.
@@ -178,6 +182,17 @@ fun MainShell(
                 }
                 comingSoon(ShellTab.CATEGORIES, navController)
             }
+            navigation(startDestination = CART_ROUTE, route = ShellTab.CART.route) {
+                composable(CART_ROUTE) {
+                    CartScreen(
+                        snackbarHostState = snackbarHostState,
+                        onNavigate = { navController.openFromCart(it) },
+                    )
+                }
+                wishlist(ShellTab.CART, navController, snackbarHostState)
+                productDetails(ShellTab.CART, navController, snackbarHostState)
+                comingSoon(ShellTab.CART, navController)
+            }
             navigation(startDestination = PROFILE_ROUTE, route = ShellTab.PROFILE.route) {
                 composable(PROFILE_ROUTE) {
                     ProfileScreen(
@@ -191,8 +206,8 @@ fun MainShell(
                 productDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
-            listOf(ShellTab.CART, ShellTab.ORDERS).forEach { tab ->
-                composable(tab.route) { ComingSoonScreen(title = stringResource(tab.label), onBack = null) }
+            composable(ShellTab.ORDERS.route) {
+                ComingSoonScreen(title = stringResource(ShellTab.ORDERS.label), onBack = null)
             }
         }
     }
@@ -243,7 +258,7 @@ private fun NavGraphBuilder.wishlist(
             onNavigate = { destination ->
                 when (destination) {
                     is WishlistDestination.Product -> navController.openProduct(tab, destination.id)
-                    WishlistDestination.Cart -> navController.switchTab(ShellTab.CART)
+                    WishlistDestination.Cart -> navController.goToCart(tab)
                     WishlistDestination.ExploreProducts -> navController.goHome(tab)
                 }
             },
@@ -290,7 +305,7 @@ private fun NavGraphBuilder.productDetails(
                 when (destination) {
                     is ProductDetailsDestination.Store -> navController.openPlaceholder(tab, Placeholder.STORE)
                     is ProductDetailsDestination.Product -> navController.openProduct(tab, destination.id)
-                    ProductDetailsDestination.Cart -> navController.switchTab(ShellTab.CART)
+                    ProductDetailsDestination.Cart -> navController.goToCart(tab)
                 }
             },
         )
@@ -306,8 +321,22 @@ private fun NavHostController.goHome(from: ShellTab) {
     if (from == ShellTab.HOME) popBackStack(HOME_ROUTE, inclusive = false) else switchTab(ShellTab.HOME)
 }
 
+// Inside Cart, go back to the cart list, for the same reason as goHome.
+private fun NavHostController.goToCart(from: ShellTab) {
+    if (from == ShellTab.CART) popBackStack(CART_ROUTE, inclusive = false) else switchTab(ShellTab.CART)
+}
+
 private fun NavHostController.openPlaceholder(tab: ShellTab, placeholder: Placeholder) {
     navigate("${tab.route}/coming_soon/${placeholder.name}")
+}
+
+private fun NavHostController.openFromCart(destination: CartDestination) {
+    when (destination) {
+        is CartDestination.Product -> openProduct(ShellTab.CART, destination.id)
+        CartDestination.Wishlist -> navigate(wishlistRoute(ShellTab.CART))
+        CartDestination.Checkout -> openPlaceholder(ShellTab.CART, Placeholder.CHECKOUT)
+        CartDestination.StartShopping -> switchTab(ShellTab.HOME)
+    }
 }
 
 private fun NavHostController.openFromCategories(destination: CategoriesDestination) {
