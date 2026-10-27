@@ -135,7 +135,7 @@ fun CartContent(
                     onNavigate = onNavigate,
                     modifier = Modifier.weight(1f),
                 )
-                CheckoutBar(totalCents = state.totals.totalCents, onCheckout = { onNavigate(CartDestination.Checkout) })
+                CheckoutBar(totalCents = state.totals.totalCents, onCheckout = { onNavigate(CartDestination.Checkout(state.promo?.code)) })
             }
         }
     }

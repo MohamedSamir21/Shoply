@@ -16,6 +16,9 @@ interface ProfileRepository {
     /** The address marked as primary, or null when the user has none (UI shows "Add delivery address"). */
     fun observePrimaryAddress(): Flow<DeliveryAddress?>
 
+    /** All saved addresses, primary first. */
+    fun observeAddresses(): Flow<List<DeliveryAddress>>
+
     /** Name, email and phone for the Profile tab. */
     fun observeAccount(): Flow<Account>
 }

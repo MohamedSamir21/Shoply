@@ -6,7 +6,8 @@ sealed interface CartDestination {
 
     data object Wishlist : CartDestination
 
-    data object Checkout : CartDestination
+    /** [promoCode] is the applied code, checked again by Checkout. */
+    data class Checkout(val promoCode: String?) : CartDestination
 
     /** "Start Shopping" on the empty cart. */
     data object StartShopping : CartDestination

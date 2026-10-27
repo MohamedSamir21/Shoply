@@ -1,5 +1,6 @@
 package com.shopping.shoply.common.presentation.navigation
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,6 +58,11 @@ import androidx.navigation.navArgument
 import com.shopping.shoply.R
 import com.shopping.shoply.cart.presentation.CartDestination
 import com.shopping.shoply.cart.presentation.CartScreen
+import com.shopping.shoply.checkout.presentation.CheckoutDestination
+import com.shopping.shoply.checkout.presentation.CheckoutScreen
+import com.shopping.shoply.checkout.presentation.ORDER_ID_ARG
+import com.shopping.shoply.checkout.presentation.OrderPlacedScreen
+import com.shopping.shoply.checkout.presentation.PROMO_CODE_ARG
 import com.shopping.shoply.categories.presentation.CategoriesDestination
 import com.shopping.shoply.categories.presentation.CategoriesScreen
 import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
@@ -98,13 +104,17 @@ private enum class Placeholder(@StringRes val title: Int) {
     SETTINGS(R.string.screen_settings),
     FAVORITE_STORES(R.string.screen_favorite_stores),
     PAYMENT_METHODS(R.string.screen_payment_methods),
-    CHECKOUT(R.string.screen_checkout),
 }
 
 private const val HOME_ROUTE = "home_feed"
 private const val CATEGORIES_ROUTE = "categories_grid"
 private const val PROFILE_ROUTE = "profile_home"
 private const val CART_ROUTE = "cart_items"
+private const val CHECKOUT_ROUTE = "tab_cart/checkout?$PROMO_CODE_ARG={$PROMO_CODE_ARG}"
+private const val ORDER_PLACED_ROUTE = "tab_cart/order_placed/{$ORDER_ID_ARG}"
+
+// Checkout and its success screen are full-screen flows: the bottom navigation hides there.
+private val ROUTES_WITHOUT_BOTTOM_BAR = setOf(CHECKOUT_ROUTE, ORDER_PLACED_ROUTE)
 private const val PLACEHOLDER_ARG = "placeholder"
 
 // Each tab has its own placeholder and Help Center routes, so the screen keeps its tab selected
@@ -150,11 +160,13 @@ fun MainShell(
             SnackbarHost(snackbarHostState) { data -> Snackbar(data, shape = RoundedCornerShape(12.dp)) }
         },
         bottomBar = {
-            ShoplyBottomBar(
-                currentDestination = backStackEntry?.destination,
-                cartBadge = cartBadge,
-                onTabClick = navController::switchTab,
-            )
+            if (backStackEntry?.destination?.route !in ROUTES_WITHOUT_BOTTOM_BAR) {
+                ShoplyBottomBar(
+                    currentDestination = backStackEntry?.destination,
+                    cartBadge = cartBadge,
+                    onTabClick = navController::switchTab,
+                )
+            }
         },
     ) { innerPadding ->
         NavHost(
@@ -192,6 +204,7 @@ fun MainShell(
                 wishlist(ShellTab.CART, navController, snackbarHostState)
                 productDetails(ShellTab.CART, navController, snackbarHostState)
                 comingSoon(ShellTab.CART, navController)
+                checkout(navController, snackbarHostState)
             }
             navigation(startDestination = PROFILE_ROUTE, route = ShellTab.PROFILE.route) {
                 composable(PROFILE_ROUTE) {
@@ -312,6 +325,48 @@ private fun NavGraphBuilder.productDetails(
     }
 }
 
+/**
+ * Checkout and Order Placed inside the Cart tab. A placed order replaces Checkout, so back from
+ * Order Placed returns to the (now empty) cart. Its buttons first clear it from the Cart tab, so
+ * coming back to Cart later shows the cart, not the old success screen.
+ */
+private fun NavGraphBuilder.checkout(navController: NavHostController, snackbarHostState: SnackbarHostState) {
+    composable(
+        route = CHECKOUT_ROUTE,
+        arguments = listOf(navArgument(PROMO_CODE_ARG) { type = NavType.StringType; nullable = true }),
+    ) {
+        CheckoutScreen(
+            snackbarHostState = snackbarHostState,
+            onNavigate = { destination ->
+                when (destination) {
+                    CheckoutDestination.Back -> navController.popBackStack()
+                    is CheckoutDestination.OrderPlaced -> navController.navigate("tab_cart/order_placed/${destination.orderId}") {
+                        popUpTo(CART_ROUTE)
+                    }
+                    CheckoutDestination.AddAddress -> navController.openPlaceholder(ShellTab.CART, Placeholder.ADDRESSES)
+                    CheckoutDestination.AddCard -> navController.openPlaceholder(ShellTab.CART, Placeholder.PAYMENT_METHODS)
+                }
+            },
+        )
+    }
+    composable(
+        route = ORDER_PLACED_ROUTE,
+        arguments = listOf(navArgument(ORDER_ID_ARG) { type = NavType.StringType }),
+    ) { entry ->
+        OrderPlacedScreen(
+            orderId = entry.arguments?.getString(ORDER_ID_ARG).orEmpty(),
+            onTrackOrder = {
+                navController.popBackStack(CART_ROUTE, inclusive = false)
+                navController.switchTab(ShellTab.ORDERS)
+            },
+            onContinueShopping = {
+                navController.popBackStack(CART_ROUTE, inclusive = false)
+                navController.switchTab(ShellTab.HOME)
+            },
+        )
+    }
+}
+
 private fun NavHostController.openProduct(tab: ShellTab, productId: String) {
     navigate("${tab.route}/product/$productId")
 }
@@ -334,7 +389,9 @@ private fun NavHostController.openFromCart(destination: CartDestination) {
     when (destination) {
         is CartDestination.Product -> openProduct(ShellTab.CART, destination.id)
         CartDestination.Wishlist -> navigate(wishlistRoute(ShellTab.CART))
-        CartDestination.Checkout -> openPlaceholder(ShellTab.CART, Placeholder.CHECKOUT)
+        is CartDestination.Checkout -> navigate(
+            "tab_cart/checkout" + destination.promoCode?.let { "?$PROMO_CODE_ARG=${Uri.encode(it)}" }.orEmpty(),
+        )
         CartDestination.StartShopping -> switchTab(ShellTab.HOME)
     }
 }

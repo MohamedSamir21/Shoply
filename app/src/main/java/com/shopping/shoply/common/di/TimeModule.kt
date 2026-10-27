@@ -1,6 +1,7 @@
 package com.shopping.shoply.common.di
 
 import com.shopping.shoply.common.domain.time.CurrentHourProvider
+import com.shopping.shoply.common.domain.time.NowProvider
 import com.shopping.shoply.common.domain.time.StartOfDayProvider
 import dagger.Module
 import dagger.Provides
@@ -25,4 +26,7 @@ object TimeModule {
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
     }
+
+    @Provides
+    fun provideNowProvider(): NowProvider = NowProvider { System.currentTimeMillis() }
 }
