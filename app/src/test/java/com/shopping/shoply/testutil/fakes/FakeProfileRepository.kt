@@ -9,17 +9,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 
 /**
- * Set [displayName] / [primaryAddress] / [account] directly to simulate live changes.
+ * Set [displayName] / [primaryAddress] / [addresses] / [account] directly to simulate live changes.
  * [silentAccount] makes [observeAccount] never emit, like a listener stuck on a permission error.
  */
 class FakeProfileRepository : ProfileRepository {
     val displayName = MutableStateFlow("")
     val primaryAddress = MutableStateFlow<DeliveryAddress?>(null)
     val account = MutableStateFlow(Account(name = "", email = "", phone = null))
+    val addresses = MutableStateFlow<List<DeliveryAddress>>(emptyList())
     var silentAccount = false
 
     override fun observeDisplayName() = displayName
     override fun observePrimaryAddress() = primaryAddress
+    override fun observeAddresses() = addresses
     override fun observeAccount(): Flow<Account> =
         if (silentAccount) flow { awaitCancellation() } else account
 }

@@ -205,4 +205,18 @@ object ShoplyAppIcons {
     val CheckCircle: ImageVector by lazy {
         lineIcon("CheckCircle", circle(12f, 12f, 8.5f), "M8.3 12.3l2.5 2.5 5 -5.3")
     }
+
+    // —— Checkout ——
+    val Check: ImageVector by lazy {
+        lineIcon("Check", "M5.5 12.5l4.2 4.2L18.5 7.8")
+    }
+    val Bolt: ImageVector by lazy {
+        lineIcon("Bolt", "M13 3.5L5.5 13.5H12l-1 7 7.5 -10H12z")
+    }
+    val Cash: ImageVector by lazy {
+        lineIcon("Cash", rect(3f, 6.5f, 18f, 11f, 2.4f), circle(12f, 12f, 2.5f), "M6.5 9.5v0.01M17.5 14.5v0.01")
+    }
+    val Clock: ImageVector by lazy {
+        lineIcon("Clock", circle(12f, 12f, 8.5f), "M12 7.5V12l3 2")
+    }
 }

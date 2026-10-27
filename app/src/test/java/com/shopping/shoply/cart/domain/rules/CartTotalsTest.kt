@@ -86,6 +86,16 @@ class CartTotalsTest {
     }
 
     @Test
+    @DisplayName("the express fee is added to delivery, even when delivery is otherwise free")
+    fun `the express fee is added to delivery, even when delivery is otherwise free`() {
+        val below = listOf(aCartItem(storeId = "a", priceCents = 2000))
+        val over = listOf(aCartItem(storeId = "a", priceCents = 4000))
+
+        assertThat(cartTotals(below, fees, null, EXPRESS_FEE_CENTS).deliveryCents).isEqualTo(199 + 499)
+        assertThat(cartTotals(over, fees, null, EXPRESS_FEE_CENTS).totalCents).isEqualTo(4000 + 499)
+    }
+
+    @Test
     @DisplayName("total is never below 0")
     fun `total is never below 0`() {
         val items = listOf(aCartItem(priceCents = 2000))

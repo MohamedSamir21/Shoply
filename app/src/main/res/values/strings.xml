@@ -316,4 +316,54 @@
     <string name="snackbar_promo_failed">Couldn\'t check the code. Try again.</string>
     <string name="cd_cart_remove_item">Remove item</string>
     <string name="cd_promo_code">Promo code</string>
+
+    <!-- Checkout -->
+    <string name="checkout_step_address">Address</string>
+    <string name="checkout_step_delivery">Delivery</string>
+    <string name="checkout_step_payment">Payment</string>
+    <string name="checkout_step_review">Review</string>
+    <string name="checkout_continue">Continue</string>
+    <string name="checkout_place_order">Place Order</string>
+    <string name="checkout_address_title">Delivery Address</string>
+    <string name="checkout_address_default">Default</string>
+    <string name="checkout_add_address">Add New Address</string>
+    <string name="checkout_contact_title">Contact</string>
+    <string name="checkout_no_address">Add an address to continue.</string>
+    <string name="checkout_speed_title">Delivery Speed</string>
+    <string name="checkout_standard">Standard</string>
+    <string name="checkout_standard_sub">Choose a 2-hour slot</string>
+    <string name="checkout_express">Express</string>
+    <string name="checkout_express_sub">Within 45 minutes</string>
+    <string name="checkout_express_fee">+%1$s</string>
+    <string name="checkout_day_title">Day</string>
+    <string name="checkout_today">Today</string>
+    <string name="checkout_time_title">Time</string>
+    <string name="checkout_payment_title">Payment Method</string>
+    <string name="checkout_card_title">%1$s •••• %2$s</string>
+    <string name="checkout_card_expires">Expires %1$s</string>
+    <string name="checkout_installments">Pay in Installments</string>
+    <string name="checkout_installments_sub" formatted="false">Split into monthly payments, 0% interest</string>
+    <string name="checkout_months">%1$d months</string>
+    <string name="checkout_due_today">Due today</string>
+    <string name="checkout_then_monthly">Then monthly × %1$d</string>
+    <string name="checkout_interest">Interest &amp; fees</string>
+    <string name="checkout_charged_to">Charged to %1$s every month.</string>
+    <string name="checkout_cod">Cash on Delivery</string>
+    <string name="checkout_cod_sub">Pay the courier when your order arrives</string>
+    <string name="checkout_add_card">Add New Card</string>
+    <string name="checkout_deliver_to">Deliver to</string>
+    <string name="checkout_review_delivery">Delivery</string>
+    <string name="checkout_review_payment">Payment</string>
+    <string name="checkout_change">Change</string>
+    <string name="checkout_items_title">Items (%1$d)</string>
+    <string name="checkout_express_label">Express · within 45 min</string>
+    <string name="checkout_installments_label">Pay in %1$d · %2$s</string>
+    <string name="checkout_cod_label">Cash on delivery</string>
+    <string name="checkout_terms">By placing your order you agree to Shoply’s Terms of Sale.</string>
+    <string name="checkout_empty_message">Add something to your cart to check out.</string>
+    <string name="snackbar_order_failed">Couldn\'t place your order. Try again.</string>
+    <string name="order_placed_title">Order Placed!</string>
+    <string name="order_placed_message">Order #%1$s is confirmed. We\'ll let you know when it\'s on its way.</string>
+    <string name="order_placed_track">Track Order</string>
+    <string name="order_placed_continue">Continue Shopping</string>
 </resources>

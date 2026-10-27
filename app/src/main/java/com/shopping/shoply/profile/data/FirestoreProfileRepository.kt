@@ -1,6 +1,7 @@
 package com.shopping.shoply.profile.data
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.shopping.shoply.common.data.firestore.liveSnapshots
 import com.shopping.shoply.common.data.firestore.string
@@ -29,9 +30,15 @@ class FirestoreProfileRepository @Inject constructor(
             .whereEqualTo("primary", true)
             .limit(1)
             .liveSnapshots()
-            .map { snapshot ->
-                snapshot.documents.firstOrNull()?.let { DeliveryAddress(it.string("label"), it.string("line1")) }
-            }
+            .map { snapshot -> snapshot.documents.firstOrNull()?.toAddress() }
+    }
+
+    // Sorted here, not in the query, so no composite index is needed.
+    override fun observeAddresses(): Flow<List<DeliveryAddress>> {
+        val uid = auth.currentUser?.uid ?: return flowOf(emptyList())
+        return user(uid).collection("addresses").liveSnapshots().map { snapshot ->
+            snapshot.documents.map { it.toAddress() }.sortedByDescending { it.primary }
+        }
     }
 
     override fun observeAccount(): Flow<Account> {
@@ -44,6 +51,16 @@ class FirestoreProfileRepository @Inject constructor(
             )
         }
     }
+
+    private fun DocumentSnapshot.toAddress() = DeliveryAddress(
+        label = string("label"),
+        line1 = string("line1"),
+        id = id,
+        recipientName = string("recipientName"),
+        line2 = string("line2"),
+        phone = string("phone"),
+        primary = getBoolean("primary") == true,
+    )
 
     private fun user(uid: String) = firestore.collection("users").document(uid)
 }
