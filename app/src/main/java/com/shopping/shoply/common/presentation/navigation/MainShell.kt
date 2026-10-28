@@ -77,6 +77,10 @@ import com.shopping.shoply.notifications.presentation.NotificationsScreen
 import com.shopping.shoply.product.presentation.PRODUCT_ID_ARG
 import com.shopping.shoply.product.presentation.ProductDetailsDestination
 import com.shopping.shoply.product.presentation.ProductDetailsScreen
+import com.shopping.shoply.orders.presentation.ORDER_DETAILS_ID_ARG
+import com.shopping.shoply.orders.presentation.OrderDetailsScreen
+import com.shopping.shoply.orders.presentation.OrdersDestination
+import com.shopping.shoply.orders.presentation.OrdersScreen
 import com.shopping.shoply.profile.presentation.ProfileDestination
 import com.shopping.shoply.profile.presentation.ProfileScreen
 import com.shopping.shoply.wishlist.presentation.WishlistDestination
@@ -94,7 +98,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
     SEARCH(R.string.screen_search),
-    ORDER_DETAILS(R.string.screen_order_details),
     ADDRESSES(R.string.screen_addresses),
     PRODUCTS(R.string.screen_products),
     ALL_STORES(R.string.screen_all_stores),
@@ -110,6 +113,7 @@ private const val HOME_ROUTE = "home_feed"
 private const val CATEGORIES_ROUTE = "categories_grid"
 private const val PROFILE_ROUTE = "profile_home"
 private const val CART_ROUTE = "cart_items"
+private const val ORDERS_ROUTE = "orders_list"
 private const val CHECKOUT_ROUTE = "tab_cart/checkout?$PROMO_CODE_ARG={$PROMO_CODE_ARG}"
 private const val ORDER_PLACED_ROUTE = "tab_cart/order_placed/{$ORDER_ID_ARG}"
 
@@ -124,14 +128,15 @@ private fun helpRoute(tab: ShellTab) = "${tab.route}/help_center"
 private fun wishlistRoute(tab: ShellTab) = "${tab.route}/wishlist"
 private fun notificationsRoute(tab: ShellTab) = "${tab.route}/notifications"
 private fun productRoute(tab: ShellTab) = "${tab.route}/product/{$PRODUCT_ID_ARG}"
+private fun orderRoute(tab: ShellTab) = "${tab.route}/order/{$ORDER_DETAILS_ID_ARG}"
 
 /**
  * The signed-in app: a `Scaffold` with the bottom navigation (Home, Categories, Cart, Orders,
  * Profile; 80 dp tall, pill on the active tab) and its own inner `NavHost`.
  *
  * - Cart tab shows [MainShellViewModel.cartBadge]; null hides the badge.
- * - Home, Categories, Cart, Profile, and the Help Center, Wishlist, Notifications and Product Details
- *   (inside the tabs that open them) are built. Orders, and every destination not built yet, open
+ * - All 5 tabs, and the Help Center, Wishlist, Notifications, Product Details, Order Details and
+ *   Checkout (inside the tabs that open them) are built. Every destination not built yet opens
  *   [ComingSoonScreen].
  *   [HomeDestination.AllCategories], [HomeDestination.Cart] and [ProfileDestination.Orders] switch
  *   to their tab instead.
@@ -185,6 +190,7 @@ fun MainShell(
                 helpCenter(ShellTab.HOME, navController)
                 wishlist(ShellTab.HOME, navController, snackbarHostState)
                 notifications(ShellTab.HOME, navController, snackbarHostState)
+                orderDetails(ShellTab.HOME, navController, snackbarHostState)
                 productDetails(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
             }
@@ -216,11 +222,20 @@ fun MainShell(
                 helpCenter(ShellTab.PROFILE, navController)
                 wishlist(ShellTab.PROFILE, navController, snackbarHostState)
                 notifications(ShellTab.PROFILE, navController, snackbarHostState)
+                orderDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 productDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
-            composable(ShellTab.ORDERS.route) {
-                ComingSoonScreen(title = stringResource(ShellTab.ORDERS.label), onBack = null)
+            navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
+                composable(ORDERS_ROUTE) {
+                    OrdersScreen(
+                        snackbarHostState = snackbarHostState,
+                        onNavigate = { navController.openFromOrders(ShellTab.ORDERS, it) },
+                    )
+                }
+                orderDetails(ShellTab.ORDERS, navController, snackbarHostState)
+                productDetails(ShellTab.ORDERS, navController, snackbarHostState)
+                comingSoon(ShellTab.ORDERS, navController)
             }
         }
     }
@@ -279,7 +294,7 @@ private fun NavGraphBuilder.wishlist(
     }
 }
 
-/** Notifications inside [tab]'s graph; orders and payment methods open "Coming soon". */
+/** Notifications inside [tab]'s graph; an order opens Order Details, payment methods "Coming soon". */
 private fun NavGraphBuilder.notifications(
     tab: ShellTab,
     navController: NavHostController,
@@ -291,7 +306,7 @@ private fun NavGraphBuilder.notifications(
             onBack = { navController.popBackStack() },
             onNavigate = { destination ->
                 when (destination) {
-                    is NotificationDestination.Order -> navController.openPlaceholder(tab, Placeholder.ORDER_DETAILS)
+                    is NotificationDestination.Order -> navController.openOrder(tab, destination.id)
                     is NotificationDestination.Product -> navController.openProduct(tab, destination.id)
                     NotificationDestination.PaymentMethods -> navController.openPlaceholder(tab, Placeholder.PAYMENT_METHODS)
                     NotificationDestination.Home -> navController.goHome(tab)
@@ -356,14 +371,47 @@ private fun NavGraphBuilder.checkout(navController: NavHostController, snackbarH
         OrderPlacedScreen(
             orderId = entry.arguments?.getString(ORDER_ID_ARG).orEmpty(),
             onTrackOrder = {
+                val orderId = entry.arguments?.getString(ORDER_ID_ARG).orEmpty()
                 navController.popBackStack(CART_ROUTE, inclusive = false)
                 navController.switchTab(ShellTab.ORDERS)
+                navController.openOrder(ShellTab.ORDERS, orderId)
             },
             onContinueShopping = {
                 navController.popBackStack(CART_ROUTE, inclusive = false)
                 navController.switchTab(ShellTab.HOME)
             },
         )
+    }
+}
+
+/** Order Details inside [tab]'s graph; its items open Product Details in the same tab. */
+private fun NavGraphBuilder.orderDetails(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(
+        route = orderRoute(tab),
+        arguments = listOf(navArgument(ORDER_DETAILS_ID_ARG) { type = NavType.StringType }),
+    ) {
+        OrderDetailsScreen(
+            snackbarHostState = snackbarHostState,
+            onNavigate = { navController.openFromOrders(tab, it) },
+        )
+    }
+}
+
+private fun NavHostController.openOrder(tab: ShellTab, orderId: String) {
+    navigate("${tab.route}/order/$orderId")
+}
+
+private fun NavHostController.openFromOrders(tab: ShellTab, destination: OrdersDestination) {
+    when (destination) {
+        is OrdersDestination.OrderDetails -> openOrder(tab, destination.id)
+        is OrdersDestination.Product -> openProduct(tab, destination.id)
+        OrdersDestination.Cart -> goToCart(tab)
+        OrdersDestination.StartShopping -> goHome(tab)
+        OrdersDestination.Back -> popBackStack()
     }
 }
 

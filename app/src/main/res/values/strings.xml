@@ -366,4 +366,42 @@
     <string name="order_placed_message">Order #%1$s is confirmed. We\'ll let you know when it\'s on its way.</string>
     <string name="order_placed_track">Track Order</string>
     <string name="order_placed_continue">Continue Shopping</string>
+
+    <!-- Orders -->
+    <string name="orders_title">My Orders</string>
+    <string name="orders_tab_active">Active</string>
+    <string name="orders_tab_past">Past</string>
+    <string name="orders_number">Order #%1$s</string>
+    <string name="orders_arriving_by">Arriving by %1$s</string>
+    <string name="orders_delivery_on">Delivery %1$s</string>
+    <plurals name="orders_item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <string name="orders_track">Track Order</string>
+    <string name="orders_reorder">Reorder</string>
+    <string name="orders_details">Details</string>
+    <string name="orders_empty_active_title">No Active Orders</string>
+    <string name="orders_empty_active_message">When you place an order, you can follow it here from store to door.</string>
+    <string name="orders_empty_past_title">No Past Orders</string>
+    <string name="orders_empty_past_message">Your delivered and cancelled orders will appear here.</string>
+    <string name="orders_status_placed">Placed</string>
+    <string name="orders_status_confirmed">Confirmed</string>
+    <string name="orders_status_packed">Packed</string>
+    <string name="orders_status_on_the_way">On the way</string>
+    <string name="orders_status_delivered">Delivered</string>
+    <string name="orders_status_cancelled">Cancelled</string>
+    <string name="orders_step_placed">Order placed</string>
+    <string name="orders_placed_on">Placed %1$s</string>
+    <string name="orders_headline_cancelled">Order cancelled</string>
+    <string name="orders_cancelled_message">This order was cancelled. Any payment was returned to %1$s.</string>
+    <string name="orders_items_title">Items (%1$d)</string>
+    <string name="orders_delivery_payment_title">Delivery &amp; Payment</string>
+    <string name="orders_summary_title">Summary</string>
+    <string name="orders_payment">Payment</string>
+    <string name="orders_not_found_title">Order Not Found</string>
+    <string name="orders_not_found_message">This order isn\'t in your account anymore.</string>
+    <string name="orders_not_found_action">Back to Orders</string>
+    <string name="snackbar_reordered">Items added to your cart</string>
+    <string name="snackbar_reorder_failed">Couldn\'t add these items. Try again.</string>
 </resources>
