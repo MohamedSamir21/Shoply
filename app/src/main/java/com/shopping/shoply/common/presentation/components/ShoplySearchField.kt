@@ -50,7 +50,8 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
  * The design's editable search bar: 52 dp, search icon, [placeholder] while empty, ✕ to clear.
  *
  * - Focused: surface fill, 2 dp orange border, orange icon. Otherwise a tonal fill and a 1.4 dp line.
- * - The keyboard's search key closes the keyboard; results follow [value] as you type.
+ * - The keyboard's search key closes the keyboard and calls [onSearch]; results can also follow
+ *   [value] as you type.
  */
 @Composable
 fun ShoplySearchField(
@@ -58,6 +59,7 @@ fun ShoplySearchField(
     onValueChange: (String) -> Unit,
     placeholder: String,
     modifier: Modifier = Modifier,
+    onSearch: () -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -75,7 +77,10 @@ fun ShoplySearchField(
         ),
         cursorBrush = SolidColor(scheme.primary),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
+        keyboardActions = KeyboardActions(onSearch = {
+            onSearch()
+            focusManager.clearFocus()
+        }),
         interactionSource = interactionSource,
         modifier = modifier.fillMaxWidth(),
         decorationBox = { innerTextField ->

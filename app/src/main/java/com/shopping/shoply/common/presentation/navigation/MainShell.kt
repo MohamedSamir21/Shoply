@@ -81,6 +81,9 @@ import com.shopping.shoply.orders.presentation.ORDER_DETAILS_ID_ARG
 import com.shopping.shoply.orders.presentation.OrderDetailsScreen
 import com.shopping.shoply.orders.presentation.OrdersDestination
 import com.shopping.shoply.orders.presentation.OrdersScreen
+import com.shopping.shoply.search.presentation.SEARCH_OPEN_FILTERS_ARG
+import com.shopping.shoply.search.presentation.SearchDestination
+import com.shopping.shoply.search.presentation.SearchScreen
 import com.shopping.shoply.store.presentation.STORE_ID_ARG
 import com.shopping.shoply.store.presentation.StoreDestination
 import com.shopping.shoply.store.presentation.StoreScreen
@@ -100,7 +103,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
-    SEARCH(R.string.screen_search),
     ADDRESSES(R.string.screen_addresses),
     PRODUCTS(R.string.screen_products),
     ALL_STORES(R.string.screen_all_stores),
@@ -120,7 +122,7 @@ private const val CHECKOUT_ROUTE = "tab_cart/checkout?$PROMO_CODE_ARG={$PROMO_CO
 private const val ORDER_PLACED_ROUTE = "tab_cart/order_placed/{$ORDER_ID_ARG}"
 
 // Checkout and its success screen are full-screen flows: the bottom navigation hides there.
-private val ROUTES_WITHOUT_BOTTOM_BAR = setOf(CHECKOUT_ROUTE, ORDER_PLACED_ROUTE)
+private val ROUTES_WITHOUT_BOTTOM_BAR = setOf(CHECKOUT_ROUTE, ORDER_PLACED_ROUTE) + ShellTab.entries.map(::searchRoute)
 private const val PLACEHOLDER_ARG = "placeholder"
 
 // Each tab has its own placeholder and Help Center routes, so the screen keeps its tab selected
@@ -132,6 +134,7 @@ private fun notificationsRoute(tab: ShellTab) = "${tab.route}/notifications"
 private fun productRoute(tab: ShellTab) = "${tab.route}/product/{$PRODUCT_ID_ARG}"
 private fun orderRoute(tab: ShellTab) = "${tab.route}/order/{$ORDER_DETAILS_ID_ARG}"
 private fun storeRoute(tab: ShellTab) = "${tab.route}/store/{$STORE_ID_ARG}"
+private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
  * The signed-in app: a `Scaffold` with the bottom navigation (Home, Categories, Cart, Orders,
@@ -196,12 +199,17 @@ fun MainShell(
                 orderDetails(ShellTab.HOME, navController, snackbarHostState)
                 productDetails(ShellTab.HOME, navController, snackbarHostState)
                 store(ShellTab.HOME, navController, snackbarHostState)
+                search(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
             }
             navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
                 composable(CATEGORIES_ROUTE) {
                     CategoriesScreen(onNavigate = { navController.openFromCategories(it) })
                 }
+                wishlist(ShellTab.CATEGORIES, navController, snackbarHostState)
+                productDetails(ShellTab.CATEGORIES, navController, snackbarHostState)
+                store(ShellTab.CATEGORIES, navController, snackbarHostState)
+                search(ShellTab.CATEGORIES, navController, snackbarHostState)
                 comingSoon(ShellTab.CATEGORIES, navController)
             }
             navigation(startDestination = CART_ROUTE, route = ShellTab.CART.route) {
@@ -214,6 +222,7 @@ fun MainShell(
                 wishlist(ShellTab.CART, navController, snackbarHostState)
                 productDetails(ShellTab.CART, navController, snackbarHostState)
                 store(ShellTab.CART, navController, snackbarHostState)
+                search(ShellTab.CART, navController, snackbarHostState)
                 comingSoon(ShellTab.CART, navController)
                 checkout(navController, snackbarHostState)
             }
@@ -230,6 +239,7 @@ fun MainShell(
                 orderDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 productDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 store(ShellTab.PROFILE, navController, snackbarHostState)
+                search(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
             navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
@@ -243,6 +253,7 @@ fun MainShell(
                 wishlist(ShellTab.ORDERS, navController, snackbarHostState)
                 productDetails(ShellTab.ORDERS, navController, snackbarHostState)
                 store(ShellTab.ORDERS, navController, snackbarHostState)
+                search(ShellTab.ORDERS, navController, snackbarHostState)
                 comingSoon(ShellTab.ORDERS, navController)
             }
         }
@@ -425,7 +436,7 @@ private fun NavGraphBuilder.store(
                 when (destination) {
                     StoreDestination.Back -> navController.popBackStack()
                     is StoreDestination.Product -> navController.openProduct(tab, destination.productId)
-                    StoreDestination.Search -> navController.openPlaceholder(tab, Placeholder.SEARCH)
+                    StoreDestination.Search -> navController.openSearch(tab)
                     StoreDestination.Home -> navController.goHome(tab)
                     StoreDestination.Wishlist -> navController.navigate(wishlistRoute(tab))
                     StoreDestination.Cart -> navController.goToCart(tab)
@@ -433,6 +444,35 @@ private fun NavGraphBuilder.store(
             },
         )
     }
+}
+
+/** Search inside [tab]'s graph (no bottom bar); results open Product Details and Store in the same tab. */
+private fun NavGraphBuilder.search(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(
+        route = searchRoute(tab),
+        arguments = listOf(navArgument(SEARCH_OPEN_FILTERS_ARG) { type = NavType.BoolType; defaultValue = false }),
+    ) {
+        SearchScreen(
+            snackbarHostState = snackbarHostState,
+            onNavigate = { destination ->
+                when (destination) {
+                    SearchDestination.Back -> navController.popBackStack()
+                    is SearchDestination.Product -> navController.openProduct(tab, destination.productId)
+                    is SearchDestination.Store -> navController.openStore(tab, destination.storeId)
+                    SearchDestination.Wishlist -> navController.navigate(wishlistRoute(tab))
+                    SearchDestination.Cart -> navController.goToCart(tab)
+                }
+            },
+        )
+    }
+}
+
+private fun NavHostController.openSearch(tab: ShellTab, openFilters: Boolean = false) {
+    navigate("${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG=$openFilters")
 }
 
 private fun NavHostController.openStore(tab: ShellTab, storeId: String) {
@@ -484,7 +524,7 @@ private fun NavHostController.openFromCart(destination: CartDestination) {
 
 private fun NavHostController.openFromCategories(destination: CategoriesDestination) {
     val placeholder = when (destination) {
-        CategoriesDestination.Search -> Placeholder.SEARCH
+        CategoriesDestination.Search -> return openSearch(ShellTab.CATEGORIES)
         CategoriesDestination.Addresses -> Placeholder.ADDRESSES
         is CategoriesDestination.ProductListing -> Placeholder.PRODUCTS
     }
@@ -495,7 +535,7 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
     val placeholder = when (destination) {
         HomeDestination.AllCategories -> return switchTab(ShellTab.CATEGORIES)
         HomeDestination.Cart -> return switchTab(ShellTab.CART)
-        is HomeDestination.Search -> Placeholder.SEARCH
+        is HomeDestination.Search -> return openSearch(ShellTab.HOME, destination.openFilters)
         HomeDestination.Notifications -> return navigate(notificationsRoute(ShellTab.HOME))
         HomeDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.HOME))
         HomeDestination.Addresses -> Placeholder.ADDRESSES

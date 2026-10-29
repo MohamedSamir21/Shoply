@@ -62,4 +62,6 @@ fun DocumentSnapshot.toProduct() = Product(
     sizes = (get("sizes") as? List<String>).orEmpty(),
     description = string("description"),
     categoryId = string("categoryId"),
+    subcategory = string("subcategory"),
+    keywords = string("keywords"),
 )

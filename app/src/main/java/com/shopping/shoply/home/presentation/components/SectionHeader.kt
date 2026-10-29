@@ -26,7 +26,7 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
 /**
  * Section title (17 sp bold) with an optional orange "See all" on the right.
- * [onSeeAll] null hides "See all" (Recommended has none). Includes the screen gutter and the
+ * [onSeeAll] null hides "See all" (Recommended has none); [actionLabel] replaces its text. Includes the screen gutter and the
  * design's 26 dp above / 14 dp below.
  */
 @Composable
@@ -34,6 +34,7 @@ fun SectionHeader(
     title: String,
     onSeeAll: (() -> Unit)?,
     modifier: Modifier = Modifier,
+    actionLabel: String? = null,
 ) {
     Row(
         modifier = modifier
@@ -55,7 +56,7 @@ fun SectionHeader(
         )
         if (onSeeAll != null) {
             Text(
-                text = stringResource(R.string.common_see_all),
+                text = actionLabel ?: stringResource(R.string.common_see_all),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,

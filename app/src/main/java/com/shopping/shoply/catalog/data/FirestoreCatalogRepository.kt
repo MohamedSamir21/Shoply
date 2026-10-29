@@ -81,6 +81,27 @@ class FirestoreCatalogRepository @Inject constructor(
     override suspend fun getProductsInStore(storeId: String): Result<List<Product>, DataError> =
         productsWhere("storeId", storeId, limit = Int.MAX_VALUE)
 
+    override suspend fun getAllProducts(): Result<List<Product>, DataError> =
+        readCollection("products") { it.toProduct() }
+
+    override suspend fun getAllStores(): Result<List<Store>, DataError> =
+        readCollection("stores") { it.toStore() }
+
+    // A whole collection in display order. The catalog is small, so it's read in one go.
+    private suspend fun <T> readCollection(
+        collection: String,
+        map: (DocumentSnapshot) -> T,
+    ): Result<List<T>, DataError> = withContext(ioDispatcher) {
+        try {
+            withTimeout(TIMEOUT_MS.milliseconds) {
+                val snapshot = firestore.collection(collection).orderBy("order").get().await()
+                Result.Success(snapshot.documents.map(map))
+            }
+        } catch (e: Throwable) {
+            Result.Error(e.toReadError())
+        }
+    }
+
     // Products whose [field] equals [value], in display order.
     private suspend fun productsWhere(field: String, value: String, limit: Int): Result<List<Product>, DataError> =
         withContext(ioDispatcher) {

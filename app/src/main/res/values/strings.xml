@@ -175,7 +175,6 @@
     <string name="nav_cart">Cart</string>
     <string name="nav_orders">Orders</string>
     <string name="nav_profile">Profile</string>
-    <string name="screen_search">Search</string>
     <string name="screen_notifications">Notifications</string>
     <string name="screen_wishlist">Wishlist</string>
     <string name="screen_addresses">Addresses</string>
@@ -422,4 +421,60 @@
     <string name="cd_store_favorite_add">Add store to favorites</string>
     <string name="cd_store_favorite_remove">Remove store from favorites</string>
     <string name="snackbar_store_favorite_failed">Couldn\'t update your favorite stores</string>
+    <!-- Filters / Sort (Search, Product Listing) -->
+    <string name="filters_title">Filters</string>
+    <string name="filters_price">Price</string>
+    <string name="filters_rating">Rating</string>
+    <string name="filters_category">Category</string>
+    <string name="filters_any">Any</string>
+    <string name="filters_price_under_25">Under $25</string>
+    <string name="filters_price_25_50">$25–$50</string>
+    <string name="filters_price_50_100">$50–$100</string>
+    <string name="filters_price_over_100">Over $100</string>
+    <string name="filters_rating_up">%1$.1f &amp; up</string>
+    <string name="filters_free_delivery">Free delivery only</string>
+    <string name="filters_free_delivery_hint">Stores with no delivery fee</string>
+    <string name="filters_reset">Reset</string>
+    <plurals name="filters_show_results">
+        <item quantity="one">Show %1$d Result</item>
+        <item quantity="other">Show %1$d Results</item>
+    </plurals>
+    <string name="filters_chip">Filters</string>
+    <string name="filters_quick_under_50">Under $50</string>
+    <string name="filters_quick_rating">4.5 &amp; up</string>
+    <string name="filters_quick_free_delivery">Free delivery</string>
+    <string name="filters_no_matches_title">No Matches</string>
+    <string name="filters_no_matches_message">Nothing matches these filters. Try removing one or two.</string>
+    <string name="filters_no_matches_action">Reset Filters</string>
+    <string name="sort_title">Sort By</string>
+    <string name="sort_chip">Sort</string>
+    <string name="sort_relevance">Relevance</string>
+    <string name="sort_price_low_high">Price: Low to High</string>
+    <string name="sort_price_high_low">Price: High to Low</string>
+    <string name="sort_top_rated">Top Rated</string>
+    <plurals name="results_count">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
+    <!-- Search -->
+    <string name="search_recent">Recent Searches</string>
+    <string name="search_clear_all">Clear all</string>
+    <string name="search_popular">Popular Right Now</string>
+    <string name="search_stores">Stores</string>
+    <string name="search_store_eta">Store · %1$d–%2$d min</string>
+    <string name="search_for">Search for “%1$s”</string>
+    <string name="search_no_results_title">No Results Found</string>
+    <string name="search_no_results_message">We couldn\'t find anything for “%1$s”. Try a different word or check the spelling.</string>
+    <string name="search_no_results_action">Clear Search</string>
+    <string name="search_try">Try searching for</string>
+    <string name="cd_remove_recent">Remove %1$s</string>
+    <string name="cd_use_suggestion">Use suggestion</string>
+    <string-array name="search_popular_terms">
+        <item>Headphones</item>
+        <item>Linen shirt</item>
+        <item>Desk lamp</item>
+        <item>Running shoes</item>
+        <item>Plants</item>
+        <item>Face serum</item>
+    </string-array>
 </resources>

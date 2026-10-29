@@ -28,7 +28,9 @@ fun aProduct(
     sizes: List<String> = listOf("S", "M", "L"),
     description: String = "About $id",
     categoryId: String = "electronics",
-) = Product(id, name, storeId, icon, priceCents, oldPriceCents, rating, reviewCount, colors, sizes, description, categoryId)
+    subcategory: String = "",
+    keywords: String = "",
+) = Product(id, name, storeId, icon, priceCents, oldPriceCents, rating, reviewCount, colors, sizes, description, categoryId, subcategory, keywords)
 
 fun aStore(
     id: String = "store1",
