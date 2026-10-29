@@ -56,6 +56,10 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.shopping.shoply.R
+import com.shopping.shoply.addresses.presentation.ADDRESS_ID_ARG
+import com.shopping.shoply.addresses.presentation.AddressEditScreen
+import com.shopping.shoply.addresses.presentation.AddressesDestination
+import com.shopping.shoply.addresses.presentation.AddressesScreen
 import com.shopping.shoply.cart.presentation.CartDestination
 import com.shopping.shoply.cart.presentation.CartScreen
 import com.shopping.shoply.checkout.presentation.CheckoutDestination
@@ -109,7 +113,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
-    ADDRESSES(R.string.screen_addresses),
     SUPPORT_CHAT(R.string.screen_support_chat),
     EDIT_PROFILE(R.string.screen_edit_profile),
     SETTINGS(R.string.screen_settings),
@@ -139,6 +142,8 @@ private fun orderRoute(tab: ShellTab) = "${tab.route}/order/{$ORDER_DETAILS_ID_A
 private fun storeRoute(tab: ShellTab) = "${tab.route}/store/{$STORE_ID_ARG}"
 private fun listingRoute(tab: ShellTab) = "${tab.route}/products/{$LISTING_CATEGORY_ID_ARG}"
 private fun storesRoute(tab: ShellTab) = "${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG={$STORES_FAVORITES_ONLY_ARG}"
+private fun addressesRoute(tab: ShellTab) = "${tab.route}/addresses"
+private fun addressEditRoute(tab: ShellTab) = "${tab.route}/address?$ADDRESS_ID_ARG={$ADDRESS_ID_ARG}"
 private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
@@ -205,6 +210,7 @@ fun MainShell(
                 productDetails(ShellTab.HOME, navController, snackbarHostState)
                 store(ShellTab.HOME, navController, snackbarHostState)
                 search(ShellTab.HOME, navController, snackbarHostState)
+                addresses(ShellTab.HOME, navController, snackbarHostState)
                 productListing(ShellTab.HOME, navController, snackbarHostState)
                 stores(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
@@ -217,6 +223,7 @@ fun MainShell(
                 productDetails(ShellTab.CATEGORIES, navController, snackbarHostState)
                 store(ShellTab.CATEGORIES, navController, snackbarHostState)
                 search(ShellTab.CATEGORIES, navController, snackbarHostState)
+                addresses(ShellTab.CATEGORIES, navController, snackbarHostState)
                 productListing(ShellTab.CATEGORIES, navController, snackbarHostState)
                 comingSoon(ShellTab.CATEGORIES, navController)
             }
@@ -233,6 +240,7 @@ fun MainShell(
                 search(ShellTab.CART, navController, snackbarHostState)
                 comingSoon(ShellTab.CART, navController)
                 checkout(navController, snackbarHostState)
+                addresses(ShellTab.CART, navController, snackbarHostState)
             }
             navigation(startDestination = PROFILE_ROUTE, route = ShellTab.PROFILE.route) {
                 composable(PROFILE_ROUTE) {
@@ -248,6 +256,7 @@ fun MainShell(
                 productDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 store(ShellTab.PROFILE, navController, snackbarHostState)
                 search(ShellTab.PROFILE, navController, snackbarHostState)
+                addresses(ShellTab.PROFILE, navController, snackbarHostState)
                 stores(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
@@ -386,7 +395,7 @@ private fun NavGraphBuilder.checkout(navController: NavHostController, snackbarH
                     is CheckoutDestination.OrderPlaced -> navController.navigate("tab_cart/order_placed/${destination.orderId}") {
                         popUpTo(CART_ROUTE)
                     }
-                    CheckoutDestination.AddAddress -> navController.openPlaceholder(ShellTab.CART, Placeholder.ADDRESSES)
+                    CheckoutDestination.AddAddress -> navController.openAddressEdit(ShellTab.CART, addressId = null)
                     CheckoutDestination.AddCard -> navController.openPlaceholder(ShellTab.CART, Placeholder.PAYMENT_METHODS)
                 }
             },
@@ -525,11 +534,41 @@ private fun NavGraphBuilder.stores(
                     StoresDestination.Back -> navController.popBackStack()
                     is StoresDestination.Store -> navController.openStore(tab, destination.storeId)
                     StoresDestination.AllStores -> navController.openStores(tab, favoritesOnly = false)
-                    StoresDestination.Addresses -> navController.openPlaceholder(tab, Placeholder.ADDRESSES)
+                    StoresDestination.Addresses -> navController.navigate(addressesRoute(tab))
                 }
             },
         )
     }
+}
+
+/** Addresses and Add / Edit Address inside [tab]'s graph. */
+private fun NavGraphBuilder.addresses(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(addressesRoute(tab)) {
+        AddressesScreen(
+            snackbarHostState = snackbarHostState,
+            onNavigate = { destination ->
+                when (destination) {
+                    AddressesDestination.Back -> navController.popBackStack()
+                    AddressesDestination.Add -> navController.openAddressEdit(tab, addressId = null)
+                    is AddressesDestination.Edit -> navController.openAddressEdit(tab, destination.id)
+                }
+            },
+        )
+    }
+    composable(
+        route = addressEditRoute(tab),
+        arguments = listOf(navArgument(ADDRESS_ID_ARG) { type = NavType.StringType; defaultValue = "" }),
+    ) {
+        AddressEditScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
+    }
+}
+
+private fun NavHostController.openAddressEdit(tab: ShellTab, addressId: String?) {
+    navigate("${tab.route}/address?$ADDRESS_ID_ARG=${addressId.orEmpty()}")
 }
 
 private fun NavHostController.openStores(tab: ShellTab, favoritesOnly: Boolean) {
@@ -592,29 +631,27 @@ private fun NavHostController.openFromCart(destination: CartDestination) {
 }
 
 private fun NavHostController.openFromCategories(destination: CategoriesDestination) {
-    val placeholder = when (destination) {
-        CategoriesDestination.Search -> return openSearch(ShellTab.CATEGORIES)
-        CategoriesDestination.Addresses -> Placeholder.ADDRESSES
-        is CategoriesDestination.ProductListing -> return openListing(ShellTab.CATEGORIES, destination.categoryId)
+    when (destination) {
+        CategoriesDestination.Search -> openSearch(ShellTab.CATEGORIES)
+        CategoriesDestination.Addresses -> navigate(addressesRoute(ShellTab.CATEGORIES))
+        is CategoriesDestination.ProductListing -> openListing(ShellTab.CATEGORIES, destination.categoryId)
     }
-    openPlaceholder(ShellTab.CATEGORIES, placeholder)
 }
 
 private fun NavHostController.openFromHome(destination: HomeDestination) {
-    val placeholder = when (destination) {
-        HomeDestination.AllCategories -> return switchTab(ShellTab.CATEGORIES)
-        HomeDestination.Cart -> return switchTab(ShellTab.CART)
-        is HomeDestination.Search -> return openSearch(ShellTab.HOME, destination.openFilters)
-        HomeDestination.Notifications -> return navigate(notificationsRoute(ShellTab.HOME))
-        HomeDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.HOME))
-        HomeDestination.Addresses -> Placeholder.ADDRESSES
-        is HomeDestination.ProductListing -> return openListing(ShellTab.HOME, destination.categoryId)
-        HomeDestination.AllStores -> return openStores(ShellTab.HOME, favoritesOnly = false)
-        is HomeDestination.Store -> return openStore(ShellTab.HOME, destination.storeId)
-        is HomeDestination.ProductDetails -> return openProduct(ShellTab.HOME, destination.productId)
-        HomeDestination.Help -> return navigate(helpRoute(ShellTab.HOME))
+    when (destination) {
+        HomeDestination.AllCategories -> switchTab(ShellTab.CATEGORIES)
+        HomeDestination.Cart -> switchTab(ShellTab.CART)
+        is HomeDestination.Search -> openSearch(ShellTab.HOME, destination.openFilters)
+        HomeDestination.Notifications -> navigate(notificationsRoute(ShellTab.HOME))
+        HomeDestination.Wishlist -> navigate(wishlistRoute(ShellTab.HOME))
+        HomeDestination.Addresses -> navigate(addressesRoute(ShellTab.HOME))
+        is HomeDestination.ProductListing -> openListing(ShellTab.HOME, destination.categoryId)
+        HomeDestination.AllStores -> openStores(ShellTab.HOME, favoritesOnly = false)
+        is HomeDestination.Store -> openStore(ShellTab.HOME, destination.storeId)
+        is HomeDestination.ProductDetails -> openProduct(ShellTab.HOME, destination.productId)
+        HomeDestination.Help -> navigate(helpRoute(ShellTab.HOME))
     }
-    openPlaceholder(ShellTab.HOME, placeholder)
 }
 
 private fun NavHostController.openFromProfile(destination: ProfileDestination) {
@@ -625,7 +662,7 @@ private fun NavHostController.openFromProfile(destination: ProfileDestination) {
         ProfileDestination.Settings -> Placeholder.SETTINGS
         ProfileDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.PROFILE))
         ProfileDestination.FavoriteStores -> return openStores(ShellTab.PROFILE, favoritesOnly = true)
-        ProfileDestination.Addresses -> Placeholder.ADDRESSES
+        ProfileDestination.Addresses -> return navigate(addressesRoute(ShellTab.PROFILE))
         ProfileDestination.Payments -> Placeholder.PAYMENT_METHODS
         ProfileDestination.Notifications -> return navigate(notificationsRoute(ShellTab.PROFILE))
     }

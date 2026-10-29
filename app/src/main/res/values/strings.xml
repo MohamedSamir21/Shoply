@@ -508,4 +508,33 @@
     <string name="favorites_empty_action">Browse Stores</string>
     <string name="cd_store_follow">Follow %1$s</string>
     <string name="cd_store_unfollow">Unfollow %1$s</string>
+    <!-- Addresses -->
+    <string name="addresses_add">Add New Address</string>
+    <string name="addresses_edit_title">Edit Address</string>
+    <string name="addresses_default">Default</string>
+    <string name="addresses_edit">Edit</string>
+    <string name="addresses_set_default">Set as Default</string>
+    <string name="addresses_empty_title">No Saved Addresses</string>
+    <string name="addresses_empty_message">Add an address so checkout takes just a tap next time.</string>
+    <string name="addresses_save_as">Save as</string>
+    <string name="addresses_label_home">Home</string>
+    <string name="addresses_label_work">Work</string>
+    <string name="addresses_label_other">Other</string>
+    <string name="addresses_field_name">Full Name</string>
+    <string name="addresses_field_phone">Phone Number</string>
+    <string name="addresses_field_street">Street Address</string>
+    <string name="addresses_field_apartment">Apt, Suite, Floor (optional)</string>
+    <string name="addresses_field_city">City</string>
+    <string name="addresses_field_zip">ZIP</string>
+    <string name="addresses_field_required">Required</string>
+    <string name="addresses_field_phone_invalid">Enter a valid phone number</string>
+    <string name="addresses_default_switch">Set as default address</string>
+    <string name="addresses_default_switch_hint">Used first at checkout</string>
+    <string name="addresses_save">Save Address</string>
+    <string name="addresses_delete">Delete Address</string>
+    <string name="snackbar_address_saved">Address saved</string>
+    <string name="snackbar_address_updated">Address updated</string>
+    <string name="snackbar_address_deleted">Address deleted</string>
+    <string name="snackbar_address_default">Default address updated</string>
+    <string name="snackbar_address_failed">Couldn\'t update your addresses. Try again.</string>
 </resources>
