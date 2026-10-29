@@ -90,6 +90,7 @@ import com.shopping.shoply.products.presentation.LISTING_CATEGORY_ID_ARG
 import com.shopping.shoply.products.presentation.ProductListingDestination
 import com.shopping.shoply.products.presentation.ProductListingScreen
 import com.shopping.shoply.search.presentation.SEARCH_OPEN_FILTERS_ARG
+import com.shopping.shoply.settings.presentation.SettingsScreen
 import com.shopping.shoply.search.presentation.SearchDestination
 import com.shopping.shoply.search.presentation.SearchScreen
 import com.shopping.shoply.store.presentation.STORES_FAVORITES_ONLY_ARG
@@ -116,7 +117,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 private enum class Placeholder(@StringRes val title: Int) {
     SUPPORT_CHAT(R.string.screen_support_chat),
     EDIT_PROFILE(R.string.screen_edit_profile),
-    SETTINGS(R.string.screen_settings),
 }
 
 private const val HOME_ROUTE = "home_feed"
@@ -145,6 +145,7 @@ private fun storesRoute(tab: ShellTab) = "${tab.route}/stores?$STORES_FAVORITES_
 private fun addressesRoute(tab: ShellTab) = "${tab.route}/addresses"
 private fun addressEditRoute(tab: ShellTab) = "${tab.route}/address?$ADDRESS_ID_ARG={$ADDRESS_ID_ARG}"
 private fun paymentsRoute(tab: ShellTab) = "${tab.route}/payments"
+private const val SETTINGS_ROUTE = "tab_profile/settings"
 private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
@@ -261,6 +262,9 @@ fun MainShell(
                 search(ShellTab.PROFILE, navController, snackbarHostState)
                 addresses(ShellTab.PROFILE, navController, snackbarHostState)
                 paymentMethods(ShellTab.PROFILE, navController, snackbarHostState)
+                composable(SETTINGS_ROUTE) {
+                    SettingsScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
+                }
                 stores(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
@@ -674,7 +678,7 @@ private fun NavHostController.openFromProfile(destination: ProfileDestination) {
         ProfileDestination.Orders -> return switchTab(ShellTab.ORDERS)
         ProfileDestination.Help -> return navigate(helpRoute(ShellTab.PROFILE))
         ProfileDestination.EditProfile -> Placeholder.EDIT_PROFILE
-        ProfileDestination.Settings -> Placeholder.SETTINGS
+        ProfileDestination.Settings -> return navigate(SETTINGS_ROUTE)
         ProfileDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.PROFILE))
         ProfileDestination.FavoriteStores -> return openStores(ShellTab.PROFILE, favoritesOnly = true)
         ProfileDestination.Addresses -> return navigate(addressesRoute(ShellTab.PROFILE))

@@ -561,4 +561,24 @@
     <string name="snackbar_card_removed">Card removed</string>
     <string name="snackbar_card_default">Default card updated</string>
     <string name="snackbar_card_failed">Couldn\'t update your cards. Try again.</string>
+    <!-- Settings -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_system_hint">Follows your device setting.</string>
+    <string name="settings_theme_fixed_hint">Always use the %1$s theme.</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_order_updates">Order Updates</string>
+    <string name="settings_order_updates_hint">Status changes and delivery alerts</string>
+    <string name="settings_offers">Offers &amp; Promotions</string>
+    <string name="settings_offers_hint">Deals from stores you follow</string>
+    <string name="settings_price_drops">Price Drops</string>
+    <string name="settings_price_drops_hint">When wishlist items get cheaper</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_change_password">Change Password</string>
+    <string name="settings_change_password_hint">We\'ll email you a reset link</string>
+    <string name="snackbar_reset_sent">We sent a reset link to %1$s</string>
+    <string name="snackbar_reset_failed">Couldn\'t send the reset link. Try again.</string>
 </resources>
