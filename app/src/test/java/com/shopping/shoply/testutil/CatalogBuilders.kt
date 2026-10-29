@@ -39,7 +39,12 @@ fun aStore(
     reviewCount: Int = 100,
     etaMinutes: IntRange = 25..35,
     deliveryFeeCents: Long = 199,
-) = Store(id, name, category, icon, rating, reviewCount, etaMinutes, deliveryFeeCents)
+    opensAtMinutes: Int = 10 * 60,
+    closesAtMinutes: Int = 21 * 60,
+) = Store(
+    id, name, category, icon, rating, reviewCount, etaMinutes, deliveryFeeCents,
+    opensAtMinutes = opensAtMinutes, closesAtMinutes = closesAtMinutes,
+)
 
 fun aCategory(
     id: String = "electronics",

@@ -181,7 +181,6 @@
     <string name="screen_addresses">Addresses</string>
     <string name="screen_products">Products</string>
     <string name="screen_all_stores">All Stores</string>
-    <string name="screen_store">Store</string>
     <string name="screen_support_chat">Support Chat</string>
     <string name="screen_order_details">Order Details</string>
 
@@ -404,4 +403,23 @@
     <string name="orders_not_found_action">Back to Orders</string>
     <string name="snackbar_reordered">Items added to your cart</string>
     <string name="snackbar_reorder_failed">Couldn\'t add these items. Try again.</string>
+    <!-- Store -->
+    <string name="store_location">%1$s · %2$s mi away</string>
+    <string name="store_open_until">Open until %1$s</string>
+    <string name="store_closed_opens_at">Closed · Opens at %1$s</string>
+    <string name="store_info_delivery">Delivery</string>
+    <string name="store_info_fee">Fee</string>
+    <string name="store_info_minimum">Minimum</string>
+    <string name="store_tab_all">All</string>
+    <string name="store_tab_top_rated">Top Rated</string>
+    <string name="store_tab_offers">Offers</string>
+    <string name="store_empty_title">No Products Yet</string>
+    <string name="store_empty_message">%1$s hasn\'t listed any products yet. Check back soon.</string>
+    <string name="store_empty_action">Back to Home</string>
+    <string name="store_offers_empty_title">No Offers Right Now</string>
+    <string name="store_offers_empty_message">This store has no discounts at the moment.</string>
+    <string name="store_offers_empty_action">See All Products</string>
+    <string name="cd_store_favorite_add">Add store to favorites</string>
+    <string name="cd_store_favorite_remove">Remove store from favorites</string>
+    <string name="snackbar_store_favorite_failed">Couldn\'t update your favorite stores</string>
 </resources>

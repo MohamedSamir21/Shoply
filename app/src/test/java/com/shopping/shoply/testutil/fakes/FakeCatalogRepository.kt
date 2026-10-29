@@ -17,6 +17,8 @@ import com.shopping.shoply.testutil.categories
  * - [getProduct] fails with [productError] when set, or [DataError.Unknown] for an unknown id.
  * - [getProductsInCategory] fails with [categoryError] when set.
  *
+ * - [getProductsInStore] fails with [storeProductsError] when set.
+ *
  * [getStore] answers from [stores], or fails with [storeError] when set.
  */
 class FakeCatalogRepository(
@@ -32,6 +34,7 @@ class FakeCatalogRepository(
 
     var productError: DataError? = null
     var categoryError: DataError? = null
+    var storeProductsError: DataError? = null
 
     var stores: List<Store> = emptyList()
     var storeError: DataError? = null
@@ -63,5 +66,10 @@ class FakeCatalogRepository(
     override suspend fun getProductsInCategory(categoryId: String, limit: Int): Result<List<Product>, DataError> {
         categoryError?.let { return Result.Error(it) }
         return Result.Success(products.filter { it.categoryId == categoryId }.take(limit))
+    }
+
+    override suspend fun getProductsInStore(storeId: String): Result<List<Product>, DataError> {
+        storeProductsError?.let { return Result.Error(it) }
+        return Result.Success(products.filter { it.storeId == storeId })
     }
 }

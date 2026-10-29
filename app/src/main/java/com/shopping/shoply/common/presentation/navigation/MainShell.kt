@@ -81,6 +81,9 @@ import com.shopping.shoply.orders.presentation.ORDER_DETAILS_ID_ARG
 import com.shopping.shoply.orders.presentation.OrderDetailsScreen
 import com.shopping.shoply.orders.presentation.OrdersDestination
 import com.shopping.shoply.orders.presentation.OrdersScreen
+import com.shopping.shoply.store.presentation.STORE_ID_ARG
+import com.shopping.shoply.store.presentation.StoreDestination
+import com.shopping.shoply.store.presentation.StoreScreen
 import com.shopping.shoply.profile.presentation.ProfileDestination
 import com.shopping.shoply.profile.presentation.ProfileScreen
 import com.shopping.shoply.wishlist.presentation.WishlistDestination
@@ -101,7 +104,6 @@ private enum class Placeholder(@StringRes val title: Int) {
     ADDRESSES(R.string.screen_addresses),
     PRODUCTS(R.string.screen_products),
     ALL_STORES(R.string.screen_all_stores),
-    STORE(R.string.screen_store),
     SUPPORT_CHAT(R.string.screen_support_chat),
     EDIT_PROFILE(R.string.screen_edit_profile),
     SETTINGS(R.string.screen_settings),
@@ -129,6 +131,7 @@ private fun wishlistRoute(tab: ShellTab) = "${tab.route}/wishlist"
 private fun notificationsRoute(tab: ShellTab) = "${tab.route}/notifications"
 private fun productRoute(tab: ShellTab) = "${tab.route}/product/{$PRODUCT_ID_ARG}"
 private fun orderRoute(tab: ShellTab) = "${tab.route}/order/{$ORDER_DETAILS_ID_ARG}"
+private fun storeRoute(tab: ShellTab) = "${tab.route}/store/{$STORE_ID_ARG}"
 
 /**
  * The signed-in app: a `Scaffold` with the bottom navigation (Home, Categories, Cart, Orders,
@@ -192,6 +195,7 @@ fun MainShell(
                 notifications(ShellTab.HOME, navController, snackbarHostState)
                 orderDetails(ShellTab.HOME, navController, snackbarHostState)
                 productDetails(ShellTab.HOME, navController, snackbarHostState)
+                store(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
             }
             navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
@@ -209,6 +213,7 @@ fun MainShell(
                 }
                 wishlist(ShellTab.CART, navController, snackbarHostState)
                 productDetails(ShellTab.CART, navController, snackbarHostState)
+                store(ShellTab.CART, navController, snackbarHostState)
                 comingSoon(ShellTab.CART, navController)
                 checkout(navController, snackbarHostState)
             }
@@ -224,6 +229,7 @@ fun MainShell(
                 notifications(ShellTab.PROFILE, navController, snackbarHostState)
                 orderDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 productDetails(ShellTab.PROFILE, navController, snackbarHostState)
+                store(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
             navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
@@ -234,7 +240,9 @@ fun MainShell(
                     )
                 }
                 orderDetails(ShellTab.ORDERS, navController, snackbarHostState)
+                wishlist(ShellTab.ORDERS, navController, snackbarHostState)
                 productDetails(ShellTab.ORDERS, navController, snackbarHostState)
+                store(ShellTab.ORDERS, navController, snackbarHostState)
                 comingSoon(ShellTab.ORDERS, navController)
             }
         }
@@ -316,7 +324,7 @@ private fun NavGraphBuilder.notifications(
     }
 }
 
-/** Product Details inside [tab]'s graph; the store opens "Coming soon", a similar product its own page. */
+/** Product Details inside [tab]'s graph; the store and similar products open in the same tab. */
 private fun NavGraphBuilder.productDetails(
     tab: ShellTab,
     navController: NavHostController,
@@ -331,7 +339,7 @@ private fun NavGraphBuilder.productDetails(
             onBack = { navController.popBackStack() },
             onNavigate = { destination ->
                 when (destination) {
-                    is ProductDetailsDestination.Store -> navController.openPlaceholder(tab, Placeholder.STORE)
+                    is ProductDetailsDestination.Store -> navController.openStore(tab, destination.id)
                     is ProductDetailsDestination.Product -> navController.openProduct(tab, destination.id)
                     ProductDetailsDestination.Cart -> navController.goToCart(tab)
                 }
@@ -401,6 +409,36 @@ private fun NavGraphBuilder.orderDetails(
     }
 }
 
+/** Store inside [tab]'s graph; products open Product Details in the same tab. */
+private fun NavGraphBuilder.store(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(
+        route = storeRoute(tab),
+        arguments = listOf(navArgument(STORE_ID_ARG) { type = NavType.StringType }),
+    ) {
+        StoreScreen(
+            snackbarHostState = snackbarHostState,
+            onNavigate = { destination ->
+                when (destination) {
+                    StoreDestination.Back -> navController.popBackStack()
+                    is StoreDestination.Product -> navController.openProduct(tab, destination.productId)
+                    StoreDestination.Search -> navController.openPlaceholder(tab, Placeholder.SEARCH)
+                    StoreDestination.Home -> navController.goHome(tab)
+                    StoreDestination.Wishlist -> navController.navigate(wishlistRoute(tab))
+                    StoreDestination.Cart -> navController.goToCart(tab)
+                }
+            },
+        )
+    }
+}
+
+private fun NavHostController.openStore(tab: ShellTab, storeId: String) {
+    navigate("${tab.route}/store/$storeId")
+}
+
 private fun NavHostController.openOrder(tab: ShellTab, orderId: String) {
     navigate("${tab.route}/order/$orderId")
 }
@@ -463,7 +501,7 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
         HomeDestination.Addresses -> Placeholder.ADDRESSES
         is HomeDestination.ProductListing -> Placeholder.PRODUCTS
         HomeDestination.AllStores -> Placeholder.ALL_STORES
-        is HomeDestination.Store -> Placeholder.STORE
+        is HomeDestination.Store -> return openStore(ShellTab.HOME, destination.storeId)
         is HomeDestination.ProductDetails -> return openProduct(ShellTab.HOME, destination.productId)
         HomeDestination.Help -> return navigate(helpRoute(ShellTab.HOME))
     }

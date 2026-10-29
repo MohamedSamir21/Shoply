@@ -4,6 +4,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.shopping.shoply.catalog.domain.model.CatalogIcon
 import com.shopping.shoply.catalog.domain.model.Category
 import com.shopping.shoply.catalog.domain.model.ColorOption
+import com.shopping.shoply.catalog.domain.model.MINUTES_PER_DAY
 import com.shopping.shoply.catalog.domain.model.Product
 import com.shopping.shoply.catalog.domain.model.Store
 import com.shopping.shoply.common.data.firestore.double
@@ -33,7 +34,17 @@ fun DocumentSnapshot.toStore() = Store(
     reviewCount = int("reviewCount"),
     etaMinutes = int("etaMinMinutes")..int("etaMaxMinutes"),
     deliveryFeeCents = long("deliveryFeeCents"),
+    distanceMiles = double("distanceMiles"),
+    minOrderCents = long("minOrderCents"),
+    opensAtMinutes = minutesOf(getString("opensAt")) ?: 0,
+    closesAtMinutes = minutesOf(getString("closesAt")) ?: MINUTES_PER_DAY,
 )
+
+// "21:00" -> 1260. Null when missing or not "HH:mm".
+private fun minutesOf(time: String?): Int? {
+    val (hours, minutes) = time?.split(":")?.takeIf { it.size == 2 } ?: return null
+    return (hours.toIntOrNull() ?: return null) * 60 + (minutes.toIntOrNull() ?: return null)
+}
 
 @Suppress("UNCHECKED_CAST")
 fun DocumentSnapshot.toProduct() = Product(
