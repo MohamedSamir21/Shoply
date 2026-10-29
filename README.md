@@ -9,7 +9,9 @@ It is built with Kotlin and Jetpack Compose on Clean Architecture (data / domain
 | Area | State |
 | --- | --- |
 | Authentication: splash, onboarding, sign in / sign up, social login, account verification, password reset (email link or SMS OTP) | Built and tested |
-| Shopping: home, product details, cart, checkout, orders, profile | Designed, in progress |
+| Shopping: home, categories, search with filters and sort, product listing, product details, stores, wishlist, cart, checkout, orders, notifications | Built |
+| Account: profile, addresses, payment methods, settings (light / dark theme), help center, support chat | Built |
+| Edit profile | In progress |
 
 ## Design
 
