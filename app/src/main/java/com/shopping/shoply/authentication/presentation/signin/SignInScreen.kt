@@ -40,6 +40,7 @@ import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.authentication.presentation.components.ShoplyButtonVariant
 import com.shopping.shoply.common.presentation.components.ShoplyLogo
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
+import com.shopping.shoply.common.presentation.navigation.navigateToHome
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import kotlinx.coroutines.flow.collectLatest
@@ -56,8 +57,7 @@ fun SignInScreen(
         viewModel.signInResult.collectLatest { result ->
             when (result) {
                 SignInScreenEvent.SignInResult.Success -> {
-                    navController.popBackStack()
-                    navController.navigate(NavRoutes.Home.route)
+                    navController.navigateToHome()
                 }
 
                 is SignInScreenEvent.SignInResult.Failure -> {

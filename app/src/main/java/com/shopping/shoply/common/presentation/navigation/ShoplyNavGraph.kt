@@ -3,7 +3,6 @@ package com.shopping.shoply.common.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -170,6 +169,17 @@ fun NavGraphBuilder.addForgotPasswordScreen(
     }
 }
 
+/**
+ * Opens Home with nothing behind it, so Back from Home leaves the app instead of returning to the
+ * sign-in screens. Clears the whole graph: Splash (the start destination) is already gone by now.
+ */
+fun NavHostController.navigateToHome() {
+    navigate(NavRoutes.Home.route) {
+        popUpTo(graph.id) { inclusive = true }
+        launchSingleTop = true
+    }
+}
+
 fun NavGraphBuilder.addHomeScreen(navController: NavHostController) {
     composable(
         route = NavRoutes.Home.route
@@ -230,14 +240,11 @@ private fun NavGraphBuilder.addResultScreen(
             onContinue = {
                 when (purpose) {
                     ResultPurpose.PASSWORD_RESET -> navController.navigate(NavRoutes.SignIn.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
+                        popUpTo(navController.graph.id) { inclusive = true }
                         launchSingleTop = true
                     }
 
-                    ResultPurpose.EMAIL_VERIFIED -> navController.navigate(NavRoutes.Home.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { inclusive = true }
-                        launchSingleTop = true
-                    }
+                    ResultPurpose.EMAIL_VERIFIED -> navController.navigateToHome()
 
                     ResultPurpose.VERIFY_FAILED -> navController.popBackStack()
                 }
