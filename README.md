@@ -13,39 +13,144 @@ It is built with Kotlin and Jetpack Compose on Clean Architecture (data / domain
 | Account: profile, addresses, payment methods, settings (light / dark theme), help center, support chat | Built |
 | Edit profile | In progress |
 
-## Design
+## Screenshots
 
-The UI was designed in **Claude Design**: a calm Material 3 layout with a single terracotta-orange accent, warm neutral surfaces, and full light and dark themes.
+Taken from the app running on a phone, each in light and dark theme. The UI was designed in **Claude Design**: a calm Material 3 layout with a single terracotta-orange accent and warm neutral surfaces.
+
+<table>
+  <tr>
+    <td align="center"><b>Home</b><br>
+      <img src="screenshots/home.png" width="180" alt="Home" />
+      <img src="screenshots/home-dark.png" width="180" alt="Home, dark theme" />
+    </td>
+    <td align="center"><b>Search</b><br>
+      <img src="screenshots/search.png" width="180" alt="Search results" />
+      <img src="screenshots/search-dark.png" width="180" alt="Search results, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>Product details</b><br>
+      <img src="screenshots/product.png" width="180" alt="Product details" />
+      <img src="screenshots/product-dark.png" width="180" alt="Product details, dark theme" />
+    </td>
+    <td align="center"><b>Checkout</b><br>
+      <img src="screenshots/checkout.png" width="180" alt="Checkout, payment step" />
+      <img src="screenshots/checkout-dark.png" width="180" alt="Checkout, payment step, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>My orders</b><br>
+      <img src="screenshots/orders.png" width="180" alt="My orders" />
+      <img src="screenshots/orders-dark.png" width="180" alt="My orders, dark theme" />
+    </td>
+    <td align="center"><b>Support chat</b><br>
+      <img src="screenshots/support-chat.png" width="180" alt="Support chat" />
+      <img src="screenshots/support-chat-dark.png" width="180" alt="Support chat, dark theme" />
+    </td>
+  </tr>
+</table>
+
+<details>
+<summary><b>More screens</b></summary>
 
 ### Onboarding and sign in
 
-<p>
-  <img src="screenshots/onboarding.png" width="240" alt="Onboarding" />
-  <img src="screenshots/sign-in.png" width="240" alt="Sign in" />
-  <img src="screenshots/sign-in-dark.png" width="240" alt="Sign in, dark theme" />
-</p>
+<table>
+  <tr>
+    <td align="center"><b>Onboarding</b><br>
+      <img src="screenshots/onboarding.png" width="180" alt="Onboarding" />
+      <img src="screenshots/onboarding-dark.png" width="180" alt="Onboarding, dark theme" />
+    </td>
+    <td align="center"><b>Sign in</b><br>
+      <img src="screenshots/sign-in.png" width="180" alt="Sign in" />
+      <img src="screenshots/sign-in-dark.png" width="180" alt="Sign in, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>Sign up</b><br>
+      <img src="screenshots/sign-up.png" width="180" alt="Sign up" />
+      <img src="screenshots/sign-up-dark.png" width="180" alt="Sign up, dark theme" />
+    </td>
+  </tr>
+</table>
 
 ### Shopping
 
-<p>
-  <img src="screenshots/home.png" width="240" alt="Home" />
-  <img src="screenshots/product.png" width="240" alt="Product details" />
-  <img src="screenshots/cart.png" width="240" alt="Cart" />
-</p>
+<table>
+  <tr>
+    <td align="center"><b>Categories</b><br>
+      <img src="screenshots/categories.png" width="180" alt="Categories" />
+      <img src="screenshots/categories-dark.png" width="180" alt="Categories, dark theme" />
+    </td>
+    <td align="center"><b>Product listing</b><br>
+      <img src="screenshots/listing.png" width="180" alt="Product listing" />
+      <img src="screenshots/listing-dark.png" width="180" alt="Product listing, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>Search filters</b><br>
+      <img src="screenshots/search-filters.png" width="180" alt="Search filters" />
+      <img src="screenshots/search-filters-dark.png" width="180" alt="Search filters, dark theme" />
+    </td>
+    <td align="center"><b>Store</b><br>
+      <img src="screenshots/store.png" width="180" alt="Store" />
+      <img src="screenshots/store-dark.png" width="180" alt="Store, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>All stores</b><br>
+      <img src="screenshots/stores.png" width="180" alt="All stores" />
+      <img src="screenshots/stores-dark.png" width="180" alt="All stores, dark theme" />
+    </td>
+    <td align="center"><b>Wishlist</b><br>
+      <img src="screenshots/wishlist.png" width="180" alt="Wishlist" />
+      <img src="screenshots/wishlist-dark.png" width="180" alt="Wishlist, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>Cart</b><br>
+      <img src="screenshots/cart.png" width="180" alt="Cart" />
+      <img src="screenshots/cart-dark.png" width="180" alt="Cart, dark theme" />
+    </td>
+    <td align="center"><b>Notifications</b><br>
+      <img src="screenshots/notifications.png" width="180" alt="Notifications" />
+      <img src="screenshots/notifications-dark.png" width="180" alt="Notifications, dark theme" />
+    </td>
+  </tr>
+</table>
 
-### Checkout and orders
+### Account
 
-<p>
-  <img src="screenshots/checkout.png" width="240" alt="Checkout, payment step" />
-  <img src="screenshots/orders.png" width="240" alt="My orders" />
-</p>
+<table>
+  <tr>
+    <td align="center"><b>Addresses</b><br>
+      <img src="screenshots/addresses.png" width="180" alt="Addresses" />
+      <img src="screenshots/addresses-dark.png" width="180" alt="Addresses, dark theme" />
+    </td>
+    <td align="center"><b>Payment methods</b><br>
+      <img src="screenshots/payment-methods.png" width="180" alt="Payment methods" />
+      <img src="screenshots/payment-methods-dark.png" width="180" alt="Payment methods, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>Settings</b><br>
+      <img src="screenshots/settings.png" width="180" alt="Settings" />
+      <img src="screenshots/settings-dark.png" width="180" alt="Settings, dark theme" />
+    </td>
+    <td align="center"><b>Favorite stores</b><br>
+      <img src="screenshots/favorite-stores.png" width="180" alt="Favorite stores" />
+      <img src="screenshots/favorite-stores-dark.png" width="180" alt="Favorite stores, dark theme" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><b>Help center</b><br>
+      <img src="screenshots/help-center.png" width="180" alt="Help center" />
+      <img src="screenshots/help-center-dark.png" width="180" alt="Help center, dark theme" />
+    </td>
+  </tr>
+</table>
 
-### Dark theme
-
-<p>
-  <img src="screenshots/home-dark.png" width="240" alt="Home, dark theme" />
-  <img src="screenshots/product-dark.png" width="240" alt="Product details, dark theme" />
-</p>
+</details>
 
 ## Tech stack
 
