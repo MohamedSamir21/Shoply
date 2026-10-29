@@ -581,4 +581,20 @@
     <string name="settings_change_password_hint">We\'ll email you a reset link</string>
     <string name="snackbar_reset_sent">We sent a reset link to %1$s</string>
     <string name="snackbar_reset_failed">Couldn\'t send the reset link. Try again.</string>
+    <!-- Support Chat -->
+    <string name="chat_subtitle">Usually replies in 2 minutes</string>
+    <string name="chat_intro">Today · Ask us anything about your orders</string>
+    <string name="chat_empty_title">How Can We Help?</string>
+    <string name="chat_empty_message">Send us a message or pick a topic below. We\'ll reply right here.</string>
+    <string name="chat_quick_start">Start a Chat</string>
+    <string name="chat_typing">Shoply Support is typing…</string>
+    <string name="chat_hint">Message Shoply Support</string>
+    <string name="cd_send_message">Send message</string>
+    <string name="snackbar_chat_failed">Couldn\'t send your message. Try again.</string>
+    <string-array name="chat_quick_replies">
+        <item>Where is my order?</item>
+        <item>I want a refund</item>
+        <item>My delivery is late</item>
+        <item>Payment problem</item>
+    </string-array>
 </resources>
