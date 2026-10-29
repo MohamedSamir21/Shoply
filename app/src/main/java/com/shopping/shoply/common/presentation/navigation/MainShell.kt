@@ -85,6 +85,7 @@ import com.shopping.shoply.orders.presentation.ORDER_DETAILS_ID_ARG
 import com.shopping.shoply.orders.presentation.OrderDetailsScreen
 import com.shopping.shoply.orders.presentation.OrdersDestination
 import com.shopping.shoply.orders.presentation.OrdersScreen
+import com.shopping.shoply.payments.presentation.PaymentMethodsScreen
 import com.shopping.shoply.products.presentation.LISTING_CATEGORY_ID_ARG
 import com.shopping.shoply.products.presentation.ProductListingDestination
 import com.shopping.shoply.products.presentation.ProductListingScreen
@@ -116,7 +117,6 @@ private enum class Placeholder(@StringRes val title: Int) {
     SUPPORT_CHAT(R.string.screen_support_chat),
     EDIT_PROFILE(R.string.screen_edit_profile),
     SETTINGS(R.string.screen_settings),
-    PAYMENT_METHODS(R.string.screen_payment_methods),
 }
 
 private const val HOME_ROUTE = "home_feed"
@@ -144,6 +144,7 @@ private fun listingRoute(tab: ShellTab) = "${tab.route}/products/{$LISTING_CATEG
 private fun storesRoute(tab: ShellTab) = "${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG={$STORES_FAVORITES_ONLY_ARG}"
 private fun addressesRoute(tab: ShellTab) = "${tab.route}/addresses"
 private fun addressEditRoute(tab: ShellTab) = "${tab.route}/address?$ADDRESS_ID_ARG={$ADDRESS_ID_ARG}"
+private fun paymentsRoute(tab: ShellTab) = "${tab.route}/payments"
 private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
@@ -211,6 +212,7 @@ fun MainShell(
                 store(ShellTab.HOME, navController, snackbarHostState)
                 search(ShellTab.HOME, navController, snackbarHostState)
                 addresses(ShellTab.HOME, navController, snackbarHostState)
+                paymentMethods(ShellTab.HOME, navController, snackbarHostState)
                 productListing(ShellTab.HOME, navController, snackbarHostState)
                 stores(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
@@ -241,6 +243,7 @@ fun MainShell(
                 comingSoon(ShellTab.CART, navController)
                 checkout(navController, snackbarHostState)
                 addresses(ShellTab.CART, navController, snackbarHostState)
+                paymentMethods(ShellTab.CART, navController, snackbarHostState)
             }
             navigation(startDestination = PROFILE_ROUTE, route = ShellTab.PROFILE.route) {
                 composable(PROFILE_ROUTE) {
@@ -257,6 +260,7 @@ fun MainShell(
                 store(ShellTab.PROFILE, navController, snackbarHostState)
                 search(ShellTab.PROFILE, navController, snackbarHostState)
                 addresses(ShellTab.PROFILE, navController, snackbarHostState)
+                paymentMethods(ShellTab.PROFILE, navController, snackbarHostState)
                 stores(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
@@ -345,7 +349,7 @@ private fun NavGraphBuilder.notifications(
                 when (destination) {
                     is NotificationDestination.Order -> navController.openOrder(tab, destination.id)
                     is NotificationDestination.Product -> navController.openProduct(tab, destination.id)
-                    NotificationDestination.PaymentMethods -> navController.openPlaceholder(tab, Placeholder.PAYMENT_METHODS)
+                    NotificationDestination.PaymentMethods -> navController.navigate(paymentsRoute(tab))
                     NotificationDestination.Home -> navController.goHome(tab)
                 }
             },
@@ -396,7 +400,7 @@ private fun NavGraphBuilder.checkout(navController: NavHostController, snackbarH
                         popUpTo(CART_ROUTE)
                     }
                     CheckoutDestination.AddAddress -> navController.openAddressEdit(ShellTab.CART, addressId = null)
-                    CheckoutDestination.AddCard -> navController.openPlaceholder(ShellTab.CART, Placeholder.PAYMENT_METHODS)
+                    CheckoutDestination.AddCard -> navController.navigate(paymentsRoute(ShellTab.CART))
                 }
             },
         )
@@ -567,6 +571,17 @@ private fun NavGraphBuilder.addresses(
     }
 }
 
+/** Payment Methods inside [tab]'s graph. */
+private fun NavGraphBuilder.paymentMethods(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(paymentsRoute(tab)) {
+        PaymentMethodsScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
+    }
+}
+
 private fun NavHostController.openAddressEdit(tab: ShellTab, addressId: String?) {
     navigate("${tab.route}/address?$ADDRESS_ID_ARG=${addressId.orEmpty()}")
 }
@@ -663,7 +678,7 @@ private fun NavHostController.openFromProfile(destination: ProfileDestination) {
         ProfileDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.PROFILE))
         ProfileDestination.FavoriteStores -> return openStores(ShellTab.PROFILE, favoritesOnly = true)
         ProfileDestination.Addresses -> return navigate(addressesRoute(ShellTab.PROFILE))
-        ProfileDestination.Payments -> Placeholder.PAYMENT_METHODS
+        ProfileDestination.Payments -> return navigate(paymentsRoute(ShellTab.PROFILE))
         ProfileDestination.Notifications -> return navigate(notificationsRoute(ShellTab.PROFILE))
     }
     openPlaceholder(ShellTab.PROFILE, placeholder)

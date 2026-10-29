@@ -537,4 +537,28 @@
     <string name="snackbar_address_deleted">Address deleted</string>
     <string name="snackbar_address_default">Default address updated</string>
     <string name="snackbar_address_failed">Couldn\'t update your addresses. Try again.</string>
+    <!-- Payment Methods -->
+    <string name="payments_cards">Cards</string>
+    <string name="payments_expires">Expires %1$s</string>
+    <string name="payments_default">Default</string>
+    <string name="payments_set_default">Set as Default</string>
+    <string name="payments_add_card">Add New Card</string>
+    <string name="payments_empty_title">No Saved Cards</string>
+    <string name="payments_empty_message">Add a card for faster checkout. You can also pay with cash on delivery.</string>
+    <string name="payments_secure_note">Only the last 4 digits and the expiry date are saved.</string>
+    <string name="payments_field_name">Name on Card</string>
+    <string name="payments_field_number">Card Number</string>
+    <string name="payments_field_expiry">Expiry (MM/YY)</string>
+    <string name="payments_field_cvv">CVV</string>
+    <string name="payments_error_name">Enter the name on the card</string>
+    <string name="payments_error_number">Enter a valid card number</string>
+    <string name="payments_error_expiry">Enter a valid expiry date</string>
+    <string name="payments_error_cvv">Enter the 3 or 4 digit code</string>
+    <string name="payments_make_default">Set as default card</string>
+    <string name="payments_save_card">Save Card</string>
+    <string name="cd_remove_card">Remove %1$s</string>
+    <string name="snackbar_card_saved">Card saved</string>
+    <string name="snackbar_card_removed">Card removed</string>
+    <string name="snackbar_card_default">Default card updated</string>
+    <string name="snackbar_card_failed">Couldn\'t update your cards. Try again.</string>
 </resources>
