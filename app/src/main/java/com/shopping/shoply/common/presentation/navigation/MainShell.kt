@@ -94,6 +94,7 @@ import com.shopping.shoply.settings.presentation.SettingsScreen
 import com.shopping.shoply.search.presentation.SearchDestination
 import com.shopping.shoply.search.presentation.SearchScreen
 import com.shopping.shoply.store.presentation.STORES_FAVORITES_ONLY_ARG
+import com.shopping.shoply.supportchat.presentation.SupportChatScreen
 import com.shopping.shoply.store.presentation.STORE_ID_ARG
 import com.shopping.shoply.store.presentation.StoresDestination
 import com.shopping.shoply.store.presentation.StoresScreen
@@ -115,7 +116,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
-    SUPPORT_CHAT(R.string.screen_support_chat),
     EDIT_PROFILE(R.string.screen_edit_profile),
 }
 
@@ -146,6 +146,7 @@ private fun addressesRoute(tab: ShellTab) = "${tab.route}/addresses"
 private fun addressEditRoute(tab: ShellTab) = "${tab.route}/address?$ADDRESS_ID_ARG={$ADDRESS_ID_ARG}"
 private fun paymentsRoute(tab: ShellTab) = "${tab.route}/payments"
 private const val SETTINGS_ROUTE = "tab_profile/settings"
+private fun supportChatRoute(tab: ShellTab) = "${tab.route}/support_chat"
 private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
@@ -205,7 +206,7 @@ fun MainShell(
                         onNavigate = { navController.openFromHome(it) },
                     )
                 }
-                helpCenter(ShellTab.HOME, navController)
+                helpCenter(ShellTab.HOME, navController, snackbarHostState)
                 wishlist(ShellTab.HOME, navController, snackbarHostState)
                 notifications(ShellTab.HOME, navController, snackbarHostState)
                 orderDetails(ShellTab.HOME, navController, snackbarHostState)
@@ -253,7 +254,7 @@ fun MainShell(
                         onSignedOut = onSignedOut,
                     )
                 }
-                helpCenter(ShellTab.PROFILE, navController)
+                helpCenter(ShellTab.PROFILE, navController, snackbarHostState)
                 wishlist(ShellTab.PROFILE, navController, snackbarHostState)
                 notifications(ShellTab.PROFILE, navController, snackbarHostState)
                 orderDetails(ShellTab.PROFILE, navController, snackbarHostState)
@@ -309,12 +310,15 @@ private fun NavGraphBuilder.comingSoon(tab: ShellTab, navController: NavHostCont
 }
 
 /** The Help Center inside [tab]'s graph; chat opens "Coming soon" in the same tab. */
-private fun NavGraphBuilder.helpCenter(tab: ShellTab, navController: NavHostController) {
+private fun NavGraphBuilder.helpCenter(tab: ShellTab, navController: NavHostController, snackbarHostState: SnackbarHostState) {
     composable(helpRoute(tab)) {
         HelpScreen(
             onBack = { navController.popBackStack() },
-            onOpenChat = { navController.openPlaceholder(tab, Placeholder.SUPPORT_CHAT) },
+            onOpenChat = { navController.navigate(supportChatRoute(tab)) },
         )
+    }
+    composable(supportChatRoute(tab)) {
+        SupportChatScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
     }
 }
 
