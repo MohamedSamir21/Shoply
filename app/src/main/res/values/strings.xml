@@ -481,4 +481,31 @@
     <string name="listing_empty_title">Nothing Here Yet</string>
     <string name="listing_empty_message">Stores near you haven\'t listed anything in %1$s yet. Check back soon.</string>
     <string name="listing_empty_action">Browse Categories</string>
+    <!-- All Stores / Favorite Stores -->
+    <plurals name="stores_near_you">
+        <item quantity="one">%1$d store near you</item>
+        <item quantity="other">%1$d stores near you</item>
+    </plurals>
+    <plurals name="stores_count">
+        <item quantity="one">%1$d store</item>
+        <item quantity="other">%1$d stores</item>
+    </plurals>
+    <string name="stores_search_hint">Search stores</string>
+    <string name="stores_all">All</string>
+    <string name="stores_sort_title">Sort Stores</string>
+    <string name="stores_sort_nearest">Nearest</string>
+    <string name="stores_sort_top_rated">Top Rated</string>
+    <string name="stores_sort_fastest">Fastest delivery</string>
+    <string name="stores_none_title">No Stores Nearby Yet</string>
+    <string name="stores_none_message">We don\'t deliver to this address yet. Try another address to see stores near you.</string>
+    <string name="stores_none_action">Change Address</string>
+    <string name="stores_not_found_title">No Stores Found</string>
+    <string name="stores_not_found_query">No stores match “%1$s”. Try a different name or category.</string>
+    <string name="stores_not_found_category">No stores in this category yet.</string>
+    <string name="stores_not_found_action">Clear Filters</string>
+    <string name="favorites_empty_title">No Favorite Stores Yet</string>
+    <string name="favorites_empty_message">Tap the heart on a store page to follow it. Your stores will show up here.</string>
+    <string name="favorites_empty_action">Browse Stores</string>
+    <string name="cd_store_follow">Follow %1$s</string>
+    <string name="cd_store_unfollow">Unfollow %1$s</string>
 </resources>

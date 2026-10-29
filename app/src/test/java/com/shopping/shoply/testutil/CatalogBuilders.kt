@@ -43,9 +43,10 @@ fun aStore(
     deliveryFeeCents: Long = 199,
     opensAtMinutes: Int = 10 * 60,
     closesAtMinutes: Int = 21 * 60,
+    distanceMiles: Double = 1.0,
 ) = Store(
     id, name, category, icon, rating, reviewCount, etaMinutes, deliveryFeeCents,
-    opensAtMinutes = opensAtMinutes, closesAtMinutes = closesAtMinutes,
+    distanceMiles = distanceMiles, opensAtMinutes = opensAtMinutes, closesAtMinutes = closesAtMinutes,
 )
 
 fun aCategory(

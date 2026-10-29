@@ -87,7 +87,10 @@ import com.shopping.shoply.products.presentation.ProductListingScreen
 import com.shopping.shoply.search.presentation.SEARCH_OPEN_FILTERS_ARG
 import com.shopping.shoply.search.presentation.SearchDestination
 import com.shopping.shoply.search.presentation.SearchScreen
+import com.shopping.shoply.store.presentation.STORES_FAVORITES_ONLY_ARG
 import com.shopping.shoply.store.presentation.STORE_ID_ARG
+import com.shopping.shoply.store.presentation.StoresDestination
+import com.shopping.shoply.store.presentation.StoresScreen
 import com.shopping.shoply.store.presentation.StoreDestination
 import com.shopping.shoply.store.presentation.StoreScreen
 import com.shopping.shoply.profile.presentation.ProfileDestination
@@ -107,11 +110,9 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
     ADDRESSES(R.string.screen_addresses),
-    ALL_STORES(R.string.screen_all_stores),
     SUPPORT_CHAT(R.string.screen_support_chat),
     EDIT_PROFILE(R.string.screen_edit_profile),
     SETTINGS(R.string.screen_settings),
-    FAVORITE_STORES(R.string.screen_favorite_stores),
     PAYMENT_METHODS(R.string.screen_payment_methods),
 }
 
@@ -137,6 +138,7 @@ private fun productRoute(tab: ShellTab) = "${tab.route}/product/{$PRODUCT_ID_ARG
 private fun orderRoute(tab: ShellTab) = "${tab.route}/order/{$ORDER_DETAILS_ID_ARG}"
 private fun storeRoute(tab: ShellTab) = "${tab.route}/store/{$STORE_ID_ARG}"
 private fun listingRoute(tab: ShellTab) = "${tab.route}/products/{$LISTING_CATEGORY_ID_ARG}"
+private fun storesRoute(tab: ShellTab) = "${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG={$STORES_FAVORITES_ONLY_ARG}"
 private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
@@ -204,6 +206,7 @@ fun MainShell(
                 store(ShellTab.HOME, navController, snackbarHostState)
                 search(ShellTab.HOME, navController, snackbarHostState)
                 productListing(ShellTab.HOME, navController, snackbarHostState)
+                stores(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
             }
             navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
@@ -245,6 +248,7 @@ fun MainShell(
                 productDetails(ShellTab.PROFILE, navController, snackbarHostState)
                 store(ShellTab.PROFILE, navController, snackbarHostState)
                 search(ShellTab.PROFILE, navController, snackbarHostState)
+                stores(ShellTab.PROFILE, navController, snackbarHostState)
                 comingSoon(ShellTab.PROFILE, navController)
             }
             navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
@@ -504,6 +508,34 @@ private fun NavGraphBuilder.productListing(
     }
 }
 
+/** All Stores or Favorite Stores inside [tab]'s graph; a store opens its page in the same tab. */
+private fun NavGraphBuilder.stores(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(
+        route = storesRoute(tab),
+        arguments = listOf(navArgument(STORES_FAVORITES_ONLY_ARG) { type = NavType.BoolType; defaultValue = false }),
+    ) {
+        StoresScreen(
+            snackbarHostState = snackbarHostState,
+            onNavigate = { destination ->
+                when (destination) {
+                    StoresDestination.Back -> navController.popBackStack()
+                    is StoresDestination.Store -> navController.openStore(tab, destination.storeId)
+                    StoresDestination.AllStores -> navController.openStores(tab, favoritesOnly = false)
+                    StoresDestination.Addresses -> navController.openPlaceholder(tab, Placeholder.ADDRESSES)
+                }
+            },
+        )
+    }
+}
+
+private fun NavHostController.openStores(tab: ShellTab, favoritesOnly: Boolean) {
+    navigate("${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG=$favoritesOnly")
+}
+
 private fun NavHostController.openListing(tab: ShellTab, categoryId: String) {
     navigate("${tab.route}/products/$categoryId")
 }
@@ -577,7 +609,7 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
         HomeDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.HOME))
         HomeDestination.Addresses -> Placeholder.ADDRESSES
         is HomeDestination.ProductListing -> return openListing(ShellTab.HOME, destination.categoryId)
-        HomeDestination.AllStores -> Placeholder.ALL_STORES
+        HomeDestination.AllStores -> return openStores(ShellTab.HOME, favoritesOnly = false)
         is HomeDestination.Store -> return openStore(ShellTab.HOME, destination.storeId)
         is HomeDestination.ProductDetails -> return openProduct(ShellTab.HOME, destination.productId)
         HomeDestination.Help -> return navigate(helpRoute(ShellTab.HOME))
@@ -592,7 +624,7 @@ private fun NavHostController.openFromProfile(destination: ProfileDestination) {
         ProfileDestination.EditProfile -> Placeholder.EDIT_PROFILE
         ProfileDestination.Settings -> Placeholder.SETTINGS
         ProfileDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.PROFILE))
-        ProfileDestination.FavoriteStores -> Placeholder.FAVORITE_STORES
+        ProfileDestination.FavoriteStores -> return openStores(ShellTab.PROFILE, favoritesOnly = true)
         ProfileDestination.Addresses -> Placeholder.ADDRESSES
         ProfileDestination.Payments -> Placeholder.PAYMENT_METHODS
         ProfileDestination.Notifications -> return navigate(notificationsRoute(ShellTab.PROFILE))

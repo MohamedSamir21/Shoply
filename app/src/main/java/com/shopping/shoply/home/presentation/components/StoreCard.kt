@@ -30,6 +30,7 @@ import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import com.shopping.shoply.common.presentation.theme.shoplyCard
 import com.shopping.shoply.common.presentation.theme.shoplyExtra
 import com.shopping.shoply.home.presentation.preview.HomePreviewData
+import java.util.Locale
 
 /**
  * 248 dp rail card: 56 dp icon thumbnail, name, category, "★ 4.8 · 25–35 min".
@@ -40,6 +41,8 @@ fun StoreCard(
     store: Store,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    showDistance: Boolean = false,
+    trailing: (@Composable () -> Unit)? = null,
 ) {
     Row(
         modifier = modifier
@@ -66,7 +69,11 @@ fun StoreCard(
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = store.category,
+                text = if (showDistance) {
+                    stringResource(R.string.store_location, store.category, String.format(Locale.US, "%.1f", store.distanceMiles))
+                } else {
+                    store.category
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 2.dp),
@@ -91,6 +98,7 @@ fun StoreCard(
                 )
             }
         }
+        trailing?.invoke()
     }
 }
 
