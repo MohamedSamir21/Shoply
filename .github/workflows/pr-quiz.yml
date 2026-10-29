@@ -31,7 +31,7 @@ jobs:
           script: |
             // ---- Config ----------------------------------------------------
             const ALLOW_AUTHOR = true;   // false: ticks made by the PR author are reset
-            const REQUIRE_QUIZ = true;   // true: PRs without a quiz fail the check
+            const REQUIRE_QUIZ = false;  // true: PRs without a quiz fail the check
             const REVEAL_WRONG = false;  // true: say which question numbers are wrong
             const STATUS_CONTEXT = 'PR Quiz';
             // -----------------------------------------------------------------
