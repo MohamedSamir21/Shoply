@@ -76,12 +76,19 @@ class FirestoreCatalogRepository @Inject constructor(
         readDocument("stores", id) { it.toStore() }
 
     override suspend fun getProductsInCategory(categoryId: String, limit: Int): Result<List<Product>, DataError> =
+        productsWhere("categoryId", categoryId, limit)
+
+    override suspend fun getProductsInStore(storeId: String): Result<List<Product>, DataError> =
+        productsWhere("storeId", storeId, limit = Int.MAX_VALUE)
+
+    // Products whose [field] equals [value], in display order.
+    private suspend fun productsWhere(field: String, value: String, limit: Int): Result<List<Product>, DataError> =
         withContext(ioDispatcher) {
             try {
                 withTimeout(TIMEOUT_MS.milliseconds) {
                     // Sorted here: whereEqualTo + orderBy on another field would need a composite index.
                     val snapshot = firestore.collection("products")
-                        .whereEqualTo("categoryId", categoryId)
+                        .whereEqualTo(field, value)
                         .get().await()
                     val products = snapshot.documents
                         .sortedBy { it.getLong("order") ?: Long.MAX_VALUE }

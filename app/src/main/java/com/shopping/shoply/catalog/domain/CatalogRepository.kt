@@ -37,4 +37,7 @@ interface CatalogRepository {
 
     /** Up to [limit] products of [categoryId], in display order. Same errors as [getCategories]. */
     suspend fun getProductsInCategory(categoryId: String, limit: Int): Result<List<Product>, DataError>
+
+    /** Every product of [storeId], in display order. Same errors as [getCategories]. */
+    suspend fun getProductsInStore(storeId: String): Result<List<Product>, DataError>
 }
