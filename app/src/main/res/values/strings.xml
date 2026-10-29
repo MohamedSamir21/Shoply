@@ -178,7 +178,6 @@
     <string name="screen_notifications">Notifications</string>
     <string name="screen_wishlist">Wishlist</string>
     <string name="screen_addresses">Addresses</string>
-    <string name="screen_products">Products</string>
     <string name="screen_all_stores">All Stores</string>
     <string name="screen_support_chat">Support Chat</string>
     <string name="screen_order_details">Order Details</string>
@@ -477,4 +476,9 @@
         <item>Plants</item>
         <item>Face serum</item>
     </string-array>
+    <!-- Product Listing -->
+    <string name="listing_all">All</string>
+    <string name="listing_empty_title">Nothing Here Yet</string>
+    <string name="listing_empty_message">Stores near you haven\'t listed anything in %1$s yet. Check back soon.</string>
+    <string name="listing_empty_action">Browse Categories</string>
 </resources>

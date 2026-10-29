@@ -81,6 +81,9 @@ import com.shopping.shoply.orders.presentation.ORDER_DETAILS_ID_ARG
 import com.shopping.shoply.orders.presentation.OrderDetailsScreen
 import com.shopping.shoply.orders.presentation.OrdersDestination
 import com.shopping.shoply.orders.presentation.OrdersScreen
+import com.shopping.shoply.products.presentation.LISTING_CATEGORY_ID_ARG
+import com.shopping.shoply.products.presentation.ProductListingDestination
+import com.shopping.shoply.products.presentation.ProductListingScreen
 import com.shopping.shoply.search.presentation.SEARCH_OPEN_FILTERS_ARG
 import com.shopping.shoply.search.presentation.SearchDestination
 import com.shopping.shoply.search.presentation.SearchScreen
@@ -104,7 +107,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
     ADDRESSES(R.string.screen_addresses),
-    PRODUCTS(R.string.screen_products),
     ALL_STORES(R.string.screen_all_stores),
     SUPPORT_CHAT(R.string.screen_support_chat),
     EDIT_PROFILE(R.string.screen_edit_profile),
@@ -134,6 +136,7 @@ private fun notificationsRoute(tab: ShellTab) = "${tab.route}/notifications"
 private fun productRoute(tab: ShellTab) = "${tab.route}/product/{$PRODUCT_ID_ARG}"
 private fun orderRoute(tab: ShellTab) = "${tab.route}/order/{$ORDER_DETAILS_ID_ARG}"
 private fun storeRoute(tab: ShellTab) = "${tab.route}/store/{$STORE_ID_ARG}"
+private fun listingRoute(tab: ShellTab) = "${tab.route}/products/{$LISTING_CATEGORY_ID_ARG}"
 private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
@@ -200,6 +203,7 @@ fun MainShell(
                 productDetails(ShellTab.HOME, navController, snackbarHostState)
                 store(ShellTab.HOME, navController, snackbarHostState)
                 search(ShellTab.HOME, navController, snackbarHostState)
+                productListing(ShellTab.HOME, navController, snackbarHostState)
                 comingSoon(ShellTab.HOME, navController)
             }
             navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
@@ -210,6 +214,7 @@ fun MainShell(
                 productDetails(ShellTab.CATEGORIES, navController, snackbarHostState)
                 store(ShellTab.CATEGORIES, navController, snackbarHostState)
                 search(ShellTab.CATEGORIES, navController, snackbarHostState)
+                productListing(ShellTab.CATEGORIES, navController, snackbarHostState)
                 comingSoon(ShellTab.CATEGORIES, navController)
             }
             navigation(startDestination = CART_ROUTE, route = ShellTab.CART.route) {
@@ -471,6 +476,38 @@ private fun NavGraphBuilder.search(
     }
 }
 
+/** Product Listing inside [tab]'s graph; products open Product Details in the same tab. */
+private fun NavGraphBuilder.productListing(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState,
+) {
+    composable(
+        route = listingRoute(tab),
+        arguments = listOf(navArgument(LISTING_CATEGORY_ID_ARG) { type = NavType.StringType }),
+    ) {
+        ProductListingScreen(
+            snackbarHostState = snackbarHostState,
+            onNavigate = { destination ->
+                when (destination) {
+                    ProductListingDestination.Back -> navController.popBackStack()
+                    ProductListingDestination.Search -> navController.openSearch(tab)
+                    is ProductListingDestination.Product -> navController.openProduct(tab, destination.productId)
+                    ProductListingDestination.Categories ->
+                        if (tab == ShellTab.CATEGORIES) navController.popBackStack(CATEGORIES_ROUTE, inclusive = false)
+                        else navController.switchTab(ShellTab.CATEGORIES)
+                    ProductListingDestination.Wishlist -> navController.navigate(wishlistRoute(tab))
+                    ProductListingDestination.Cart -> navController.goToCart(tab)
+                }
+            },
+        )
+    }
+}
+
+private fun NavHostController.openListing(tab: ShellTab, categoryId: String) {
+    navigate("${tab.route}/products/$categoryId")
+}
+
 private fun NavHostController.openSearch(tab: ShellTab, openFilters: Boolean = false) {
     navigate("${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG=$openFilters")
 }
@@ -526,7 +563,7 @@ private fun NavHostController.openFromCategories(destination: CategoriesDestinat
     val placeholder = when (destination) {
         CategoriesDestination.Search -> return openSearch(ShellTab.CATEGORIES)
         CategoriesDestination.Addresses -> Placeholder.ADDRESSES
-        is CategoriesDestination.ProductListing -> Placeholder.PRODUCTS
+        is CategoriesDestination.ProductListing -> return openListing(ShellTab.CATEGORIES, destination.categoryId)
     }
     openPlaceholder(ShellTab.CATEGORIES, placeholder)
 }
@@ -539,7 +576,7 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
         HomeDestination.Notifications -> return navigate(notificationsRoute(ShellTab.HOME))
         HomeDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.HOME))
         HomeDestination.Addresses -> Placeholder.ADDRESSES
-        is HomeDestination.ProductListing -> Placeholder.PRODUCTS
+        is HomeDestination.ProductListing -> return openListing(ShellTab.HOME, destination.categoryId)
         HomeDestination.AllStores -> Placeholder.ALL_STORES
         is HomeDestination.Store -> return openStore(ShellTab.HOME, destination.storeId)
         is HomeDestination.ProductDetails -> return openProduct(ShellTab.HOME, destination.productId)
