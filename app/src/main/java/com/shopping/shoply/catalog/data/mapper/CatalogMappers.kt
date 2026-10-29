@@ -63,5 +63,6 @@ fun DocumentSnapshot.toProduct() = Product(
     description = string("description"),
     categoryId = string("categoryId"),
     subcategory = string("subcategory"),
-    keywords = string("keywords"),
+    // Stored as a list of words, e.g. ["wireless", "bluetooth"].
+    keywords = (get("keywords") as? List<String>).orEmpty().joinToString(" "),
 )
