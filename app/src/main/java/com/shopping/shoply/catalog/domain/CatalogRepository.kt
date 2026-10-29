@@ -40,4 +40,10 @@ interface CatalogRepository {
 
     /** Every product of [storeId], in display order. Same errors as [getCategories]. */
     suspend fun getProductsInStore(storeId: String): Result<List<Product>, DataError>
+
+    /** Every product, in display order. Same errors as [getCategories]. */
+    suspend fun getAllProducts(): Result<List<Product>, DataError>
+
+    /** Every store, in display order. Same errors as [getCategories]. */
+    suspend fun getAllStores(): Result<List<Store>, DataError>
 }

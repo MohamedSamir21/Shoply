@@ -8,6 +8,8 @@ package com.shopping.shoply.catalog.domain.model
  * @property sizes available sizes in display order (e.g. S, M, L); may be empty.
  * @property description shown on the product page; may be empty.
  * @property categoryId the [Category] it belongs to; finds similar products.
+ * @property subcategory e.g. "Audio"; may be empty.
+ * @property keywords extra words Search matches, e.g. "wireless bluetooth"; may be empty.
  */
 data class Product(
     val id: String,
@@ -22,6 +24,8 @@ data class Product(
     val sizes: List<String>,
     val description: String = "",
     val categoryId: String = "",
+    val subcategory: String = "",
+    val keywords: String = "",
 )
 
 /** A colour choice. [hex] is "#RRGGBB", used for the swatch. */

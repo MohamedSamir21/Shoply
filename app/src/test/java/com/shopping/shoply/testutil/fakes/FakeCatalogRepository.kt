@@ -18,6 +18,7 @@ import com.shopping.shoply.testutil.categories
  * - [getProductsInCategory] fails with [categoryError] when set.
  *
  * - [getProductsInStore] fails with [storeProductsError] when set.
+ * - [getAllProducts] fails with [productsError] when set; [getAllStores] with [storeError].
  *
  * [getStore] answers from [stores], or fails with [storeError] when set.
  */
@@ -71,5 +72,16 @@ class FakeCatalogRepository(
     override suspend fun getProductsInStore(storeId: String): Result<List<Product>, DataError> {
         storeProductsError?.let { return Result.Error(it) }
         return Result.Success(products.filter { it.storeId == storeId })
+    }
+
+    override suspend fun getAllProducts(): Result<List<Product>, DataError> {
+        gate.pass()
+        productsError?.let { return Result.Error(it) }
+        return Result.Success(products)
+    }
+
+    override suspend fun getAllStores(): Result<List<Store>, DataError> {
+        storeError?.let { return Result.Error(it) }
+        return Result.Success(stores)
     }
 }
