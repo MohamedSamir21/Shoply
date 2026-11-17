@@ -43,7 +43,7 @@ import com.shopping.shoply.authentication.presentation.components.CountryCodePic
 import com.shopping.shoply.authentication.presentation.components.FacebookButton
 import com.shopping.shoply.authentication.presentation.components.FormEmail
 import com.shopping.shoply.authentication.presentation.components.FormPassword
-import com.shopping.shoply.authentication.presentation.components.FormTextField
+import com.shopping.shoply.common.presentation.components.FormTextField
 import com.shopping.shoply.authentication.presentation.components.GoogleButton
 import com.shopping.shoply.authentication.presentation.components.PasswordStrengthMeter
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton

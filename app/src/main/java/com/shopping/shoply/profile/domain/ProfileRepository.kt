@@ -1,7 +1,10 @@
 package com.shopping.shoply.profile.domain
 
+import com.shopping.shoply.common.domain.DataError
+import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.profile.domain.model.Account
 import com.shopping.shoply.profile.domain.model.DeliveryAddress
+import com.shopping.shoply.profile.domain.model.UserInfo
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -21,4 +24,7 @@ interface ProfileRepository {
 
     /** Name, email and phone for the Profile tab. */
     fun observeAccount(): Flow<Account>
+
+    /** Saves the non-null fields of [userInfo]. Fails with [DataError.PhotoTooLarge] when the picked photo is too big. */
+    suspend fun updateUserInfo(userInfo: UserInfo): Result<Unit, DataError>
 }

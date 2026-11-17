@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -15,20 +16,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.shopping.shoply.R
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import com.shopping.shoply.common.presentation.theme.darkRing
 
-/** Soft orange circle with the user's [initials], or a person icon when there are none. */
+/**
+ * The user's [photo] in a circle; without one, a soft orange circle with their [initials], or a
+ * person icon when there are none. [photo] is any Coil model: a URL, a content URI, or JPEG bytes.
+ */
 @Composable
 fun Avatar(
     initials: String?,
+    photo: Any? = null,
     modifier: Modifier = Modifier,
     size: Dp = 44.dp,
 ) {
@@ -40,7 +49,14 @@ fun Avatar(
             .darkRing(CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        if (initials != null) {
+        if (photo != null) {
+            AsyncImage(
+                model = photo,
+                contentDescription = stringResource(R.string.avatar),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else if (initials != null) {
             Text(
                 text = initials,
                 style = MaterialTheme.typography.titleSmall,
@@ -49,6 +65,7 @@ fun Avatar(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
+
         } else {
             Icon(
                 imageVector = ShoplyAppIcons.User,

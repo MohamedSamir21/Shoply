@@ -73,6 +73,7 @@ import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
+import com.shopping.shoply.editprofile.presentation.EditProfileScreen
 import com.shopping.shoply.help.presentation.HelpScreen
 import com.shopping.shoply.home.presentation.HomeDestination
 import com.shopping.shoply.home.presentation.HomeScreen
@@ -128,7 +129,8 @@ private const val CHECKOUT_ROUTE = "tab_cart/checkout?$PROMO_CODE_ARG={$PROMO_CO
 private const val ORDER_PLACED_ROUTE = "tab_cart/order_placed/{$ORDER_ID_ARG}"
 
 // Checkout and its success screen are full-screen flows: the bottom navigation hides there.
-private val ROUTES_WITHOUT_BOTTOM_BAR = setOf(CHECKOUT_ROUTE, ORDER_PLACED_ROUTE) + ShellTab.entries.map(::searchRoute)
+private val ROUTES_WITHOUT_BOTTOM_BAR =
+    setOf(CHECKOUT_ROUTE, ORDER_PLACED_ROUTE) + ShellTab.entries.map(::searchRoute)
 private const val PLACEHOLDER_ARG = "placeholder"
 
 // Each tab has its own placeholder and Help Center routes, so the screen keeps its tab selected
@@ -141,13 +143,20 @@ private fun productRoute(tab: ShellTab) = "${tab.route}/product/{$PRODUCT_ID_ARG
 private fun orderRoute(tab: ShellTab) = "${tab.route}/order/{$ORDER_DETAILS_ID_ARG}"
 private fun storeRoute(tab: ShellTab) = "${tab.route}/store/{$STORE_ID_ARG}"
 private fun listingRoute(tab: ShellTab) = "${tab.route}/products/{$LISTING_CATEGORY_ID_ARG}"
-private fun storesRoute(tab: ShellTab) = "${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG={$STORES_FAVORITES_ONLY_ARG}"
+private fun storesRoute(tab: ShellTab) =
+    "${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG={$STORES_FAVORITES_ONLY_ARG}"
+
+private fun editProfileRoute(tab: ShellTab) = "${tab.route}/edit_profile"
+
 private fun addressesRoute(tab: ShellTab) = "${tab.route}/addresses"
-private fun addressEditRoute(tab: ShellTab) = "${tab.route}/address?$ADDRESS_ID_ARG={$ADDRESS_ID_ARG}"
+private fun addressEditRoute(tab: ShellTab) =
+    "${tab.route}/address?$ADDRESS_ID_ARG={$ADDRESS_ID_ARG}"
+
 private fun paymentsRoute(tab: ShellTab) = "${tab.route}/payments"
 private const val SETTINGS_ROUTE = "tab_profile/settings"
 private fun supportChatRoute(tab: ShellTab) = "${tab.route}/support_chat"
-private fun searchRoute(tab: ShellTab) = "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
+private fun searchRoute(tab: ShellTab) =
+    "${tab.route}/search?$SEARCH_OPEN_FILTERS_ARG={$SEARCH_OPEN_FILTERS_ARG}"
 
 /**
  * The signed-in app: a `Scaffold` with the bottom navigation (Home, Categories, Cart, Orders,
@@ -181,7 +190,12 @@ fun MainShell(
         // The app's outer Scaffold already pads for the system bars.
         contentWindowInsets = WindowInsets(0),
         snackbarHost = {
-            SnackbarHost(snackbarHostState) { data -> Snackbar(data, shape = RoundedCornerShape(12.dp)) }
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    data,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
         },
         bottomBar = {
             if (backStackEntry?.destination?.route !in ROUTES_WITHOUT_BOTTOM_BAR) {
@@ -263,11 +277,9 @@ fun MainShell(
                 search(ShellTab.PROFILE, navController, snackbarHostState)
                 addresses(ShellTab.PROFILE, navController, snackbarHostState)
                 paymentMethods(ShellTab.PROFILE, navController, snackbarHostState)
-                composable(SETTINGS_ROUTE) {
-                    SettingsScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
-                }
+                settings(snackbarHostState, navController)
                 stores(ShellTab.PROFILE, navController, snackbarHostState)
-                comingSoon(ShellTab.PROFILE, navController)
+                editProfile(ShellTab.PROFILE, navController, snackbarHostState)
             }
             navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
                 composable(ORDERS_ROUTE) {
@@ -284,6 +296,34 @@ fun MainShell(
                 comingSoon(ShellTab.ORDERS, navController)
             }
         }
+    }
+}
+
+private fun NavGraphBuilder.editProfile(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackHostState: SnackbarHostState
+) {
+    composable(
+        route = editProfileRoute(tab)
+    ) {
+        EditProfileScreen(
+            snackHostState = snackHostState,
+            onBack = { navController.popBackStack() },
+            onChangeEmailClicked = {},
+            onChangePhoneClicked = {}
+        )
+    }
+}
+
+private fun NavGraphBuilder.settings(
+    snackHostState: SnackbarHostState,
+    navController: NavHostController
+) {
+    composable(SETTINGS_ROUTE) {
+        SettingsScreen(
+            snackbarHostState = snackHostState,
+            onBack = { navController.popBackStack() })
     }
 }
 
@@ -310,7 +350,11 @@ private fun NavGraphBuilder.comingSoon(tab: ShellTab, navController: NavHostCont
 }
 
 /** The Help Center inside [tab]'s graph; chat opens "Coming soon" in the same tab. */
-private fun NavGraphBuilder.helpCenter(tab: ShellTab, navController: NavHostController, snackbarHostState: SnackbarHostState) {
+private fun NavGraphBuilder.helpCenter(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState
+) {
     composable(helpRoute(tab)) {
         HelpScreen(
             onBack = { navController.popBackStack() },
@@ -318,7 +362,9 @@ private fun NavGraphBuilder.helpCenter(tab: ShellTab, navController: NavHostCont
         )
     }
     composable(supportChatRoute(tab)) {
-        SupportChatScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
+        SupportChatScreen(
+            snackbarHostState = snackbarHostState,
+            onBack = { navController.popBackStack() })
     }
 }
 
@@ -356,8 +402,17 @@ private fun NavGraphBuilder.notifications(
             onNavigate = { destination ->
                 when (destination) {
                     is NotificationDestination.Order -> navController.openOrder(tab, destination.id)
-                    is NotificationDestination.Product -> navController.openProduct(tab, destination.id)
-                    NotificationDestination.PaymentMethods -> navController.navigate(paymentsRoute(tab))
+                    is NotificationDestination.Product -> navController.openProduct(
+                        tab,
+                        destination.id
+                    )
+
+                    NotificationDestination.PaymentMethods -> navController.navigate(
+                        paymentsRoute(
+                            tab
+                        )
+                    )
+
                     NotificationDestination.Home -> navController.goHome(tab)
                 }
             },
@@ -380,8 +435,16 @@ private fun NavGraphBuilder.productDetails(
             onBack = { navController.popBackStack() },
             onNavigate = { destination ->
                 when (destination) {
-                    is ProductDetailsDestination.Store -> navController.openStore(tab, destination.id)
-                    is ProductDetailsDestination.Product -> navController.openProduct(tab, destination.id)
+                    is ProductDetailsDestination.Store -> navController.openStore(
+                        tab,
+                        destination.id
+                    )
+
+                    is ProductDetailsDestination.Product -> navController.openProduct(
+                        tab,
+                        destination.id
+                    )
+
                     ProductDetailsDestination.Cart -> navController.goToCart(tab)
                 }
             },
@@ -394,10 +457,15 @@ private fun NavGraphBuilder.productDetails(
  * Order Placed returns to the (now empty) cart. Its buttons first clear it from the Cart tab, so
  * coming back to Cart later shows the cart, not the old success screen.
  */
-private fun NavGraphBuilder.checkout(navController: NavHostController, snackbarHostState: SnackbarHostState) {
+private fun NavGraphBuilder.checkout(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState
+) {
     composable(
         route = CHECKOUT_ROUTE,
-        arguments = listOf(navArgument(PROMO_CODE_ARG) { type = NavType.StringType; nullable = true }),
+        arguments = listOf(navArgument(PROMO_CODE_ARG) {
+            type = NavType.StringType; nullable = true
+        }),
     ) {
         CheckoutScreen(
             snackbarHostState = snackbarHostState,
@@ -407,7 +475,12 @@ private fun NavGraphBuilder.checkout(navController: NavHostController, snackbarH
                     is CheckoutDestination.OrderPlaced -> navController.navigate("tab_cart/order_placed/${destination.orderId}") {
                         popUpTo(CART_ROUTE)
                     }
-                    CheckoutDestination.AddAddress -> navController.openAddressEdit(ShellTab.CART, addressId = null)
+
+                    CheckoutDestination.AddAddress -> navController.openAddressEdit(
+                        ShellTab.CART,
+                        addressId = null
+                    )
+
                     CheckoutDestination.AddCard -> navController.navigate(paymentsRoute(ShellTab.CART))
                 }
             },
@@ -465,7 +538,11 @@ private fun NavGraphBuilder.store(
             onNavigate = { destination ->
                 when (destination) {
                     StoreDestination.Back -> navController.popBackStack()
-                    is StoreDestination.Product -> navController.openProduct(tab, destination.productId)
+                    is StoreDestination.Product -> navController.openProduct(
+                        tab,
+                        destination.productId
+                    )
+
                     StoreDestination.Search -> navController.openSearch(tab)
                     StoreDestination.Home -> navController.goHome(tab)
                     StoreDestination.Wishlist -> navController.navigate(wishlistRoute(tab))
@@ -484,14 +561,20 @@ private fun NavGraphBuilder.search(
 ) {
     composable(
         route = searchRoute(tab),
-        arguments = listOf(navArgument(SEARCH_OPEN_FILTERS_ARG) { type = NavType.BoolType; defaultValue = false }),
+        arguments = listOf(navArgument(SEARCH_OPEN_FILTERS_ARG) {
+            type = NavType.BoolType; defaultValue = false
+        }),
     ) {
         SearchScreen(
             snackbarHostState = snackbarHostState,
             onNavigate = { destination ->
                 when (destination) {
                     SearchDestination.Back -> navController.popBackStack()
-                    is SearchDestination.Product -> navController.openProduct(tab, destination.productId)
+                    is SearchDestination.Product -> navController.openProduct(
+                        tab,
+                        destination.productId
+                    )
+
                     is SearchDestination.Store -> navController.openStore(tab, destination.storeId)
                     SearchDestination.Wishlist -> navController.navigate(wishlistRoute(tab))
                     SearchDestination.Cart -> navController.goToCart(tab)
@@ -517,10 +600,18 @@ private fun NavGraphBuilder.productListing(
                 when (destination) {
                     ProductListingDestination.Back -> navController.popBackStack()
                     ProductListingDestination.Search -> navController.openSearch(tab)
-                    is ProductListingDestination.Product -> navController.openProduct(tab, destination.productId)
+                    is ProductListingDestination.Product -> navController.openProduct(
+                        tab,
+                        destination.productId
+                    )
+
                     ProductListingDestination.Categories ->
-                        if (tab == ShellTab.CATEGORIES) navController.popBackStack(CATEGORIES_ROUTE, inclusive = false)
+                        if (tab == ShellTab.CATEGORIES) navController.popBackStack(
+                            CATEGORIES_ROUTE,
+                            inclusive = false
+                        )
                         else navController.switchTab(ShellTab.CATEGORIES)
+
                     ProductListingDestination.Wishlist -> navController.navigate(wishlistRoute(tab))
                     ProductListingDestination.Cart -> navController.goToCart(tab)
                 }
@@ -537,7 +628,9 @@ private fun NavGraphBuilder.stores(
 ) {
     composable(
         route = storesRoute(tab),
-        arguments = listOf(navArgument(STORES_FAVORITES_ONLY_ARG) { type = NavType.BoolType; defaultValue = false }),
+        arguments = listOf(navArgument(STORES_FAVORITES_ONLY_ARG) {
+            type = NavType.BoolType; defaultValue = false
+        }),
     ) {
         StoresScreen(
             snackbarHostState = snackbarHostState,
@@ -545,7 +638,11 @@ private fun NavGraphBuilder.stores(
                 when (destination) {
                     StoresDestination.Back -> navController.popBackStack()
                     is StoresDestination.Store -> navController.openStore(tab, destination.storeId)
-                    StoresDestination.AllStores -> navController.openStores(tab, favoritesOnly = false)
+                    StoresDestination.AllStores -> navController.openStores(
+                        tab,
+                        favoritesOnly = false
+                    )
+
                     StoresDestination.Addresses -> navController.navigate(addressesRoute(tab))
                 }
             },
@@ -566,16 +663,23 @@ private fun NavGraphBuilder.addresses(
                 when (destination) {
                     AddressesDestination.Back -> navController.popBackStack()
                     AddressesDestination.Add -> navController.openAddressEdit(tab, addressId = null)
-                    is AddressesDestination.Edit -> navController.openAddressEdit(tab, destination.id)
+                    is AddressesDestination.Edit -> navController.openAddressEdit(
+                        tab,
+                        destination.id
+                    )
                 }
             },
         )
     }
     composable(
         route = addressEditRoute(tab),
-        arguments = listOf(navArgument(ADDRESS_ID_ARG) { type = NavType.StringType; defaultValue = "" }),
+        arguments = listOf(navArgument(ADDRESS_ID_ARG) {
+            type = NavType.StringType; defaultValue = ""
+        }),
     ) {
-        AddressEditScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
+        AddressEditScreen(
+            snackbarHostState = snackbarHostState,
+            onBack = { navController.popBackStack() })
     }
 }
 
@@ -586,7 +690,9 @@ private fun NavGraphBuilder.paymentMethods(
     snackbarHostState: SnackbarHostState,
 ) {
     composable(paymentsRoute(tab)) {
-        PaymentMethodsScreen(snackbarHostState = snackbarHostState, onBack = { navController.popBackStack() })
+        PaymentMethodsScreen(
+            snackbarHostState = snackbarHostState,
+            onBack = { navController.popBackStack() })
     }
 }
 
@@ -630,12 +736,18 @@ private fun NavHostController.openProduct(tab: ShellTab, productId: String) {
 
 // Inside Home, go back to the feed; switching to the tab you're in would restore this same back stack.
 private fun NavHostController.goHome(from: ShellTab) {
-    if (from == ShellTab.HOME) popBackStack(HOME_ROUTE, inclusive = false) else switchTab(ShellTab.HOME)
+    if (from == ShellTab.HOME) popBackStack(
+        HOME_ROUTE,
+        inclusive = false
+    ) else switchTab(ShellTab.HOME)
 }
 
 // Inside Cart, go back to the cart list, for the same reason as goHome.
 private fun NavHostController.goToCart(from: ShellTab) {
-    if (from == ShellTab.CART) popBackStack(CART_ROUTE, inclusive = false) else switchTab(ShellTab.CART)
+    if (from == ShellTab.CART) popBackStack(
+        CART_ROUTE,
+        inclusive = false
+    ) else switchTab(ShellTab.CART)
 }
 
 private fun NavHostController.openPlaceholder(tab: ShellTab, placeholder: Placeholder) {
@@ -647,8 +759,10 @@ private fun NavHostController.openFromCart(destination: CartDestination) {
         is CartDestination.Product -> openProduct(ShellTab.CART, destination.id)
         CartDestination.Wishlist -> navigate(wishlistRoute(ShellTab.CART))
         is CartDestination.Checkout -> navigate(
-            "tab_cart/checkout" + destination.promoCode?.let { "?$PROMO_CODE_ARG=${Uri.encode(it)}" }.orEmpty(),
+            "tab_cart/checkout" + destination.promoCode?.let { "?$PROMO_CODE_ARG=${Uri.encode(it)}" }
+                .orEmpty(),
         )
+
         CartDestination.StartShopping -> switchTab(ShellTab.HOME)
     }
 }
@@ -657,7 +771,10 @@ private fun NavHostController.openFromCategories(destination: CategoriesDestinat
     when (destination) {
         CategoriesDestination.Search -> openSearch(ShellTab.CATEGORIES)
         CategoriesDestination.Addresses -> navigate(addressesRoute(ShellTab.CATEGORIES))
-        is CategoriesDestination.ProductListing -> openListing(ShellTab.CATEGORIES, destination.categoryId)
+        is CategoriesDestination.ProductListing -> openListing(
+            ShellTab.CATEGORIES,
+            destination.categoryId
+        )
     }
 }
 
@@ -681,10 +798,14 @@ private fun NavHostController.openFromProfile(destination: ProfileDestination) {
     val placeholder = when (destination) {
         ProfileDestination.Orders -> return switchTab(ShellTab.ORDERS)
         ProfileDestination.Help -> return navigate(helpRoute(ShellTab.PROFILE))
-        ProfileDestination.EditProfile -> Placeholder.EDIT_PROFILE
+        ProfileDestination.EditProfile -> return navigate(editProfileRoute(ShellTab.PROFILE))
         ProfileDestination.Settings -> return navigate(SETTINGS_ROUTE)
         ProfileDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.PROFILE))
-        ProfileDestination.FavoriteStores -> return openStores(ShellTab.PROFILE, favoritesOnly = true)
+        ProfileDestination.FavoriteStores -> return openStores(
+            ShellTab.PROFILE,
+            favoritesOnly = true
+        )
+
         ProfileDestination.Addresses -> return navigate(addressesRoute(ShellTab.PROFILE))
         ProfileDestination.Payments -> return navigate(paymentsRoute(ShellTab.PROFILE))
         ProfileDestination.Notifications -> return navigate(notificationsRoute(ShellTab.PROFILE))
@@ -709,7 +830,8 @@ private fun ShoplyBottomBar(
                     .padding(horizontal = ShoplyDimens.space1),
             ) {
                 ShellTab.entries.forEach { tab ->
-                    val selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true
+                    val selected =
+                        currentDestination?.hierarchy?.any { it.route == tab.route } == true
                     BottomBarItem(
                         tab = tab,
                         selected = selected,
@@ -743,7 +865,10 @@ private fun BottomBarItem(
             modifier = Modifier
                 .size(width = 56.dp, height = 32.dp)
                 // background, not clip: a wide badge ("99+") may poke past the pill's edge.
-                .background(if (selected) scheme.primaryContainer else scheme.surface, RoundedCornerShape(16.dp)),
+                .background(
+                    if (selected) scheme.primaryContainer else scheme.surface,
+                    RoundedCornerShape(16.dp)
+                ),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

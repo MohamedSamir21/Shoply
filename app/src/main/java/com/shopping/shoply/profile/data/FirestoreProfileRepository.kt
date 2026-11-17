@@ -2,21 +2,29 @@ package com.shopping.shoply.profile.data
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.shopping.shoply.common.data.firestore.liveSnapshots
 import com.shopping.shoply.common.data.firestore.string
+import com.shopping.shoply.common.data.firestore.writeForCurrentUser
+import com.shopping.shoply.common.domain.DataError
+import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.profile.domain.model.Account
 import com.shopping.shoply.profile.domain.model.DeliveryAddress
+import com.shopping.shoply.profile.domain.model.UserInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 /** Name, email and phone from the existing `users/{uid}` profile document; addresses from `users/{uid}/addresses`. */
 class FirestoreProfileRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth,
+    private val photoEncoder: PhotoEncoder
 ) : ProfileRepository {
 
     override fun observeDisplayName(): Flow<String> {
@@ -42,13 +50,41 @@ class FirestoreProfileRepository @Inject constructor(
     }
 
     override fun observeAccount(): Flow<Account> {
-        val uid = auth.currentUser?.uid ?: return flowOf(Account(name = "", email = "", phone = null))
-        return user(uid).liveSnapshots().map {
-            Account(
-                name = it.string("username"),
-                email = it.string("email"),
-                phone = it.string("phoneNumber").ifBlank { null },
+        val uid =
+            auth.currentUser?.uid ?: return flowOf(
+                Account(
+                    name = "",
+                    email = "",
+                    phone = null,
+                    photoUrl = null,
+                    dateOfBirth = null
+                )
             )
+        return user(uid).liveSnapshots().map { doc ->
+            Account(
+                name = doc.string("username"),
+                email = doc.string("email"),
+                phone = doc.string("phoneNumber").ifBlank { null },
+                photoUrl = doc.string("photoUrl").ifBlank { null },
+                customPhoto = doc.string(ProfilePhoto.FIELD_BASE64).ifBlank { null }
+                    ?.let(photoEncoder::decode),
+                dateOfBirth = doc.string("dateOfBirth").ifBlank { null }
+            )
+        }
+    }
+
+    override suspend fun updateUserInfo(userInfo: UserInfo): Result<Unit, DataError> {
+        val photoFields = userInfo.pickedPhotoUri?.let { uri ->
+            val base64 = photoEncoder.encode(uri) ?: return Result.Error(DataError.Unknown)
+            when (val fields = ProfilePhoto.fields(base64)) {
+                is Result.Success -> fields.data
+                is Result.Error -> return Result.Error(fields.error)
+            }
+        }
+        val updates = profileUpdates(userInfo.name, userInfo.dateOfBirth, photoFields) +
+            ("updatedAt" to FieldValue.serverTimestamp())
+        return auth.writeForCurrentUser { uid ->
+            user(uid).set(updates, SetOptions.merge()).await()
         }
     }
 

@@ -12,12 +12,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.shopping.shoply.R
+import com.shopping.shoply.common.presentation.components.FormTextField
+import com.shopping.shoply.common.presentation.components.shoplyTextFieldColors
 import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyShapes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
 /**
- * [FormTextField] preset for email entry — at-sign leading icon, clear affordance on the
+ * [com.shopping.shoply.common.presentation.components.FormTextField] preset for email entry — at-sign leading icon, clear affordance on the
  * trailing side, and an email keyboard that advances to the next field.
  */
 @Composable

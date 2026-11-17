@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shopping.shoply.R
-import com.shopping.shoply.authentication.presentation.components.FormTextField
+import com.shopping.shoply.common.presentation.components.FormTextField
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.checkout.domain.model.PaymentCard
 import com.shopping.shoply.checkout.presentation.components.cardLabel

@@ -21,6 +21,7 @@ fun DataError.asUiText(): UiText {
         DataError.Authentication.INVALID_CREDENTIALS -> UiText.StringResource(R.string.invalid_credentials)
         DataError.Authentication.UNKNOWN -> UiText.StringResource(R.string.unknown_authentication_error)
         DataError.Network -> UiText.StringResource(R.string.network_issue)
+        DataError.PhotoTooLarge -> UiText.StringResource(R.string.photo_too_large)
         DataError.Unknown -> UiText.StringResource(R.string.unknown_error)
     }
 }
