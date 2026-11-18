@@ -1,6 +1,7 @@
 package com.shopping.shoply.profile.data
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -67,7 +68,10 @@ class FirestoreProfileRepository @Inject constructor(
                 photoUrl = doc.string("photoUrl").ifBlank { null },
                 customPhoto = doc.string(ProfilePhoto.FIELD_BASE64).ifBlank { null }
                     ?.let(photoEncoder::decode),
-                dateOfBirth = doc.string("dateOfBirth").ifBlank { null }
+                dateOfBirth = doc.string("dateOfBirth").ifBlank { null },
+                emailVerified = auth.currentUser?.isEmailVerified == true,
+                phoneVerified = auth.currentUser?.providerData.orEmpty()
+                    .any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
             )
         }
     }

@@ -117,7 +117,8 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
-    EDIT_PROFILE(R.string.screen_edit_profile),
+    CHANGE_EMAIL(R.string.screen_change_email),
+    CHANGE_PHONE(R.string.screen_change_phone),
 }
 
 private const val HOME_ROUTE = "home_feed"
@@ -280,6 +281,7 @@ fun MainShell(
                 settings(snackbarHostState, navController)
                 stores(ShellTab.PROFILE, navController, snackbarHostState)
                 editProfile(ShellTab.PROFILE, navController, snackbarHostState)
+                comingSoon(ShellTab.PROFILE, navController)
             }
             navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
                 composable(ORDERS_ROUTE) {
@@ -310,8 +312,9 @@ private fun NavGraphBuilder.editProfile(
         EditProfileScreen(
             snackHostState = snackHostState,
             onBack = { navController.popBackStack() },
-            onChangeEmailClicked = {},
-            onChangePhoneClicked = {}
+            // Change Email and Change Phone aren't built yet.
+            onChangeEmailClicked = { navController.openPlaceholder(tab, Placeholder.CHANGE_EMAIL) },
+            onChangePhoneClicked = { navController.openPlaceholder(tab, Placeholder.CHANGE_PHONE) }
         )
     }
 }
@@ -795,22 +798,17 @@ private fun NavHostController.openFromHome(destination: HomeDestination) {
 }
 
 private fun NavHostController.openFromProfile(destination: ProfileDestination) {
-    val placeholder = when (destination) {
-        ProfileDestination.Orders -> return switchTab(ShellTab.ORDERS)
-        ProfileDestination.Help -> return navigate(helpRoute(ShellTab.PROFILE))
-        ProfileDestination.EditProfile -> return navigate(editProfileRoute(ShellTab.PROFILE))
-        ProfileDestination.Settings -> return navigate(SETTINGS_ROUTE)
-        ProfileDestination.Wishlist -> return navigate(wishlistRoute(ShellTab.PROFILE))
-        ProfileDestination.FavoriteStores -> return openStores(
-            ShellTab.PROFILE,
-            favoritesOnly = true
-        )
-
-        ProfileDestination.Addresses -> return navigate(addressesRoute(ShellTab.PROFILE))
-        ProfileDestination.Payments -> return navigate(paymentsRoute(ShellTab.PROFILE))
-        ProfileDestination.Notifications -> return navigate(notificationsRoute(ShellTab.PROFILE))
+    when (destination) {
+        ProfileDestination.Orders -> switchTab(ShellTab.ORDERS)
+        ProfileDestination.Help -> navigate(helpRoute(ShellTab.PROFILE))
+        ProfileDestination.EditProfile -> navigate(editProfileRoute(ShellTab.PROFILE))
+        ProfileDestination.Settings -> navigate(SETTINGS_ROUTE)
+        ProfileDestination.Wishlist -> navigate(wishlistRoute(ShellTab.PROFILE))
+        ProfileDestination.FavoriteStores -> openStores(ShellTab.PROFILE, favoritesOnly = true)
+        ProfileDestination.Addresses -> navigate(addressesRoute(ShellTab.PROFILE))
+        ProfileDestination.Payments -> navigate(paymentsRoute(ShellTab.PROFILE))
+        ProfileDestination.Notifications -> navigate(notificationsRoute(ShellTab.PROFILE))
     }
-    openPlaceholder(ShellTab.PROFILE, placeholder)
 }
 
 /** The design's bottom navigation: 5 tabs, an orange pill behind the active icon, cart badge. */

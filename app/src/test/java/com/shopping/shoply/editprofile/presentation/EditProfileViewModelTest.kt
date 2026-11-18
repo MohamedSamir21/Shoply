@@ -57,11 +57,23 @@ class EditProfileViewModelTest {
         val sut = createSut()
 
         sut.onIntent(EditProfileIntent.ChangeFullName("  Sam Lee "))
-        sut.onIntent(EditProfileIntent.ChangeDateOfBirth("1999-04-02"))
+        sut.onIntent(EditProfileIntent.ChangeDateOfBirth(APRIL_2ND_1999))
         sut.onIntent(EditProfileIntent.SaveUserInfo)
 
         assertThat(fakeProfileRepository.savedUserInfo.single())
             .isEqualTo(UserInfo(name = "Sam Lee", pickedPhotoUri = null, dateOfBirth = null))
+    }
+
+    @Test
+    @DisplayName("a picked date of birth is sent as yyyy-MM-dd")
+    fun `a picked date of birth is sent as yyyy-MM-dd`() = runTest(main.dispatcher) {
+        val sut = createSut()
+
+        sut.onIntent(EditProfileIntent.ChangeDateOfBirth(APRIL_25TH_2001))
+        sut.onIntent(EditProfileIntent.SaveUserInfo)
+
+        assertThat(fakeProfileRepository.savedUserInfo.single())
+            .isEqualTo(UserInfo(name = null, pickedPhotoUri = null, dateOfBirth = "2001-04-25"))
     }
 
     @Test
@@ -103,5 +115,10 @@ class EditProfileViewModelTest {
             assertThat((event.error as UiText.StringResource).id).isEqualTo(R.string.photo_too_large)
             assertThat(event.canRetry).isFalse()
         }
+    }
+
+    private companion object {
+        const val APRIL_2ND_1999 = 923_011_200_000L
+        const val APRIL_25TH_2001 = 988_156_800_000L
     }
 }

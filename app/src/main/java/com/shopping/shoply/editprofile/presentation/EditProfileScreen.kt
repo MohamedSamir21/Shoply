@@ -46,6 +46,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePicker
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -53,11 +64,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shopping.shoply.R
+import com.shopping.shoply.editprofile.domain.parseDateOfBirth
+import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.common.presentation.components.Avatar
 import com.shopping.shoply.common.presentation.components.FormTextField
@@ -118,7 +130,9 @@ fun EditProfileScreen(
         },
         onSaveUserInfo = {
             viewModel.onIntent(EditProfileIntent.SaveUserInfo)
-        }
+        },
+        onChangeEmailClicked = onChangeEmailClicked,
+        onChangePhoneClicked = onChangePhoneClicked
     )
 }
 
@@ -129,8 +143,10 @@ private fun EditProfileContent(
     onBack: () -> Unit,
     onPick: (Uri?) -> Unit,
     onChangeFullName: (String) -> Unit,
-    onChangeDateOfBirth: (String) -> Unit,
-    onSaveUserInfo: () -> Unit
+    onChangeDateOfBirth: (Long) -> Unit,
+    onSaveUserInfo: () -> Unit,
+    onChangeEmailClicked: () -> Unit,
+    onChangePhoneClicked: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -166,18 +182,17 @@ private fun EditProfileContent(
                 dateOfBirth = state.newDateOfBirth ?: state.dateOfBirth ?: "",
                 isSaving = state.isSaving,
                 onChangeFullName = onChangeFullName,
-                onDateOfBirthIconClicked = {},
                 onSaveUserInfo = onSaveUserInfo,
                 onChangeDateOfBirth = onChangeDateOfBirth
             )
             Spacer(Modifier.height(25.dp))
             ContactAndSignIn(
                 email = state.email ?: "",
-                isEmailVerified = true,
-                isPhoneVerified = true,
-                phone = state.phoneNumber ?: "",
-                onChangeEmailClicked = {},
-                onChangePhoneClicked = {}
+                isEmailVerified = state.emailVerified,
+                phone = state.phoneNumber,
+                isPhoneVerified = state.phoneVerified,
+                onChangeEmailClicked = onChangeEmailClicked,
+                onChangePhoneClicked = onChangePhoneClicked
             )
         }
 
@@ -282,10 +297,20 @@ private fun PersonInfoSection(
     dateOfBirth: String,
     isSaving: Boolean,
     onChangeFullName: (String) -> Unit,
-    onChangeDateOfBirth: (String) -> Unit,
-    onDateOfBirthIconClicked: () -> Unit,
+    onChangeDateOfBirth: (Long) -> Unit,
     onSaveUserInfo: () -> Unit
 ) {
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
+    if (showDatePicker) {
+        DateOfBirthPicker(
+            initialDate = parseDateOfBirth(dateOfBirth),
+            onConfirm = { picked ->
+                onChangeDateOfBirth(picked)
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false }
+        )
+    }
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -302,22 +327,24 @@ private fun PersonInfoSection(
             showSupportingText = nameError != null,
             supportingText = nameError
         )
-        FormTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = dateOfBirth,
-            onValueChange = onChangeDateOfBirth,
-            leadingContent = {
-                Icon(
-                    imageVector = Icons.Outlined.DateRange,
-                    contentDescription = stringResource(R.string.date_of_birth),
-                    modifier = Modifier.clickable {
-                        onDateOfBirthIconClicked()
+        // Read-only: the whole field opens the calendar, so only real, past dates can be entered.
+        Box(Modifier.fillMaxWidth()) {
+            FormTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = dateOfBirth,
+                onValueChange = {},
+                leadingIcon = Icons.Outlined.DateRange,
+                label = stringResource(R.string.date_of_birth),
+                showSupportingText = false
+            )
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .clickable(onClickLabel = stringResource(R.string.choose_date_of_birth)) {
+                        showDatePicker = true
                     }
-                )
-            },
-            label = stringResource(R.string.date_of_birth),
-            showSupportingText = false
-        )
+            )
+        }
         Spacer(Modifier.height(16.dp))
         ShoplyButton(
             modifier = Modifier.fillMaxWidth(),
@@ -332,7 +359,7 @@ private fun PersonInfoSection(
 private fun ContactAndSignIn(
     email: String,
     isEmailVerified: Boolean,
-    phone: String,
+    phone: String?,
     isPhoneVerified: Boolean,
     onChangeEmailClicked: () -> Unit,
     onChangePhoneClicked: () -> Unit,
@@ -361,8 +388,9 @@ private fun ContactAndSignIn(
                 )
                 AuthMethod(
                     authLabel = stringResource(R.string.phone_number),
-                    authValue = phone,
-                    isVerified = isPhoneVerified,
+                    // FR-005: no number yet, so nothing to verify.
+                    authValue = phone ?: stringResource(R.string.add_phone_number),
+                    isVerified = if (phone == null) null else isPhoneVerified,
                     icon = Icons.Outlined.Phone,
                     onChangeClicked = onChangePhoneClicked
                 )
@@ -382,7 +410,7 @@ fun AuthMethod(
     modifier: Modifier = Modifier,
     authLabel: String,
     authValue: String,
-    isVerified: Boolean,
+    isVerified: Boolean?,
     icon: ImageVector,
     onChangeClicked: () -> Unit
 ) {
@@ -415,20 +443,7 @@ fun AuthMethod(
                 color = Color.Gray
             )
             Text(text = authValue)
-            Box(
-                Modifier
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(if (isVerified) Color(0xFFEEF2DC) else Color(0xFFFBE3DC))
-                    .padding(4.dp)
-            ) {
-                Text(
-                    text = if (isVerified) stringResource(R.string.verified) else stringResource(R.string.not).plus(
-                        " ${stringResource(R.string.verified)}"
-                    ),
-                    color = if (isVerified) Color(0xFF7C9E36) else Color(0xCF5740),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            if (isVerified != null) VerificationBadge(isVerified)
         }
         Spacer(Modifier.width(10.dp))
         Button(
@@ -443,30 +458,106 @@ fun AuthMethod(
     }
 }
 
-@Preview
 @Composable
-private fun EditProfileScreenPreview() {
+private fun VerificationBadge(isVerified: Boolean) {
+    Box(
+        Modifier
+            .clip(RoundedCornerShape(5.dp))
+            .background(if (isVerified) Color(0xFFEEF2DC) else Color(0xFFFBE3DC))
+            .padding(4.dp)
+    ) {
+        Text(
+            text = stringResource(if (isVerified) R.string.verified else R.string.not_verified),
+            color = if (isVerified) Color(0xFF7C9E36) else Color(0xFFCF5740),
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+/** Calendar for the date of birth; days after today can't be picked (spec FR-021). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DateOfBirthPicker(
+    initialDate: Long?,
+    onConfirm: (Long) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val pickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialDate,
+        selectableDates = remember {
+            object : SelectableDates {
+                override fun isSelectableDate(utcTimeMillis: Long) =
+                    utcTimeMillis <= System.currentTimeMillis()
+            }
+        }
+    )
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = { pickerState.selectedDateMillis?.let(onConfirm) ?: onDismiss() },
+                enabled = pickerState.selectedDateMillis != null
+            ) { Text(stringResource(R.string.ok)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        }
+    ) {
+        DatePicker(state = pickerState)
+    }
+}
+
+private val previewState = EditProfileState(
+    fullName = "Ahmed Mostafa",
+    dateOfBirth = "2001-04-25",
+    email = "ahmed@gmail.com",
+    emailVerified = true,
+    phoneNumber = null,
+    isLoading = false
+)
+
+@Composable
+private fun EditProfilePreview(state: EditProfileState) {
     ShoplyTheme {
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             EditProfileContent(
-                state = EditProfileState(
-                    photoUrl = null,
-                    fullName = null,
-                    dateOfBirth = null,
-                    email = "ahmed@gmail.com",
-                    phoneNumber = "+1992839247",
-                    isLoading = false,
-                ),
+                state = state,
                 snackbarHostState = SnackbarHostState(),
                 onBack = {},
                 onPick = {},
                 onChangeFullName = {},
+                onChangeDateOfBirth = {},
                 onSaveUserInfo = {},
-                onChangeDateOfBirth = {}
+                onChangeEmailClicked = {},
+                onChangePhoneClicked = {}
             )
         }
     }
 }
+
+@PreviewLightDark
+@Composable
+private fun EditProfileLoadedPreview() = EditProfilePreview(previewState)
+
+@PreviewLightDark
+@Composable
+private fun EditProfileVerifiedPhonePreview() = EditProfilePreview(
+    previewState.copy(emailVerified = false, phoneNumber = "+201001234567", phoneVerified = true)
+)
+
+@PreviewLightDark
+@Composable
+private fun EditProfileLoadingPreview() = EditProfilePreview(EditProfileState(isLoading = true))
+
+@PreviewLightDark
+@Composable
+private fun EditProfileSavingPreview() = EditProfilePreview(previewState.copy(isSaving = true))
+
+@PreviewLightDark
+@Composable
+private fun EditProfileNameErrorPreview() = EditProfilePreview(
+    previewState.copy(
+        newFullName = "",
+        nameError = UiText.StringResource(R.string.full_name_required)
+    )
+)

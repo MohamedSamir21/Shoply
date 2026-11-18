@@ -9,6 +9,7 @@ import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.editprofile.domain.FullNameError
 import com.shopping.shoply.editprofile.domain.MAX_FULL_NAME_LENGTH
+import com.shopping.shoply.editprofile.domain.dateOfBirthFromPicker
 import com.shopping.shoply.editprofile.domain.validateFullName
 import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.profile.domain.model.UserInfo
@@ -40,8 +41,10 @@ class EditProfileViewModel @Inject constructor(
                         customPhoto = account.customPhoto,
                         fullName = account.name,
                         email = account.email,
+                        emailVerified = account.emailVerified,
                         dateOfBirth = account.dateOfBirth,
                         phoneNumber = account.phone,
+                        phoneVerified = account.phoneVerified,
                         isLoading = false
                     )
                 }
@@ -51,9 +54,15 @@ class EditProfileViewModel @Inject constructor(
 
     fun onIntent(intent: EditProfileIntent) = when (intent) {
         is EditProfileIntent.ChangeAvatar -> _state.update { it.copy(pickedPhotoUri = intent.uri) }
-        is EditProfileIntent.ChangeDateOfBirth -> _state.update { it.copy(newDateOfBirth = intent.dateOfBirth) }
+        is EditProfileIntent.ChangeDateOfBirth -> changeDateOfBirth(intent.pickedUtcMillis)
         is EditProfileIntent.ChangeFullName -> _state.update { it.copy(newFullName = intent.newName, nameError = null) }
         EditProfileIntent.SaveUserInfo -> save()
+    }
+
+    private fun changeDateOfBirth(pickedUtcMillis: Long) {
+        // The calendar already blocks future days; this guards against anything that slips through.
+        val date = dateOfBirthFromPicker(pickedUtcMillis, nowUtcMillis = System.currentTimeMillis())
+        if (date is Result.Success) _state.update { it.copy(newDateOfBirth = date.data) }
     }
 
     private fun save() {

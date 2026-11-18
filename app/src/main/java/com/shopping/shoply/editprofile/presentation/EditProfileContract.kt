@@ -17,7 +17,9 @@ data class EditProfileState(
     val dateOfBirth: String? = null,
     val newDateOfBirth: String? = null,
     val email: String? = null,
+    val emailVerified: Boolean = false,
     val phoneNumber: String? = null,
+    val phoneVerified: Boolean = false,
     val isLoading: Boolean = true,
     val isSaving: Boolean = false
 )
@@ -25,7 +27,8 @@ data class EditProfileState(
 sealed interface EditProfileIntent {
     data class ChangeAvatar(val uri: String) : EditProfileIntent
     data class ChangeFullName(val newName: String) : EditProfileIntent
-    data class ChangeDateOfBirth(val dateOfBirth: String) : EditProfileIntent
+    /** [pickedUtcMillis] is the day chosen in the calendar, as the date picker reports it. */
+    data class ChangeDateOfBirth(val pickedUtcMillis: Long) : EditProfileIntent
     data object SaveUserInfo : EditProfileIntent
 }
 

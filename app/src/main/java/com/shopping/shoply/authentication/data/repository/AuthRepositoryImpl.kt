@@ -102,7 +102,8 @@ class AuthRepositoryImpl @Inject constructor(
                 googlePhotoUrl = google.photoUrl?.toString()
             )
             if (updates.isEmpty()) return
-            doc.set(updates + ("updatedAt" to FieldValue.serverTimestamp()), SetOptions.merge()).await()
+            // Queued locally, not awaited: waiting for the server would hold sign-in hostage offline.
+            doc.set(updates + ("updatedAt" to FieldValue.serverTimestamp()), SetOptions.merge())
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
