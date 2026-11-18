@@ -37,7 +37,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
@@ -115,7 +114,6 @@ fun EditProfileScreen(
 
     EditProfileContent(
         state = state.value,
-        snackbarHostState = snackHostState,
         onBack = onBack,
         onPick = { uri ->
             uri?.let {
@@ -139,7 +137,6 @@ fun EditProfileScreen(
 @Composable
 private fun EditProfileContent(
     state: EditProfileState,
-    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onPick: (Uri?) -> Unit,
     onChangeFullName: (String) -> Unit,
@@ -148,12 +145,8 @@ private fun EditProfileContent(
     onChangeEmailClicked: () -> Unit,
     onChangePhoneClicked: () -> Unit
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        }
-    ) { innerPadding ->
+    // Snackbars show in MainShell's host; a second host here would draw each one twice.
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         if (state.isLoading) {
             Box(Modifier.padding(innerPadding).fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -522,7 +515,6 @@ private fun EditProfilePreview(state: EditProfileState) {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             EditProfileContent(
                 state = state,
-                snackbarHostState = SnackbarHostState(),
                 onBack = {},
                 onPick = {},
                 onChangeFullName = {},
