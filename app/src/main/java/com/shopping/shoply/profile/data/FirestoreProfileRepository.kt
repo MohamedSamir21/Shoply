@@ -17,7 +17,6 @@ import com.shopping.shoply.profile.domain.model.UserInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 /** Name, email and phone from the existing `users/{uid}` profile document; addresses from `users/{uid}/addresses`. */
@@ -84,7 +83,7 @@ class FirestoreProfileRepository @Inject constructor(
         val updates = profileUpdates(userInfo.name, userInfo.dateOfBirth, photoFields) +
             ("updatedAt" to FieldValue.serverTimestamp())
         return auth.writeForCurrentUser { uid ->
-            user(uid).set(updates, SetOptions.merge()).await()
+            user(uid).set(updates, SetOptions.merge())
         }
     }
 

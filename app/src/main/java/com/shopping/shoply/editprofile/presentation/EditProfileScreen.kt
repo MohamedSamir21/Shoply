@@ -81,7 +81,7 @@ fun EditProfileScreen(
                 is EditProfileEvent.ProfileUpdateError -> {
                     val result = snackHostState.showSnackbar(
                         message = event.error.asString(context),
-                        actionLabel = context.getString(R.string.try_again),
+                        actionLabel = if (event.canRetry) context.getString(R.string.try_again) else null,
                         duration = SnackbarDuration.Long
                     )
                     when(result) {

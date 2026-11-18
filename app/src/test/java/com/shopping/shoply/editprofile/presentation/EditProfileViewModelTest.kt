@@ -90,8 +90,8 @@ class EditProfileViewModelTest {
     }
 
     @Test
-    @DisplayName("a photo that is too large shows the photo-too-large error")
-    fun `a photo that is too large shows the photo-too-large error`() = runTest(main.dispatcher) {
+    @DisplayName("a photo that is too large shows its error without a retry")
+    fun `a photo that is too large shows its error without a retry`() = runTest(main.dispatcher) {
         fakeProfileRepository.updateResult = Result.Error(DataError.PhotoTooLarge)
         val sut = createSut()
 
@@ -101,6 +101,7 @@ class EditProfileViewModelTest {
 
             val event = awaitItem() as EditProfileEvent.ProfileUpdateError
             assertThat((event.error as UiText.StringResource).id).isEqualTo(R.string.photo_too_large)
+            assertThat(event.canRetry).isFalse()
         }
     }
 }

@@ -31,5 +31,6 @@ sealed interface EditProfileIntent {
 
 sealed interface EditProfileEvent {
     data object ProfileUpdated : EditProfileEvent
-    data class ProfileUpdateError(val error: UiText): EditProfileEvent
+    /** [canRetry] is false when saving the same values again can't help, like a photo that is too large. */
+    data class ProfileUpdateError(val error: UiText, val canRetry: Boolean = true) : EditProfileEvent
 }

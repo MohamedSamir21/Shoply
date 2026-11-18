@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.utility.asUiText
+import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.editprofile.domain.FullNameError
 import com.shopping.shoply.editprofile.domain.MAX_FULL_NAME_LENGTH
@@ -90,7 +91,12 @@ class EditProfileViewModel @Inject constructor(
 
                 is Result.Error -> {
                     _state.update { it.copy(isSaving = false) }
-                    _events.send(EditProfileEvent.ProfileUpdateError(result.error.asUiText()))
+                    _events.send(
+                        EditProfileEvent.ProfileUpdateError(
+                            error = result.error.asUiText(),
+                            canRetry = result.error != DataError.PhotoTooLarge
+                        )
+                    )
                 }
             }
         }
