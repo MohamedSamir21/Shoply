@@ -10,6 +10,8 @@ import com.shopping.shoply.authentication.data.datasource.auth.GoogleAuthDataSou
 import com.shopping.shoply.authentication.data.datasource.auth.AuthDataSource
 import com.shopping.shoply.authentication.domain.interfaces.repository.AuthRepository
 import com.shopping.shoply.authentication.domain.model.User
+import com.shopping.shoply.common.domain.Result
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -31,9 +33,9 @@ class AuthRepositoryImpl @Inject constructor(
         authDataSource.signIn(email, password)
 
 
-    override suspend fun signUpWithGoogle() = googleAuthDataSource.signUpWithGoogle().apply {
-        firebaseAuth.currentUser?.let { user ->
-            syncProfileFromGoogle(user)
+    override suspend fun signUpWithGoogle() = googleAuthDataSource.signUpWithGoogle().also { result ->
+        if (result is Result.Success) {
+            firebaseAuth.currentUser?.let { user -> syncProfileFromGoogle(user) }
         }
     }
 
@@ -84,25 +86,28 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun updatePassword(newPassword: String) =
         authDataSource.updatePassword(newPassword)
 
-    /** There's an invariant that this method only changes the username and photoUrl if the user
-     * doesn't update their user info from Edit Profile.*/
+    /**
+     * Copies the Google name and photo into `users/{uid}`, unless the user set their own.
+     * Best effort: sign-in has already succeeded, so a failed sync is ignored rather than thrown.
+     */
     private suspend fun syncProfileFromGoogle(user: FirebaseUser) {
-        val google =
-            user.providerData.firstOrNull { userInfo -> userInfo.providerId == "google.com" }
-                ?: return
+        val google = user.providerData.firstOrNull { it.providerId == "google.com" } ?: return
         val doc = firestore.collection("users").document(user.uid)
-        val current = doc.get().await()
-
-        val updates = mutableMapOf<String, Any?>("updatedAt" to FieldValue.serverTimestamp())
-
-        if (current.getString("nameSource") != "custom") {
-            updates["username"] = google.displayName; updates["nameSource"] = "google"
+        try {
+            val current = doc.get().await()
+            val updates = googleProfileUpdates(
+                nameSource = current.getString("nameSource"),
+                photoSource = current.getString("photoSource"),
+                googleName = google.displayName,
+                googlePhotoUrl = google.photoUrl?.toString()
+            )
+            if (updates.isEmpty()) return
+            doc.set(updates + ("updatedAt" to FieldValue.serverTimestamp()), SetOptions.merge()).await()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // Firestore offline or denied: the profile keeps its current values until the next sign-in.
         }
-
-        if (current.getString("photoSource") != "custom") {
-            updates["photoUrl"] = google.photoUrl; updates["photoSource"] = "google"
-        }
-        doc.set(updates, SetOptions.merge()).await()
     }
 
 }

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -137,6 +138,12 @@ private fun EditProfileContent(
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
+        if (state.isLoading) {
+            Box(Modifier.padding(innerPadding).fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -155,7 +162,9 @@ private fun EditProfileContent(
             Spacer(Modifier.height(10.dp))
             PersonInfoSection(
                 fullName = state.newFullName ?: state.fullName ?: "",
-                dateOfBirth = state.dateOfBirth ?: "",
+                nameError = state.nameError?.asString(),
+                dateOfBirth = state.newDateOfBirth ?: state.dateOfBirth ?: "",
+                isSaving = state.isSaving,
                 onChangeFullName = onChangeFullName,
                 onDateOfBirthIconClicked = {},
                 onSaveUserInfo = onSaveUserInfo,
@@ -269,7 +278,9 @@ private fun PhotoPicker(
 @Composable
 private fun PersonInfoSection(
     fullName: String,
+    nameError: String?,
     dateOfBirth: String,
+    isSaving: Boolean,
     onChangeFullName: (String) -> Unit,
     onChangeDateOfBirth: (String) -> Unit,
     onDateOfBirthIconClicked: () -> Unit,
@@ -288,7 +299,8 @@ private fun PersonInfoSection(
             onValueChange = onChangeFullName,
             leadingIcon = Icons.Outlined.Person,
             label = stringResource(R.string.full_name),
-            showSupportingText = false
+            showSupportingText = nameError != null,
+            supportingText = nameError
         )
         FormTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -310,7 +322,8 @@ private fun PersonInfoSection(
         ShoplyButton(
             modifier = Modifier.fillMaxWidth(),
             label = stringResource(R.string.save),
-            onClick = onSaveUserInfo
+            onClick = onSaveUserInfo,
+            enable = !isSaving
         )
     }
 }
@@ -445,6 +458,7 @@ private fun EditProfileScreenPreview() {
                     dateOfBirth = null,
                     email = "ahmed@gmail.com",
                     phoneNumber = "+1992839247",
+                    isLoading = false,
                 ),
                 snackbarHostState = SnackbarHostState(),
                 onBack = {},

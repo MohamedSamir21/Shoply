@@ -606,6 +606,8 @@
     <string name="try_again">Try again</string>
     <string name="profile_gets_updated_successfully">Profile gets updated successfully!!</string>
     <string name="photo_too_large">This photo is too large. Please choose a smaller image.</string>
+    <string name="full_name_required">Please enter your full name</string>
+    <string name="full_name_too_long">Your name can be at most %1$d characters</string>
     <string-array name="chat_quick_replies">
         <item>Where is my order?</item>
         <item>I want a refund</item>

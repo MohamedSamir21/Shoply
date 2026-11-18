@@ -2,15 +2,19 @@ package com.shopping.shoply.editprofile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shopping.shoply.R
+import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.utility.asUiText
 import com.shopping.shoply.common.domain.Result
+import com.shopping.shoply.editprofile.domain.FullNameError
+import com.shopping.shoply.editprofile.domain.MAX_FULL_NAME_LENGTH
+import com.shopping.shoply.editprofile.domain.validateFullName
 import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.profile.domain.model.UserInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -26,9 +30,9 @@ class EditProfileViewModel @Inject constructor(
     val events = _events.receiveAsFlow()
 
     init {
-        _state.update { it.copy(isLoading = true) }
+        // Live, so a saved photo or name shows up as soon as Firestore has it.
         viewModelScope.launch {
-            profileRepository.observeAccount().first().let { account ->
+            profileRepository.observeAccount().collect { account ->
                 _state.update {
                     it.copy(
                         photoUrl = account.photoUrl,
@@ -36,7 +40,8 @@ class EditProfileViewModel @Inject constructor(
                         fullName = account.name,
                         email = account.email,
                         dateOfBirth = account.dateOfBirth,
-                        phoneNumber = account.phone
+                        phoneNumber = account.phone,
+                        isLoading = false
                     )
                 }
             }
@@ -44,42 +49,55 @@ class EditProfileViewModel @Inject constructor(
     }
 
     fun onIntent(intent: EditProfileIntent) = when (intent) {
-        is EditProfileIntent.ChangeAvatar -> {
-            _state.update { it.copy(pickedPhotoUri = intent.uri) }
-        }
+        is EditProfileIntent.ChangeAvatar -> _state.update { it.copy(pickedPhotoUri = intent.uri) }
+        is EditProfileIntent.ChangeDateOfBirth -> _state.update { it.copy(newDateOfBirth = intent.dateOfBirth) }
+        is EditProfileIntent.ChangeFullName -> _state.update { it.copy(newFullName = intent.newName, nameError = null) }
+        EditProfileIntent.SaveUserInfo -> save()
+    }
 
-        is EditProfileIntent.ChangeDateOfBirth -> {
-            _state.update { it.copy(dateOfBirth = intent.dateOfBirth) }
-        }
+    private fun save() {
+        val current = state.value
+        if (current.isLoading || current.isSaving) return
 
-        is EditProfileIntent.ChangeFullName -> {
-            _state.update { it.copy(newFullName = intent.newName) }
-        }
-
-        EditProfileIntent.SaveUserInfo -> {
-            _state.update { it.copy(isLoading = true) }
-            viewModelScope.launch {
-                val cachedStateValue = state.value
-                val result = profileRepository.updateUserInfo(
-                    userInfo = UserInfo(
-                        name = cachedStateValue.newFullName,
-                        pickedPhotoUri = cachedStateValue.pickedPhotoUri,
-                        dateOfBirth = cachedStateValue.dateOfBirth
-                    )
-                )
-                when (result) {
-                    is Result.Success -> {
-                        _events.send(EditProfileEvent.ProfileUpdated)
-                    }
-
-                    is Result.Error -> {
-                        _events.send(EditProfileEvent.ProfileUpdateError(result.error.asUiText()))
-                    }
+        val name = current.newFullName?.let { typed ->
+            when (val validation = validateFullName(typed)) {
+                is Result.Success -> validation.data.takeIf { it != current.fullName }
+                is Result.Error -> {
+                    _state.update { it.copy(nameError = validation.error.asUiText()) }
+                    return
                 }
-                _state.update { it.copy(isLoading = false) }
+            }
+        }
+        val update = UserInfo(
+            name = name,
+            pickedPhotoUri = current.pickedPhotoUri,
+            dateOfBirth = current.newDateOfBirth?.takeIf { it != current.dateOfBirth }
+        )
+        if (update == UserInfo(name = null, pickedPhotoUri = null, dateOfBirth = null)) {
+            _events.trySend(EditProfileEvent.ProfileUpdated)
+            return
+        }
+
+        _state.update { it.copy(isSaving = true) }
+        viewModelScope.launch {
+            when (val result = profileRepository.updateUserInfo(update)) {
+                is Result.Success -> {
+                    _state.update {
+                        it.copy(isSaving = false, newFullName = null, newDateOfBirth = null, pickedPhotoUri = null)
+                    }
+                    _events.send(EditProfileEvent.ProfileUpdated)
+                }
+
+                is Result.Error -> {
+                    _state.update { it.copy(isSaving = false) }
+                    _events.send(EditProfileEvent.ProfileUpdateError(result.error.asUiText()))
+                }
             }
         }
     }
 
-
+    private fun FullNameError.asUiText(): UiText = when (this) {
+        FullNameError.BLANK -> UiText.StringResource(R.string.full_name_required)
+        FullNameError.TOO_LONG -> UiText.StringResource(R.string.full_name_too_long, arrayOf(MAX_FULL_NAME_LENGTH))
+    }
 }
