@@ -50,6 +50,7 @@ import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.authentication.presentation.components.ShoplyButtonVariant
 import com.shopping.shoply.authentication.presentation.resetpassword.otpverification.OtpPurpose
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
+import com.shopping.shoply.common.presentation.navigation.navigateToHome
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
@@ -91,11 +92,7 @@ fun SignUpScreen(
                         }
 
                         SignUpScreenEvent.SignUpResult.Success.Verified -> {
-                            navHostController.popBackStack(
-                                route = NavRoutes.SignUp.route,
-                                inclusive = true
-                            )
-                            navHostController.navigate(NavRoutes.Home.route)
+                            navHostController.navigateToHome()
                         }
                     }
                 }
