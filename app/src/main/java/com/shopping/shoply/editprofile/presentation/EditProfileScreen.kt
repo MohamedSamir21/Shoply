@@ -68,6 +68,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shopping.shoply.R
 import com.shopping.shoply.editprofile.domain.parseDateOfBirth
+import com.shopping.shoply.editprofile.domain.todayAsUtcMidnight
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.common.presentation.components.Avatar
@@ -480,7 +481,7 @@ private fun DateOfBirthPicker(
         selectableDates = remember {
             object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long) =
-                    utcTimeMillis <= System.currentTimeMillis()
+                    utcTimeMillis <= todayAsUtcMidnight(System.currentTimeMillis())
             }
         }
     )

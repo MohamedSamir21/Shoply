@@ -10,6 +10,7 @@ import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.editprofile.domain.FullNameError
 import com.shopping.shoply.editprofile.domain.MAX_FULL_NAME_LENGTH
 import com.shopping.shoply.editprofile.domain.dateOfBirthFromPicker
+import com.shopping.shoply.editprofile.domain.todayAsUtcMidnight
 import com.shopping.shoply.editprofile.domain.validateFullName
 import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.profile.domain.model.UserInfo
@@ -61,7 +62,7 @@ class EditProfileViewModel @Inject constructor(
 
     private fun changeDateOfBirth(pickedUtcMillis: Long) {
         // The calendar already blocks future days; this guards against anything that slips through.
-        val date = dateOfBirthFromPicker(pickedUtcMillis, nowUtcMillis = System.currentTimeMillis())
+        val date = dateOfBirthFromPicker(pickedUtcMillis, todayAsUtcMidnight(System.currentTimeMillis()))
         if (date is Result.Success) _state.update { it.copy(newDateOfBirth = date.data) }
     }
 
