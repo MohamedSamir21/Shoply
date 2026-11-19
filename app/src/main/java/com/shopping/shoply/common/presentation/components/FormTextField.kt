@@ -1,4 +1,4 @@
-package com.shopping.shoply.authentication.presentation.components
+package com.shopping.shoply.common.presentation.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth

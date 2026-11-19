@@ -14,12 +14,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.shopping.shoply.R
+import com.shopping.shoply.common.presentation.components.FormTextField
+import com.shopping.shoply.common.presentation.components.shoplyTextFieldColors
 import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyShapes
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
 /**
- * [FormTextField] preset for password entry — lock leading icon, a trailing eye that toggles
+ * [com.shopping.shoply.common.presentation.components.FormTextField] preset for password entry — lock leading icon, a trailing eye that toggles
  * masking, and a password keyboard that advances to the next field.
  *
  * [onVisibilityChanged] receives the **current** value of [showPassword], not its negation:

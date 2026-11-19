@@ -29,7 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.components.FormPassword
-import com.shopping.shoply.authentication.presentation.components.FormTextField
+import com.shopping.shoply.common.presentation.components.FormTextField
 import com.shopping.shoply.authentication.presentation.components.PasswordStrengthMeter
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.authentication.presentation.components.ShoplyTopBar

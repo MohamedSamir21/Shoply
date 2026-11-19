@@ -40,18 +40,6 @@ object AuthModule {
 
     @Singleton
     @Provides
-    fun provideFirebaseFirestore(): FirebaseFirestore {
-        return FirebaseFirestore.getInstance()
-    }
-
-    @Singleton
-    @Provides
-    fun provideFirebaseAuthentication(): FirebaseAuth {
-        return FirebaseAuth.getInstance()
-    }
-
-    @Singleton
-    @Provides
     fun provideCredentialManger(@ApplicationContext context: Context): CredentialManager {
         return CredentialManager.create(
             context

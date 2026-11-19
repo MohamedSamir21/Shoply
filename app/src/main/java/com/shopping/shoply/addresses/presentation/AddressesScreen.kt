@@ -48,7 +48,7 @@ import com.shopping.shoply.R
 import com.shopping.shoply.addresses.domain.rules.AddressField
 import com.shopping.shoply.addresses.domain.rules.AddressForm
 import com.shopping.shoply.addresses.domain.rules.AddressLabel
-import com.shopping.shoply.authentication.presentation.components.FormTextField
+import com.shopping.shoply.common.presentation.components.FormTextField
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.authentication.presentation.components.ShoplyButtonVariant
 import com.shopping.shoply.checkout.presentation.preview.CheckoutPreviewData

@@ -3,6 +3,7 @@ package com.shopping.shoply.common.domain
 sealed interface DataError : Error {
     data object Unknown : DataError
     data object Network : DataError
+    data object PhotoTooLarge : DataError
     enum class Authentication : DataError {
         WEAK_PASSWORD,
         WRONG_PASSWORD,
