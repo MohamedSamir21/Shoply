@@ -1,6 +1,22 @@
 package com.shopping.shoply.editprofile.presentation
 
 import android.net.Uri
+import java.util.TimeZone
+import java.util.Date
+import java.text.DateFormat
+import com.shopping.shoply.common.presentation.theme.shoplyExtra
+import com.shopping.shoply.common.presentation.theme.shoplyCard
+import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.window.core.layout.WindowWidthSizeClass
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import android.content.res.Configuration
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,20 +37,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -45,11 +58,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.SelectableDates
@@ -58,7 +72,6 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -113,8 +126,12 @@ fun EditProfileScreen(
         }
     }
 
+    // Landscape phones and tablets get two columns, like the sign-in screens.
+    val isWide = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+
     EditProfileContent(
         state = state.value,
+        isWide = isWide,
         onBack = onBack,
         onPick = { uri ->
             uri?.let {
@@ -138,6 +155,7 @@ fun EditProfileScreen(
 @Composable
 private fun EditProfileContent(
     state: EditProfileState,
+    isWide: Boolean,
     onBack: () -> Unit,
     onPick: (Uri?) -> Unit,
     onChangeFullName: (String) -> Unit,
@@ -154,22 +172,15 @@ private fun EditProfileContent(
             }
             return@Scaffold
         }
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(20.dp)
-        ) {
-            HeaderSection(
-                onBack = onBack
-            )
+        val avatar = @Composable {
             AvatarWithPhotoUpload(
                 // FR-010: just-picked photo, then saved custom photo, then the provider's photo.
                 photo = state.pickedPhotoUri ?: state.customPhoto ?: state.photoUrl,
                 initials = nameParts(state.fullName.orEmpty()).second,
                 onPick = onPick
             )
-            Spacer(Modifier.height(10.dp))
+        }
+        val personInfo = @Composable {
             PersonInfoSection(
                 fullName = state.newFullName ?: state.fullName ?: "",
                 nameError = state.nameError?.asString(),
@@ -179,7 +190,8 @@ private fun EditProfileContent(
                 onSaveUserInfo = onSaveUserInfo,
                 onChangeDateOfBirth = onChangeDateOfBirth
             )
-            Spacer(Modifier.height(25.dp))
+        }
+        val contact = @Composable {
             ContactAndSignIn(
                 email = state.email ?: "",
                 isEmailVerified = state.emailVerified,
@@ -190,36 +202,52 @@ private fun EditProfileContent(
             )
         }
 
-    }
-}
-
-@Composable
-private fun HeaderSection(
-    onBack: () -> Unit
-) {
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Icon(
+        Column(
             modifier = Modifier
-                .size(38.dp)
-                .clickable {
-                    onBack()
-                },
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-            contentDescription = stringResource(R.string.back),
-            tint = MaterialTheme.colorScheme.onBackground.copy(alpha = .7f)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center),
-            horizontalArrangement = Arrangement.Center
+                .padding(innerPadding)
+                .fillMaxSize()
         ) {
-            Text(
-                text = stringResource(R.string.edit_profile),
-                style = MaterialTheme.typography.headlineSmall,
-            )
+            // The top bar stays put; the content below it scrolls, so nothing is cut off.
+            ShoplyTopAppBar(title = stringResource(R.string.edit_profile), onBack = onBack)
+            if (isWide) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = 24.dp)
+                    ) {
+                        avatar()
+                        personInfo()
+                    }
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(top = 12.dp, bottom = 24.dp)
+                    ) {
+                        contact()
+                    }
+                }
+            } else {
+                Column(
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 24.dp)
+                ) {
+                    avatar()
+                    personInfo()
+                    Spacer(Modifier.height(30.dp))
+                    contact()
+                }
+            }
         }
     }
 }
@@ -230,58 +258,50 @@ private fun AvatarWithPhotoUpload(
     initials: String?,
     onPick: (Uri?) -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier.size(100.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Avatar(
-                size = 100.dp,
-                initials = initials,
-                photo = photo
-            )
-            PhotoPicker(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                onPick = onPick
-            )
-        }
-    }
-}
-
-@Composable
-private fun PhotoPicker(
-    modifier: Modifier = Modifier,
-    onPick: (Uri?) -> Unit
-) {
     val photoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = onPick
     )
     Box(
-        modifier
-            .size(32.dp)
-            .padding(end = 4.dp, bottom = 4.dp)
-            .clip(CircleShape)
-            .border(.5.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
-            .background(MaterialTheme.colorScheme.primary),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp, bottom = 26.dp),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            modifier = Modifier
-                .size(16.dp)
-                .clickable {
-                    photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
-            painter = painterResource(R.drawable.ic_camera),
-            contentDescription = stringResource(R.string.camera),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
+        Box {
+            Avatar(size = 100.dp, initials = initials, photo = photo)
+            // The whole 36 dp circle is the touch target, not just the icon.
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(3.dp, MaterialTheme.colorScheme.background, CircleShape)
+                    .clickable(onClickLabel = stringResource(R.string.camera)) {
+                        photoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    modifier = Modifier.size(17.dp),
+                    painter = painterResource(R.drawable.ic_camera),
+                    contentDescription = stringResource(R.string.camera),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
     }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        text = text,
+        fontSize = 15.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 18.dp)
+    )
 }
 
 @Composable
@@ -308,10 +328,7 @@ private fun PersonInfoSection(
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = stringResource(R.string.personal_info)
-        )
-        Spacer(Modifier.padding(bottom = 10.dp))
+        SectionLabel(stringResource(R.string.personal_info))
         FormTextField(
             modifier = Modifier.fillMaxWidth(),
             value = fullName,
@@ -325,7 +342,7 @@ private fun PersonInfoSection(
         Box(Modifier.fillMaxWidth()) {
             FormTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = dateOfBirth,
+                value = remember(dateOfBirth) { displayDate(dateOfBirth) },
                 onValueChange = {},
                 leadingIcon = Icons.Outlined.DateRange,
                 label = stringResource(R.string.date_of_birth),
@@ -367,113 +384,127 @@ private fun ContactAndSignIn(
     onChangePhoneClicked: () -> Unit,
 ) {
     Column {
-        Text(stringResource(R.string.contact_sign_in))
-        Spacer(Modifier.height(20.dp))
-        OutlinedCard(
-            modifier = Modifier
+        SectionLabel(stringResource(R.string.contact_sign_in))
+        Column(
+            Modifier
                 .fillMaxWidth()
+                .shoplyCard()
         ) {
-            Column(
-                modifier = Modifier.padding(10.dp)
-            ) {
-                AuthMethod(
-                    authLabel = stringResource(R.string.email),
-                    authValue = email,
-                    isVerified = isEmailVerified,
-                    icon = Icons.Outlined.MailOutline,
-                    onChangeClicked = onChangeEmailClicked
-                )
-                HorizontalDivider(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp)
-                )
-                AuthMethod(
-                    authLabel = stringResource(R.string.phone_number),
-                    // FR-005: no number yet, so nothing to verify.
-                    authValue = phone ?: stringResource(R.string.add_phone_number),
-                    isVerified = if (phone == null) null else isPhoneVerified,
-                    icon = Icons.Outlined.Phone,
-                    onChangeClicked = onChangePhoneClicked
-                )
-            }
+            ContactRow(
+                icon = Icons.Outlined.MailOutline,
+                label = stringResource(R.string.email),
+                value = email,
+                isVerified = isEmailVerified,
+                onAction = onChangeEmailClicked
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            ContactRow(
+                icon = Icons.Outlined.Phone,
+                label = stringResource(R.string.phone_number),
+                value = phone,
+                isVerified = isPhoneVerified,
+                onAction = onChangePhoneClicked
+            )
         }
-        Spacer(Modifier.height(10.dp))
         Text(
             text = stringResource(R.string.each_one_is_verified_on_its_own_your_current_details),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f)
+            fontSize = 12.5.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 12.dp)
         )
     }
 }
 
+/**
+ * One sign-in method: icon, label, value and a Change button. With no [value] it reads
+ * "Not added" and offers Add instead. The Verified tag shows only when [isVerified] (FR-004/005).
+ */
 @Composable
-fun AuthMethod(
-    modifier: Modifier = Modifier,
-    authLabel: String,
-    authValue: String,
-    isVerified: Boolean?,
+private fun ContactRow(
     icon: ImageVector,
-    onChangeClicked: () -> Unit
+    label: String,
+    value: String?,
+    isVerified: Boolean,
+    onAction: () -> Unit
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-
         Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                modifier = Modifier.padding(8.dp),
-                imageVector = icon,
-                contentDescription = authLabel,
-                tint = MaterialTheme.colorScheme.primary
-            )
+            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 10.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
+        Column(Modifier.weight(1f)) {
             Text(
-                text = authLabel,
-                color = Color.Gray
+                text = label,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
             )
-            Text(text = authValue)
-            if (isVerified != null) VerificationBadge(isVerified)
+            // Long emails or numbers stay on one line and end with an ellipsis.
+            Text(
+                text = value ?: stringResource(R.string.not_added),
+                fontSize = 14.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (value == null) MaterialTheme.shoplyExtra.inkFaint else MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 3.dp)
+            )
+            if (value != null && isVerified) VerifiedTag(Modifier.padding(top = 6.dp))
         }
-        Spacer(Modifier.width(10.dp))
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.LightGray.copy(alpha = .5f),
-                contentColor = Color.Black
-            ),
-            onClick = onChangeClicked
-        ) {
-            Text(stringResource(R.string.change))
+        if (value == null) {
+            Button(
+                onClick = onAction,
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                modifier = Modifier.height(36.dp)
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(stringResource(R.string.add))
+            }
+        } else {
+            FilledTonalButton(
+                onClick = onAction,
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                modifier = Modifier.height(36.dp)
+            ) {
+                Text(stringResource(R.string.change))
+            }
         }
     }
 }
 
 @Composable
-private fun VerificationBadge(isVerified: Boolean) {
-    Box(
-        Modifier
-            .clip(RoundedCornerShape(5.dp))
-            .background(if (isVerified) Color(0xFFEEF2DC) else Color(0xFFFBE3DC))
-            .padding(4.dp)
-    ) {
-        Text(
-            text = stringResource(if (isVerified) R.string.verified else R.string.not_verified),
-            color = if (isVerified) Color(0xFF7C9E36) else Color(0xFFCF5740),
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
+private fun VerifiedTag(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(R.string.verified),
+        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.shoplyExtra.onGreenSoft,
+        modifier = modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(MaterialTheme.shoplyExtra.greenSoft)
+            .padding(horizontal = 8.dp, vertical = 3.dp)
+    )
+}
+
+/** A stored `yyyy-MM-dd` date shown the user's way, e.g. "Apr 25, 2001"; other text as is. */
+private fun displayDate(isoDate: String): String {
+    val utcMillis = parseDateOfBirth(isoDate) ?: return isoDate
+    return DateFormat.getDateInstance(DateFormat.MEDIUM).apply {
+        timeZone = TimeZone.getTimeZone("UTC")
+    }.format(Date(utcMillis))
 }
 
 /** Calendar for the date of birth; days after today can't be picked (spec FR-021). */
@@ -519,11 +550,12 @@ private val previewState = EditProfileState(
 )
 
 @Composable
-private fun EditProfilePreview(state: EditProfileState) {
+private fun EditProfilePreview(state: EditProfileState, isWide: Boolean = false) {
     ShoplyTheme {
         Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
             EditProfileContent(
                 state = state,
+                isWide = isWide,
                 onBack = {},
                 onPick = {},
                 onChangeFullName = {},
@@ -562,3 +594,19 @@ private fun EditProfileNameErrorPreview() = EditProfilePreview(
         nameError = UiText.StringResource(R.string.full_name_required)
     )
 )
+
+private val landscapeState = previewState.copy(email = "a.very.long.email.address@example-company.com")
+
+// One @Preview per function: kapt can't read repeated @Preview annotations.
+@Preview(name = "Landscape - light", widthDp = 891, heightDp = 411)
+@Composable
+private fun EditProfileLandscapeLightPreview() = EditProfilePreview(landscapeState, isWide = true)
+
+@Preview(
+    name = "Landscape - dark",
+    widthDp = 891,
+    heightDp = 411,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun EditProfileLandscapeDarkPreview() = EditProfilePreview(landscapeState, isWide = true)

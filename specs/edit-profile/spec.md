@@ -13,7 +13,7 @@ Requirement IDs are stable. Tests and reviews cite them (for example "FR-012").
 - **FR-002** The back arrow returns to the Profile tab without saving.
 - **FR-003** Tapping the email row opens Change Email. Tapping the phone row opens Change Phone.
 - **FR-004** The email row shows a "Verified" badge only when Firebase Auth reports the email as verified.
-- **FR-005** The phone row shows a "Verified" badge only when the number is linked to the Firebase Auth account. With no phone number, the row shows "Add phone number".
+- **FR-005** The phone row shows a "Verified" badge only when the number is linked to the Firebase Auth account. With no phone number, the row shows "Not added" and an Add button instead of Change.
 
 ## Photo
 
