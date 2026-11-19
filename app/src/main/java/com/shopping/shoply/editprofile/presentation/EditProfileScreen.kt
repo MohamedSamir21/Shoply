@@ -346,6 +346,14 @@ private fun PersonInfoSection(
             onClick = onSaveUserInfo,
             enable = !isSaving
         )
+        // FR-023: Save shows progress while the change is being saved.
+        if (isSaving) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            )
+        }
     }
 }
 
