@@ -1,4 +1,4 @@
-package com.shopping.shoply.editprofile.domain
+package com.shopping.shoply.common.domain.validation
 
 import com.shopping.shoply.common.domain.Error
 import com.shopping.shoply.common.domain.Result
@@ -7,7 +7,7 @@ const val MAX_FULL_NAME_LENGTH = 50
 
 enum class FullNameError : Error { BLANK, TOO_LONG }
 
-/** The trimmed name, or why it can't be saved (spec FR-020). */
+/** A person's full name, trimmed, or why it can't be used. Shared by Sign Up and Edit Profile (spec FR-020). */
 fun validateFullName(input: String): Result<String, FullNameError> {
     val name = input.trim()
     return when {

@@ -12,7 +12,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.navArgument
 import androidx.compose.ui.window.DialogProperties
 import androidx.window.core.layout.WindowSizeClass
-import androidx.window.core.layout.WindowWidthSizeClass
+import com.shopping.shoply.common.presentation.adaptive.isWide
 import com.shopping.shoply.authentication.presentation.onboarding.OnboardingScreen
 import com.shopping.shoply.authentication.presentation.result.ResultPurpose
 import com.shopping.shoply.authentication.presentation.result.ResultScreen
@@ -33,10 +33,7 @@ fun ShoplyNavGraph(
     navController: NavHostController,
     windowSizeClass: WindowSizeClass
 ) {
-    val isExpandedScreen = when (windowSizeClass.windowWidthSizeClass) {
-        WindowWidthSizeClass.COMPACT -> false
-        else -> true
-    }
+    val isExpandedScreen = windowSizeClass.isWide()
 
     NavHost(
         navController = navController,

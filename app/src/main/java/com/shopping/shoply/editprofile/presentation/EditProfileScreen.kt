@@ -11,9 +11,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import com.shopping.shoply.common.presentation.adaptive.isWideScreen
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import android.content.res.Configuration
@@ -127,7 +126,7 @@ fun EditProfileScreen(
     }
 
     // Landscape phones and tablets get two columns, like the sign-in screens.
-    val isWide = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+    val isWide = isWideScreen()
 
     EditProfileContent(
         state = state.value,

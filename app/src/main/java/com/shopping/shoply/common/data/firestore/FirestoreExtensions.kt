@@ -1,6 +1,5 @@
 package com.shopping.shoply.common.data.firestore
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -41,7 +40,6 @@ inline fun FirebaseAuth.writeForCurrentUser(write: (uid: String) -> Unit): Resul
         write(uid)
         Result.Success(Unit)
     } catch (e: Exception) {
-        Log.i("FirestoreProfileRepository", "See -> ${e.message}")
         Result.Error(DataError.Unknown)
     }
 }

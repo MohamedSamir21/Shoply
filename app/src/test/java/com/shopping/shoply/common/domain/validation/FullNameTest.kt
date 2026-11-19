@@ -1,4 +1,4 @@
-package com.shopping.shoply.editprofile.domain
+package com.shopping.shoply.common.domain.validation
 
 import com.google.common.truth.Truth.assertThat
 import com.shopping.shoply.common.domain.Result

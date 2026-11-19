@@ -2,6 +2,7 @@ package com.shopping.shoply.authentication.domain.usecase.validate
 
 import com.google.common.truth.Truth.assertThat
 import com.shopping.shoply.authentication.domain.model.ValidationError
+import com.shopping.shoply.common.domain.validation.MAX_FULL_NAME_LENGTH
 import com.shopping.shoply.common.domain.Result
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.DisplayName
@@ -30,6 +31,14 @@ class ValidateUsernameUseCaseTest {
         assertThat(
             validate(username)
         ).isEqualTo(UsernameValidationError(ValidationError.EMPTY_USERNAME))
+    }
+
+    @Test
+    @DisplayName("returns USERNAME_TOO_LONG if the username is over the shared limit")
+    fun `returns USERNAME_TOO_LONG if the username is over the shared limit`() = runTest {
+        assertThat(
+            validate(username = "a".repeat(MAX_FULL_NAME_LENGTH + 1))
+        ).isEqualTo(UsernameValidationError(ValidationError.USERNAME_TOO_LONG))
     }
 
     @Test

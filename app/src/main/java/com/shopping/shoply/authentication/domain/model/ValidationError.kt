@@ -8,6 +8,7 @@ import com.shopping.shoply.common.domain.Error
 // of the domain uses — one error vocabulary instead of a bespoke ValidationResult.
 enum class ValidationError : Error {
     EMPTY_USERNAME,
+    USERNAME_TOO_LONG,
     INVALID_EMAIL,
     INVALID_PHONE_NUMBER,
     PASSWORD_TOO_SHORT,

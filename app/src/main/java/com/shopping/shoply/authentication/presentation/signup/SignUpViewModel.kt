@@ -328,7 +328,7 @@ class SignUpViewModel @Inject constructor(
             }
 
             val user = User(
-                username = form.username,
+                username = form.username.trim(),
                 email = form.email,
                 phoneNumber = e164PhoneNumber
             )

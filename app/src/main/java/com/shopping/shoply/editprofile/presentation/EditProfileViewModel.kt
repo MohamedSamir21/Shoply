@@ -7,11 +7,11 @@ import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.utility.asUiText
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
-import com.shopping.shoply.editprofile.domain.FullNameError
-import com.shopping.shoply.editprofile.domain.MAX_FULL_NAME_LENGTH
+import com.shopping.shoply.common.domain.validation.FullNameError
+import com.shopping.shoply.common.domain.validation.MAX_FULL_NAME_LENGTH
 import com.shopping.shoply.editprofile.domain.dateOfBirthFromPicker
 import com.shopping.shoply.editprofile.domain.todayAsUtcMidnight
-import com.shopping.shoply.editprofile.domain.validateFullName
+import com.shopping.shoply.common.domain.validation.validateFullName
 import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.profile.domain.model.UserInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
