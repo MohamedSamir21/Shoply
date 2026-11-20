@@ -43,6 +43,7 @@ import com.shopping.shoply.common.presentation.theme.shoplyCard
 fun AccountCard(
     name: String,
     initials: String?,
+    photo: Any? = null,
     email: String,
     phone: String?,
     onEdit: () -> Unit,
@@ -56,7 +57,7 @@ fun AccountCard(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Avatar(initials = initials, size = 60.dp)
+        Avatar(initials = initials, photo = photo, size = 60.dp)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = name,

@@ -97,6 +97,16 @@ class HomeViewModelTest {
         }
 
     @Test
+    @DisplayName("the header avatar shows the profile photo")
+    fun `the header avatar shows the profile photo`() = runTest(main.dispatcher) {
+        val sut = createSut()
+
+        fakeProfileRepository.account.update { it.copy(photoUrl = "https://photo") }
+
+        assertThat(sut.state.value.photo).isEqualTo("https://photo")
+    }
+
+    @Test
     @DisplayName("builds the header from live data")
     fun `builds the header from live data`() = runTest(main.dispatcher) {
         val sut = createSut()

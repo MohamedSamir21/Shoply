@@ -66,7 +66,7 @@ fun HomeHeader(
             horizontalArrangement = Arrangement.spacedBy(ShoplyDimens.space3),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Avatar(initials = state.initials)
+            Avatar(initials = state.initials, photo = state.photo)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(state.greeting.textRes()),

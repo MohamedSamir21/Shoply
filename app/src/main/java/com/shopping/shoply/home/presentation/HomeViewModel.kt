@@ -12,6 +12,7 @@ import com.shopping.shoply.home.domain.usecase.GetHomeFeedUseCase
 import com.shopping.shoply.notifications.domain.NotificationsRepository
 import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.profile.domain.model.DeliveryAddress
+import com.shopping.shoply.profile.domain.model.avatarPhoto
 import com.shopping.shoply.wishlist.domain.WishlistRepository
 import com.shopping.shoply.wishlist.domain.usecase.ToggleWishlistUseCase
 import com.shopping.shoply.wishlist.domain.usecase.WishlistChange
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -62,22 +64,28 @@ class HomeViewModel @Inject constructor(
             saved + pending.filterValues { it }.keys - pending.filterValues { !it }.keys
         }
 
+    private val nameAndPhoto: Flow<Pair<String, Any?>> = combine(
+        profileRepository.observeDisplayName().onStart { emit("") },
+        profileRepository.observeAccount().map { it.avatarPhoto }.onStart { emit(null) },
+    ) { name, photo -> name to photo }
+
     private val greeting = greetingFor(currentHourProvider.currentHour())
 
     // combine waits for every flow's first value; the onStart defaults stop a silent live listener
     // (e.g. permission denied) from holding the whole screen on its initial state.
     val state: StateFlow<HomeState> = combine(
         body,
-        profileRepository.observeDisplayName().onStart { emit("") },
+        nameAndPhoto,
         profileRepository.observePrimaryAddress().onStart { emit(null) },
         notificationsRepository.observeUnreadCount().onStart { emit(0) },
         shownWishlist,
-    ) { body, name, address, unread, wishlist ->
+    ) { body, (name, photo), address, unread, wishlist ->
         val (firstName, initials) = nameParts(name)
         HomeState(
             greeting = greeting,
             firstName = firstName,
             initials = initials,
+            photo = photo,
             hasUnreadNotifications = unread > 0,
             addressLine = address?.toLine(),
             body = body,
