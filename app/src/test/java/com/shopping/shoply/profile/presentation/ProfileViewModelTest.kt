@@ -53,6 +53,20 @@ class ProfileViewModelTest {
     }
 
     @Test
+    @DisplayName("the avatar shows the picked photo first, then the provider's photo")
+    fun `the avatar shows the picked photo first, then the provider's photo`() = runTest(main.dispatcher) {
+        val picked = byteArrayOf(1, 2, 3)
+        val base = Account(name = "Alex Morgan", email = "alex@mail.com", phone = null)
+        val sut = createSut()
+
+        fakeProfileRepository.account.value = base.copy(photoUrl = "https://photo")
+        assertThat(sut.state.value.photo).isEqualTo("https://photo")
+
+        fakeProfileRepository.account.value = base.copy(photoUrl = "https://photo", customPhoto = picked)
+        assertThat(sut.state.value.photo).isSameInstanceAs(picked)
+    }
+
+    @Test
     @DisplayName("live changes update the state")
     fun `live changes update the state`() = runTest(main.dispatcher) {
         val sut = createSut()

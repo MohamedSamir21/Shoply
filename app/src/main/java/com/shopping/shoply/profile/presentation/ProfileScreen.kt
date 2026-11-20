@@ -83,6 +83,7 @@ fun ProfileContent(
             AccountCard(
                 name = state.name,
                 initials = state.initials,
+                photo = state.photo,
                 email = state.email,
                 phone = state.phone,
                 onEdit = { onNavigate(ProfileDestination.EditProfile) },

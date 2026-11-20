@@ -9,6 +9,7 @@ import com.shopping.shoply.home.domain.rules.Greeting
  *
  * @property firstName from [com.shopping.shoply.home.domain.rules.nameParts]; "there" when the name is blank.
  * @property initials for the avatar; null when the name is blank.
+ * @property photo the avatar photo (JPEG bytes or a URL); null shows the initials.
  * @property addressLine "Home · 24 Elm Street" (label · part of line1 before the first comma);
  *   null when the user has no primary address.
  * @property wishlist ids of products whose heart is filled, including taps still being saved.
@@ -17,6 +18,7 @@ data class HomeState(
     val greeting: Greeting = Greeting.MORNING,
     val firstName: String = "",
     val initials: String? = null,
+    val photo: Any? = null,
     val hasUnreadNotifications: Boolean = false,
     val addressLine: String? = null,
     val body: HomeBody = HomeBody.Loading,

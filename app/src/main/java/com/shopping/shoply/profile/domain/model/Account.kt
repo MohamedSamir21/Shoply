@@ -21,6 +21,9 @@ data class Account(
     val canChangeEmail: Boolean = false
 )
 
+/** The photo to show for this account: the one picked in Edit Profile, else the provider's. */
+val Account.avatarPhoto: Any? get() = customPhoto ?: photoUrl
+
 /** Changes from Edit Profile; null fields stay as they are. [pickedPhotoUri] is a local content URI. */
 data class UserInfo(
     val name: String?,

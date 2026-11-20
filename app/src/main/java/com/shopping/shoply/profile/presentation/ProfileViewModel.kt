@@ -7,6 +7,7 @@ import com.shopping.shoply.notifications.domain.NotificationsRepository
 import com.shopping.shoply.profile.domain.ProfileRepository
 import com.shopping.shoply.profile.domain.SessionRepository
 import com.shopping.shoply.profile.domain.model.Account
+import com.shopping.shoply.profile.domain.model.avatarPhoto
 import com.shopping.shoply.wishlist.domain.WishlistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -48,6 +49,7 @@ class ProfileViewModel @Inject constructor(
         ProfileState(
             name = account.name,
             initials = nameParts(account.name).second,
+            photo = account.avatarPhoto,
             email = account.email,
             phone = account.phone,
             wishlistCount = wishlist.size,
