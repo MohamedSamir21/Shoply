@@ -15,11 +15,13 @@ import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.common.platform.ActivityProvider
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,6 +42,9 @@ class FirebasePhoneChangeRepository @Inject constructor(
 
     /** Bumped on every send, so callbacks from an older request (another number) are ignored. */
     private var activeRequest = 0
+
+    /** Whoever started the change; it never lands on an account that signed in afterwards. */
+    private var requestedBy: String? = null
 
     override fun currentPhone(): String? = auth.currentUser?.phoneNumber?.ifBlank { null }
 
@@ -62,6 +67,7 @@ class FirebasePhoneChangeRepository @Inject constructor(
 
     override fun sendCode(e164: String): Flow<PhoneCodeEvent> = callbackFlow {
         val request = ++activeRequest
+        requestedBy = auth.currentUser?.uid
         if (codeSentTo != e164) {
             // A different number: an earlier code must not be able to link it.
             verificationId = null
@@ -114,29 +120,38 @@ class FirebasePhoneChangeRepository @Inject constructor(
         return link(PhoneAuthProvider.getCredential(id, code), number)
     }
 
-    /** Replaces the linked number, or links the first one, then saves it to the profile (FR-042). */
-    private suspend fun link(credential: PhoneAuthCredential, e164: String): Result<Unit, DataError> {
-        val user = auth.currentUser ?: return Result.Error(DataError.Unknown)
-        return try {
-            val hasPhone = user.providerData.any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
-            if (hasPhone) user.updatePhoneNumber(credential).await() else user.linkWithCredential(credential).await()
+    /**
+     * Replaces the linked number, or links the first one, then saves it to the profile (FR-042).
+     * Runs to the end even if the screen closes: stopping between the two steps would leave the
+     * account and the profile with different numbers.
+     */
+    private suspend fun link(credential: PhoneAuthCredential, e164: String): Result<Unit, DataError> =
+        withContext(NonCancellable) {
+            val user = auth.currentUser?.takeIf { it.uid == requestedBy }
+                ?: return@withContext Result.Error(DataError.Unknown)
+            try {
+                val hasPhone = user.providerData.any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
+                if (hasPhone) user.updatePhoneNumber(credential).await() else user.linkWithCredential(credential).await()
+            } catch (e: Exception) {
+                // A rejected phone credential is a bad code here, never a "wrong password".
+                return@withContext when (val error = e.toAccountChangeError()) {
+                    DataError.Authentication.WRONG_PASSWORD -> Result.Error(DataError.Authentication.INVALID_CODE)
+                    else -> Result.Error(error)
+                }
+            }
             verificationId = null
             codeSentTo = null
             resendToken = null
-            // Awaited (linking just needed the network): password reset by phone reads this
-            // document, so it must not keep the old number while the account has the new one.
-            firestore.collection("users").document(user.uid)
-                .set(mapOf("phoneNumber" to e164, "phoneVerified" to true), SetOptions.merge())
-                .await()
-            Result.Success(Unit)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            // A rejected phone credential is a bad code here, never a "wrong password".
-            when (val error = e.toAccountChangeError()) {
-                DataError.Authentication.WRONG_PASSWORD -> Result.Error(DataError.Authentication.INVALID_CODE)
-                else -> Result.Error(error)
+            // The account has the new number now, so this is a success either way. Password reset
+            // by phone reads the profile: if this write fails, the profile re-syncs the number from
+            // the account the next time it loads (FirestoreProfileRepository).
+            try {
+                firestore.collection("users").document(user.uid)
+                    .set(mapOf("phoneNumber" to e164, "phoneVerified" to true), SetOptions.merge())
+                    .await()
+            } catch (e: Exception) {
+                // Repaired by the profile's sync.
             }
+            Result.Success(Unit)
         }
-    }
 }

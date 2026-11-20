@@ -255,7 +255,8 @@ private fun CodeStep(state: ChangePhoneState, onIntent: (ChangePhoneIntent) -> U
                 Text(stringResource(R.string.resend_code), fontWeight = FontWeight.Bold)
             }
         }
-        TextButton(onClick = { onIntent(ChangePhoneIntent.UseDifferentNumber) }) {
+        // Disabled while a send or verify runs, so it can't interrupt one half-way.
+        TextButton(onClick = { onIntent(ChangePhoneIntent.UseDifferentNumber) }, enabled = !state.isBusy) {
             Text(stringResource(R.string.use_a_different_number), fontWeight = FontWeight.Bold)
         }
     }
