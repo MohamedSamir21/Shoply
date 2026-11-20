@@ -15,7 +15,6 @@ import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 /**
@@ -43,8 +42,11 @@ class FirebaseEmailChangeRepository @Inject constructor(
 
     override suspend fun requestEmailChange(newEmail: String, password: String): Result<Unit, DataError> {
         val user = auth.currentUser ?: return Result.Error(DataError.Unknown)
-        val currentEmail = user.email ?: return Result.Error(DataError.Unknown)
         return firebaseCall {
+            // Fresh email first: if another device changed it, the cached one would fail the
+            // password check and read as "wrong password".
+            user.reload().await()
+            val currentEmail = user.email ?: throw IllegalStateException("Account has no email")
             user.reauthenticate(EmailAuthProvider.getCredential(currentEmail, password)).await()
             user.verifyBeforeUpdateEmail(newEmail).await()
             // Local-first: Edit Profile sees it at once, Firestore syncs it when online.
@@ -63,7 +65,7 @@ class FirebaseEmailChangeRepository @Inject constructor(
     }
 
     override suspend fun checkEmailChange(newEmail: String): Result<EmailChangeStatus, DataError> {
-        val user = auth.currentUser ?: return Result.Success(EmailChangeStatus.SIGNED_OUT)
+        val user = auth.currentUser ?: return Result.Success(EmailChangeStatus.SESSION_ENDED)
         return try {
             user.reload().await()
             if (user.email.equals(newEmail, ignoreCase = true)) {
@@ -73,11 +75,10 @@ class FirebaseEmailChangeRepository @Inject constructor(
                 Result.Success(EmailChangeStatus.WAITING)
             }
         } catch (e: FirebaseAuthInvalidUserException) {
-            // Changing the email revokes the session, so the reload is refused (FR-038). The ID token
-            // still works for a short while: record the new email first, so password reset finds it.
-            withTimeoutOrNull(SYNC_BEFORE_SIGN_OUT_MS) { saveConfirmedEmail(user.uid, newEmail).await() }
+            // The session ended (FR-038). That may or may not be this change, so nothing is saved:
+            // the profile picks up the real email after the next sign-in (FR-034).
             auth.signOut()
-            Result.Success(EmailChangeStatus.SIGNED_OUT)
+            Result.Success(EmailChangeStatus.SESSION_ENDED)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -102,7 +103,6 @@ class FirebaseEmailChangeRepository @Inject constructor(
 
     private companion object {
         const val FIELD_PENDING_EMAIL = "pendingEmail"
-        const val SYNC_BEFORE_SIGN_OUT_MS = 3_000L
     }
 }
 

@@ -45,6 +45,9 @@ enum class EmailChangeStatus {
     /** The account now uses the new email. */
     CONFIRMED,
 
-    /** The change went through and Firebase ended this session: the user must sign in again. */
-    SIGNED_OUT
+    /**
+     * The session ended, so the user must sign in again. Clicking the link ends it, but so does a
+     * password change elsewhere or a disabled account: it does NOT prove the email changed.
+     */
+    SESSION_ENDED
 }

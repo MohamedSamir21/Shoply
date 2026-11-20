@@ -6,7 +6,7 @@ enum class ChangeEmailStep { ENTER, CHECK_INBOX, UPDATED }
 
 /**
  * [newEmail] is what the user typed on [ChangeEmailStep.ENTER], then the address the link went to.
- * [mustSignInAgain] is true when the change ended this session (FR-038).
+ * [mustSignInAgain] is true when the session ended (FR-038); the email may or may not have changed.
  */
 data class ChangeEmailState(
     val step: ChangeEmailStep = ChangeEmailStep.ENTER,
@@ -18,7 +18,10 @@ data class ChangeEmailState(
     val isSending: Boolean = false,
     val resendSecondsLeft: Int = 0,
     val mustSignInAgain: Boolean = false
-)
+) {
+    // Data class toString would print the password into any log or crash report.
+    override fun toString() = "ChangeEmailState(step=$step, newEmail=$newEmail, isSending=$isSending)"
+}
 
 sealed interface ChangeEmailIntent {
     data class ChangeNewEmail(val email: String) : ChangeEmailIntent

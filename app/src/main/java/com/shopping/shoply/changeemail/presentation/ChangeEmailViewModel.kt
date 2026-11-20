@@ -129,7 +129,7 @@ class ChangeEmailViewModel @Inject constructor(
             when (result.data) {
                 EmailChangeStatus.WAITING -> Unit
                 EmailChangeStatus.CONFIRMED -> confirm(mustSignInAgain = false)
-                EmailChangeStatus.SIGNED_OUT -> confirm(mustSignInAgain = true)
+                EmailChangeStatus.SESSION_ENDED -> confirm(mustSignInAgain = true)
             }
         }
     }
@@ -142,8 +142,9 @@ class ChangeEmailViewModel @Inject constructor(
     /** Field errors go next to their field; anything else is a snackbar. */
     private suspend fun showError(error: DataError) {
         when (error) {
+            // A wrong password is cleared so it doesn't linger in memory.
             DataError.Authentication.WRONG_PASSWORD ->
-                _state.update { it.copy(passwordError = error.asUiText()) }
+                _state.update { it.copy(password = "", passwordError = error.asUiText()) }
             DataError.Authentication.EMAIL_ALREADY_IN_USE, DataError.Authentication.INVALID_EMAIL ->
                 _state.update { it.copy(emailError = error.asUiText()) }
             else -> _events.send(ChangeEmailEvent.Error(error.asUiText()))

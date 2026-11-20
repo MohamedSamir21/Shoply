@@ -44,7 +44,7 @@ Only for accounts that have an email/password sign-in.
 - **FR-035** Errors map to specific messages: email already in use, too many requests, network failure.
 - **FR-036** For accounts that sign in only with Google or Facebook, the screen explains that the email is managed by that provider and offers no change.
 - **FR-037** While a change is waiting for its link, Edit Profile shows the new address under Email with Resend and Cancel. Change Email opens on "Check your inbox" for it.
-- **FR-038** "Check your inbox" offers Open Email App, Use a different email, and Resend link after a 30-second wait. When the user comes back to the app, it checks whether the link was clicked and shows "Email updated". If the change ended the session, it asks the user to sign in again with the new email.
+- **FR-038** "Check your inbox" offers Open Email App, Use a different email, and Resend link after a 30-second wait. When the user comes back to the app, it checks whether the link was clicked and shows "Email updated". If the session ended meanwhile, it asks the user to sign in again without claiming the email changed (a forced sign-out has other causes), and saves nothing.
 
 > Delivery note: on the Spark plan, Firebase drops auth emails until a custom SMTP sender is configured.
 

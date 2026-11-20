@@ -61,6 +61,7 @@ class ChangeEmailViewModelTest {
 
         assertThat(sut.state.value.step).isEqualTo(ChangeEmailStep.ENTER)
         assertThat(sut.state.value.passwordError.id()).isEqualTo(R.string.wrong_password)
+        assertThat(sut.state.value.password).isEmpty()
     }
 
     @Test
@@ -122,10 +123,10 @@ class ChangeEmailViewModelTest {
     }
 
     @Test
-    @DisplayName("a change that ended the session asks to sign in again")
-    fun `a change that ended the session asks to sign in again`() = runTest(main.dispatcher) {
+    @DisplayName("an ended session asks to sign in again")
+    fun `an ended session asks to sign in again`() = runTest(main.dispatcher) {
         repository.pending = "sam@mail.com"
-        repository.status = Result.Success(EmailChangeStatus.SIGNED_OUT)
+        repository.status = Result.Success(EmailChangeStatus.SESSION_ENDED)
         val sut = createSut()
 
         sut.onIntent(ChangeEmailIntent.CheckIfConfirmed)

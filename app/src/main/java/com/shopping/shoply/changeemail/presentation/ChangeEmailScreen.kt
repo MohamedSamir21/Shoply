@@ -298,15 +298,22 @@ private fun CheckInboxStep(state: ChangeEmailState, onIntent: (ChangeEmailIntent
 
 @Composable
 private fun UpdatedStep(state: ChangeEmailState) {
-    CenterMessage(
-        icon = Icons.Outlined.CheckCircle,
-        success = true,
-        title = stringResource(R.string.email_updated),
-        message = stringResource(
-            if (state.mustSignInAgain) R.string.email_updated_sign_in_again else R.string.email_updated_message,
-            state.newEmail
+    // A forced sign-out doesn't prove the change went through, so it doesn't claim success.
+    if (state.mustSignInAgain) {
+        CenterMessage(
+            icon = Icons.Outlined.Lock,
+            success = false,
+            title = stringResource(R.string.sign_in_again),
+            message = stringResource(R.string.sign_in_again_message, state.newEmail)
         )
-    )
+    } else {
+        CenterMessage(
+            icon = Icons.Outlined.CheckCircle,
+            success = true,
+            title = stringResource(R.string.email_updated),
+            message = stringResource(R.string.email_updated_message, state.newEmail)
+        )
+    }
 }
 
 /** The design's big round badge with a title and a line of text under it. */
