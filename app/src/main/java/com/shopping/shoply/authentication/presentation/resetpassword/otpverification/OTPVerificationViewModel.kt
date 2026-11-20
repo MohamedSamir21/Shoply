@@ -72,6 +72,10 @@ class OTPVerificationViewModel @Inject constructor(
     // Set if the user completes the code before the send is confirmed; verified once it is.
     private var pendingVerification: Boolean = false
 
+    // True while a send waits for Firebase's answer. A code is only parked while this is true:
+    // after a failed send no confirmation is coming, so parking would spin forever.
+    private var isSending: Boolean = false
+
     private val _state =
         MutableStateFlow(
             OTPVerificationState(
@@ -133,6 +137,7 @@ class OTPVerificationViewModel @Inject constructor(
     private fun sendOTPCode(phoneNumber: String) {
         // Collect the OTP event stream; restart the countdown once the code is (re-)sent.
         startCountDownTimer()
+        isSending = true
         viewModelScope.launch {
             sendOTPCodeUseCase(
                 countryCode = "",
@@ -141,6 +146,7 @@ class OTPVerificationViewModel @Inject constructor(
             ).collect { event ->
                 when (event) {
                     SendOtpEvent.CodeSent -> {
+                        isSending = false
                         isCodeSent = true
                         startCountDownTimer()
                         // If the user already finished typing while we were still sending,
@@ -157,6 +163,7 @@ class OTPVerificationViewModel @Inject constructor(
                         // Send/verification failed: drop any pending verify and clear the spinner
                         // so the user isn't stuck waiting on a code that will never arrive.
                         is Result.Error -> {
+                            isSending = false
                             pendingVerification = false
                             resetCodeSlots()
                             _otpCodeVerificationResult.send(
@@ -184,6 +191,16 @@ class OTPVerificationViewModel @Inject constructor(
         // Code completed before the SMS was actually dispatched: keep the input, show the
         // spinner, and verify as soon as onCodeSent arrives — don't fail and wipe the code.
         if (!isCodeSent) {
+            if (!isSending) {
+                // The send failed and no code was ever sent: say so instead of spinning.
+                resetCodeSlots()
+                viewModelScope.launch {
+                    _otpCodeVerificationResult.send(
+                        OTPVerificationEvent.Error(UiText.StringResource(R.string.code_not_sent_tap_resend))
+                    )
+                }
+                return
+            }
             pendingVerification = true
             _state.update { it.copy(isLoading = true) }
             return
