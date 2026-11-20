@@ -50,11 +50,15 @@ Only for accounts that have an email/password sign-in.
 
 ## Change Phone
 
-- **FR-040** The user picks a country code and enters a number, using the existing phone input from the auth screens.
-- **FR-041** The app sends an SMS code through the existing `sendOTPCode` flow and opens the code-entry screen.
-- **FR-042** A correct code updates the phone credential on the Firebase Auth account and saves the number (E.164 format) to `users/{uid}.phone`.
-- **FR-043** A wrong or expired code shows an error. The user can request a new code after the same cooldown as the existing OTP screen.
-- **FR-044** A number already linked to another account shows an error, and nothing is saved.
+Opens from the phone row on Edit Profile. With no number yet, the same flow adds one ("Add Phone Number").
+
+- **FR-040** The user picks a country code and enters a number with the country picker used at sign-up. The current number, if any, is shown locked above it.
+- **FR-041** The number must be valid for the country and differ from the current one. Otherwise an inline error shows and no SMS is sent.
+- **FR-042** A correct code links the number to the Firebase Auth account (replacing the old one) and saves it in E.164 form to `users/{uid}.phoneNumber`, with `phoneVerified = true`.
+- **FR-043** A wrong or expired code shows under the code. Resend code is offered after 30 seconds, and "Use a different number" goes back to the number.
+- **FR-044** A number already linked to another account shows an error on the number, and nothing is saved.
+- **FR-045** Accounts that sign in with a password confirm it before a code is sent. If Firebase says the sign-in is too old, password accounts confirm the password again; others are asked to sign in again.
+- **FR-046** When Android verifies the number by itself, no code is needed. The flow ends on "Phone Number Updated" (or "Added").
 
 > Development note: use Firebase test phone numbers. The Spark plan has a small daily SMS quota.
 
@@ -69,4 +73,4 @@ Only for accounts that have an email/password sign-in.
 - **T-002** Name and date validation: FR-020, FR-021.
 - **T-003** Only changed fields are written: FR-022.
 - **T-004** Change Email ViewModel: wrong password, same email, success, confirmed after the link (FR-031 to FR-033, FR-038); Firebase error mapping (FR-035).
-- **T-005** Change Phone ViewModel: correct code, wrong code, number in use (FR-042 to FR-044).
+- **T-005** Change Phone ViewModel: send, wrong password, invalid/same number, no-password account, right/wrong code, number in use, auto-verified (FR-041 to FR-046).

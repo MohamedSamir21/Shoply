@@ -65,11 +65,13 @@ class FirestoreProfileRepository @Inject constructor(
             )
         return user(uid).liveSnapshots().map { doc ->
             val docEmail = doc.string("email")
-            val authEmail = syncedEmail(uid, docEmail)
+            val docPhone = doc.string("phoneNumber").ifBlank { null }
+            val synced = syncFromAuth(uid, docEmail, docPhone)
+            val authEmail = synced.email
             Account(
                 name = doc.string("username"),
                 email = authEmail ?: docEmail,
-                phone = doc.string("phoneNumber").ifBlank { null },
+                phone = synced.phone,
                 photoUrl = doc.string("photoUrl").ifBlank { null },
                 customPhoto = doc.string(ProfilePhoto.FIELD_BASE64).ifBlank { null }
                     ?.let(photoEncoder::decode),
@@ -86,26 +88,39 @@ class FirestoreProfileRepository @Inject constructor(
     }
 
     /**
-     * Firebase Auth owns the sign-in email; the document follows it after a change (FR-034). The
-     * cached email may be stale (another device changed it), so it is only written after a reload
-     * confirms it, which also stops two signed-in devices from overwriting each other.
+     * Firebase Auth owns the sign-in email and phone; the document follows them after a change
+     * (FR-034, FR-042), including a phone save that failed half-way. The cached values may be stale
+     * (another device changed them), so they are only written after a reload confirms them, which
+     * also stops two signed-in devices from overwriting each other.
      */
-    private suspend fun syncedEmail(uid: String, docEmail: String): String? {
-        val user = auth.currentUser ?: return null
-        if (user.email == null || user.email.equals(docEmail, ignoreCase = true)) return user.email
+    private suspend fun syncFromAuth(uid: String, docEmail: String, docPhone: String?): SyncedContact {
+        val user = auth.currentUser ?: return SyncedContact(null, docPhone)
+        val emailDiffers = user.email != null && !user.email.equals(docEmail, ignoreCase = true)
+        // Firebase may report "no phone" as an empty string: treat it as none.
+        val authPhone = user.phoneNumber?.ifBlank { null }
+        val phoneDiffers = authPhone != null && authPhone != docPhone
+        if (!emailDiffers && !phoneDiffers) return SyncedContact(user.email, docPhone)
         return try {
             user.reload().await()
-            val fresh = user.email
-            if (fresh != null && !fresh.equals(docEmail, ignoreCase = true)) {
-                user(uid).set(mapOf("email" to fresh), SetOptions.merge())
+            val updates = buildMap<String, Any> {
+                user.email?.takeUnless { it.equals(docEmail, ignoreCase = true) }?.let { put("email", it) }
+                // Password reset by phone reads this field (FR-042), so it follows the account too.
+                user.phoneNumber?.ifBlank { null }?.takeUnless { it == docPhone }?.let {
+                    put("phoneNumber", it)
+                    put("phoneVerified", true)
+                }
             }
-            fresh
+            if (updates.isNotEmpty()) user(uid).set(updates, SetOptions.merge())
+            SyncedContact(user.email, user.phoneNumber?.ifBlank { null } ?: docPhone)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            docEmail // Offline or the session ended: keep showing what the profile says.
+            // Offline or the session ended: keep showing what the profile says.
+            SyncedContact(docEmail, docPhone)
         }
     }
+
+    private data class SyncedContact(val email: String?, val phone: String?)
 
     override suspend fun updateUserInfo(userInfo: UserInfo): Result<Unit, DataError> {
         val photoFields = userInfo.pickedPhotoUri?.let { uri ->

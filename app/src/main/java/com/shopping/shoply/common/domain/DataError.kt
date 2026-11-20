@@ -21,7 +21,10 @@ sealed interface DataError : Error {
         INVALID_CREDENTIALS,
         ALREADY_VERIFIED,
         TOO_MANY_REQUESTS,
-        REQUIRES_RECENT_LOGIN
+        REQUIRES_RECENT_LOGIN,
+        INVALID_PHONE_NUMBER,
+        INVALID_CODE,
+        CODE_EXPIRED
     }
 }
 
