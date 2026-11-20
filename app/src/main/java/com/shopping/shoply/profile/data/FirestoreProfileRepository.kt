@@ -96,20 +96,22 @@ class FirestoreProfileRepository @Inject constructor(
     private suspend fun syncFromAuth(uid: String, docEmail: String, docPhone: String?): SyncedContact {
         val user = auth.currentUser ?: return SyncedContact(null, docPhone)
         val emailDiffers = user.email != null && !user.email.equals(docEmail, ignoreCase = true)
-        val phoneDiffers = user.phoneNumber != null && user.phoneNumber != docPhone
+        // Firebase may report "no phone" as an empty string: treat it as none.
+        val authPhone = user.phoneNumber?.ifBlank { null }
+        val phoneDiffers = authPhone != null && authPhone != docPhone
         if (!emailDiffers && !phoneDiffers) return SyncedContact(user.email, docPhone)
         return try {
             user.reload().await()
             val updates = buildMap<String, Any> {
                 user.email?.takeUnless { it.equals(docEmail, ignoreCase = true) }?.let { put("email", it) }
                 // Password reset by phone reads this field (FR-042), so it follows the account too.
-                user.phoneNumber?.takeUnless { it == docPhone }?.let {
+                user.phoneNumber?.ifBlank { null }?.takeUnless { it == docPhone }?.let {
                     put("phoneNumber", it)
                     put("phoneVerified", true)
                 }
             }
             if (updates.isNotEmpty()) user(uid).set(updates, SetOptions.merge())
-            SyncedContact(user.email, user.phoneNumber ?: docPhone)
+            SyncedContact(user.email, user.phoneNumber?.ifBlank { null } ?: docPhone)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

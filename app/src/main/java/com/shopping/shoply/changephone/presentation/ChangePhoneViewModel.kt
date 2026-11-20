@@ -156,6 +156,8 @@ class ChangePhoneViewModel @Inject constructor(
     }
 
     private fun done() {
+        // A late verify (the number was already linked) must not undo the success step.
+        verifying?.cancel()
         sending?.cancel()
         countdown?.cancel()
         _state.update { it.copy(step = ChangePhoneStep.UPDATED, isBusy = false, code = "", resendSecondsLeft = 0) }
