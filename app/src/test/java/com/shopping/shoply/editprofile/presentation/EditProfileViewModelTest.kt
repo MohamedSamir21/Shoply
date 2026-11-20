@@ -138,6 +138,20 @@ class EditProfileViewModelTest {
     }
 
     @Test
+    @DisplayName("resending after the password check expired opens Change Email on the password step")
+    fun `resending after the password check expired opens Change Email on the password step`() = runTest(main.dispatcher) {
+        fakeProfileRepository.account.value = fakeProfileRepository.account.value.copy(pendingEmail = "sam@mail.com")
+        fakeEmailChangeRepository.resendResult = Result.Error(DataError.Authentication.REQUIRES_RECENT_LOGIN)
+        val sut = createSut()
+
+        sut.events.test {
+            sut.onIntent(EditProfileIntent.ResendEmailLink)
+
+            assertThat(awaitItem()).isEqualTo(EditProfileEvent.OpenChangeEmail(askForPassword = true))
+        }
+    }
+
+    @Test
     @DisplayName("an account with a password opens Change Email")
     fun `an account with a password opens Change Email`() = runTest(main.dispatcher) {
         fakeProfileRepository.account.value = fakeProfileRepository.account.value.copy(canChangeEmail = true)
@@ -146,7 +160,7 @@ class EditProfileViewModelTest {
         sut.events.test {
             sut.onIntent(EditProfileIntent.ChangeEmail)
 
-            assertThat(awaitItem()).isEqualTo(EditProfileEvent.OpenChangeEmail)
+            assertThat(awaitItem()).isEqualTo(EditProfileEvent.OpenChangeEmail(askForPassword = false))
         }
     }
 

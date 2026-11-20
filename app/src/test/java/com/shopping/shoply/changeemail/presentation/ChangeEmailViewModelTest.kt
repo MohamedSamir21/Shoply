@@ -1,5 +1,6 @@
 package com.shopping.shoply.changeemail.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.domain.interfaces.validator.EmailValidator
@@ -23,9 +24,10 @@ class ChangeEmailViewModelTest {
     @JvmField
     val main = MainDispatcherExtension()
 
-    private fun createSut() = ChangeEmailViewModel(
+    private fun createSut(askForPassword: Boolean = false) = ChangeEmailViewModel(
         repository = repository,
-        validateEmail = ValidateEmailUseCase(EmailValidator { it.contains("@") && it.contains(".") })
+        validateEmail = ValidateEmailUseCase(EmailValidator { it.contains("@") && it.contains(".") }),
+        savedStateHandle = SavedStateHandle(mapOf(ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD to askForPassword))
     )
 
     private fun ChangeEmailViewModel.submit(email: String, password: String) {
@@ -92,6 +94,17 @@ class ChangeEmailViewModelTest {
         val state = createSut().state.value
 
         assertThat(state.step).isEqualTo(ChangeEmailStep.CHECK_INBOX)
+        assertThat(state.newEmail).isEqualTo("sam@mail.com")
+    }
+
+    @Test
+    @DisplayName("an expired password check opens on the password step with the pending email filled in")
+    fun `an expired password check opens on the password step with the pending email filled in`() = runTest(main.dispatcher) {
+        repository.pending = "sam@mail.com"
+
+        val state = createSut(askForPassword = true).state.value
+
+        assertThat(state.step).isEqualTo(ChangeEmailStep.ENTER)
         assertThat(state.newEmail).isEqualTo("sam@mail.com")
     }
 

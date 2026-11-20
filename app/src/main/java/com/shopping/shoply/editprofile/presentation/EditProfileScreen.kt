@@ -93,7 +93,7 @@ import com.shopping.shoply.home.domain.rules.nameParts
 fun EditProfileScreen(
     snackHostState: SnackbarHostState,
     onBack: () -> Unit,
-    onChangeEmailClicked: () -> Unit,
+    onChangeEmailClicked: (askForPassword: Boolean) -> Unit,
     onChangePhoneClicked: () -> Unit
 ) {
     val viewModel = hiltViewModel<EditProfileViewModel>()
@@ -117,7 +117,7 @@ fun EditProfileScreen(
                     }
                 }
 
-                EditProfileEvent.OpenChangeEmail -> onChangeEmailClicked()
+                is EditProfileEvent.OpenChangeEmail -> onChangeEmailClicked(event.askForPassword)
 
                 is EditProfileEvent.Message -> snackHostState.showSnackbar(event.text.asString(context))
 

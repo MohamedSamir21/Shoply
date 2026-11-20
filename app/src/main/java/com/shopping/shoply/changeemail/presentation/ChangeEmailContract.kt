@@ -33,5 +33,6 @@ sealed interface ChangeEmailIntent {
 
 sealed interface ChangeEmailEvent {
     data class Error(val message: UiText) : ChangeEmailEvent
+    data class Info(val message: UiText) : ChangeEmailEvent
     data object LinkResent : ChangeEmailEvent
 }

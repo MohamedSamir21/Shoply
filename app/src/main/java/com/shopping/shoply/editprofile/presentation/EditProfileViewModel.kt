@@ -70,7 +70,7 @@ class EditProfileViewModel @Inject constructor(
     /** FR-036: Google and Facebook own the email of accounts without a password. */
     private fun changeEmail() {
         val event = if (state.value.canChangeEmail) {
-            EditProfileEvent.OpenChangeEmail
+            EditProfileEvent.OpenChangeEmail()
         } else {
             EditProfileEvent.Message(UiText.StringResource(R.string.email_managed_by_provider))
         }
@@ -84,7 +84,7 @@ class EditProfileViewModel @Inject constructor(
                 is Result.Success -> _events.send(EditProfileEvent.Message(UiText.StringResource(R.string.verification_link_sent)))
                 // The password check expired: Change Email asks for it again.
                 is Result.Error -> if (result.error == DataError.Authentication.REQUIRES_RECENT_LOGIN) {
-                    _events.send(EditProfileEvent.OpenChangeEmail)
+                    _events.send(EditProfileEvent.OpenChangeEmail(askForPassword = true))
                 } else {
                     _events.send(EditProfileEvent.Message(result.error.asUiText()))
                 }

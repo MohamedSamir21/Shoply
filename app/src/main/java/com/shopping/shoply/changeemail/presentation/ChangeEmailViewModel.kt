@@ -1,5 +1,6 @@
 package com.shopping.shoply.changeemail.presentation
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopping.shoply.R
@@ -24,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ChangeEmailViewModel @Inject constructor(
     private val repository: EmailChangeRepository,
-    private val validateEmail: ValidateEmailUseCase
+    private val validateEmail: ValidateEmailUseCase,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _state = MutableStateFlow(ChangeEmailState(currentEmail = repository.currentEmail().orEmpty()))
     val state = _state.asStateFlow()
@@ -34,8 +36,14 @@ class ChangeEmailViewModel @Inject constructor(
 
     init {
         // Coming back to a change already in progress opens on "Check your inbox".
+        val askForPassword = savedStateHandle.get<Boolean>(ARG_ASK_FOR_PASSWORD) == true
         viewModelScope.launch {
-            repository.pendingEmail()?.let { pending ->
+            val pending = repository.pendingEmail() ?: return@launch
+            if (askForPassword) {
+                // The password check expired: ask again, with the pending address filled in.
+                _state.update { it.copy(newEmail = pending) }
+                _events.send(ChangeEmailEvent.Info(DataError.Authentication.REQUIRES_RECENT_LOGIN.asUiText()))
+            } else {
                 _state.update { it.copy(step = ChangeEmailStep.CHECK_INBOX, newEmail = pending) }
             }
         }
@@ -50,6 +58,8 @@ class ChangeEmailViewModel @Inject constructor(
             ChangeEmailIntent.UseDifferentEmail -> {
                 countdown?.cancel()
                 _state.update { it.copy(step = ChangeEmailStep.ENTER, password = "", resendSecondsLeft = 0) }
+                // Firebase can't take back a link it already emailed (see EmailChangeRepository.cancelEmailChange).
+                _events.trySend(ChangeEmailEvent.Info(UiText.StringResource(R.string.earlier_link_still_valid)))
             }
             ChangeEmailIntent.CheckIfConfirmed -> checkIfConfirmed()
         }
@@ -151,7 +161,9 @@ class ChangeEmailViewModel @Inject constructor(
         }
     }
 
-    private companion object {
-        const val RESEND_WAIT_SECONDS = 30
+    companion object {
+        /** Navigation argument: open on the password step. */
+        const val ARG_ASK_FOR_PASSWORD = "ask_password"
+        private const val RESEND_WAIT_SECONDS = 30
     }
 }

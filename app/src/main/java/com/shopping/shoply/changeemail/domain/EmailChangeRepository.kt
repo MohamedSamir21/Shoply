@@ -28,7 +28,10 @@ interface EmailChangeRepository {
      */
     suspend fun resendEmailChangeLink(newEmail: String): Result<Unit, DataError>
 
-    /** Forgets the pending address. The link already sent stops mattering once it is ignored. */
+    /**
+     * Forgets the pending address. Firebase can't revoke a link it already emailed: it stays valid
+     * until it expires, so the user must be told not to click it.
+     */
     fun cancelEmailChange()
 
     /** Whether the change to [newEmail] went through, by reloading the account from Firebase. */

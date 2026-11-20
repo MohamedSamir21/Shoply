@@ -632,7 +632,8 @@
     <string name="email_updated_sign_in_again">For your security, please sign in again with %1$s.</string>
     <string name="done">Done</string>
     <string name="waiting_for_confirmation">Waiting for confirmation</string>
-    <string name="email_change_cancelled">Email change cancelled</string>
+    <string name="email_change_cancelled">Change cancelled. Don\'t click the link we sent; it stays valid until it expires.</string>
+    <string name="earlier_link_still_valid">Don\'t click the earlier link we sent; it stays valid until it expires.</string>
     <string name="email_managed_by_provider">You sign in with Google or Facebook, so your email is managed there.</string>
     <string name="add">Add</string>
     <string name="choose_date_of_birth">Choose your date of birth</string>

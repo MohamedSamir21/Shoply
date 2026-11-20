@@ -15,6 +15,7 @@ import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 /**
@@ -66,16 +67,15 @@ class FirebaseEmailChangeRepository @Inject constructor(
         return try {
             user.reload().await()
             if (user.email.equals(newEmail, ignoreCase = true)) {
-                user(user.uid).set(
-                    mapOf("email" to newEmail, FIELD_PENDING_EMAIL to FieldValue.delete()),
-                    SetOptions.merge()
-                )
+                saveConfirmedEmail(user.uid, newEmail)
                 Result.Success(EmailChangeStatus.CONFIRMED)
             } else {
                 Result.Success(EmailChangeStatus.WAITING)
             }
         } catch (e: FirebaseAuthInvalidUserException) {
-            // Changing the email revokes the session, so the reload is refused (FR-038).
+            // Changing the email revokes the session, so the reload is refused (FR-038). The ID token
+            // still works for a short while: record the new email first, so password reset finds it.
+            withTimeoutOrNull(SYNC_BEFORE_SIGN_OUT_MS) { saveConfirmedEmail(user.uid, newEmail).await() }
             auth.signOut()
             Result.Success(EmailChangeStatus.SIGNED_OUT)
         } catch (e: CancellationException) {
@@ -95,10 +95,14 @@ class FirebaseEmailChangeRepository @Inject constructor(
             Result.Error(e.toEmailChangeError())
         }
 
+    private fun saveConfirmedEmail(uid: String, email: String) =
+        user(uid).set(mapOf("email" to email, FIELD_PENDING_EMAIL to FieldValue.delete()), SetOptions.merge())
+
     private fun user(uid: String) = firestore.collection("users").document(uid)
 
     private companion object {
         const val FIELD_PENDING_EMAIL = "pendingEmail"
+        const val SYNC_BEFORE_SIGN_OUT_MS = 3_000L
     }
 }
 

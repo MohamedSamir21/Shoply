@@ -71,6 +71,7 @@ import com.shopping.shoply.categories.presentation.CategoriesDestination
 import com.shopping.shoply.categories.presentation.CategoriesScreen
 import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
 import com.shopping.shoply.changeemail.presentation.ChangeEmailScreen
+import com.shopping.shoply.changeemail.presentation.ChangeEmailViewModel
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
@@ -148,7 +149,11 @@ private fun storesRoute(tab: ShellTab) =
     "${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG={$STORES_FAVORITES_ONLY_ARG}"
 
 private fun editProfileRoute(tab: ShellTab) = "${tab.route}/edit_profile"
-private fun changeEmailRoute(tab: ShellTab) = "${tab.route}/change_email"
+private fun changeEmailRoute(tab: ShellTab) =
+    "${tab.route}/change_email?${ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD}={${ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD}}"
+
+private fun NavHostController.openChangeEmail(tab: ShellTab, askForPassword: Boolean) =
+    navigate("${tab.route}/change_email?${ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD}=$askForPassword")
 
 private fun addressesRoute(tab: ShellTab) = "${tab.route}/addresses"
 private fun addressEditRoute(tab: ShellTab) =
@@ -314,7 +319,7 @@ private fun NavGraphBuilder.editProfile(
         EditProfileScreen(
             snackHostState = snackHostState,
             onBack = { navController.popBackStack() },
-            onChangeEmailClicked = { navController.navigate(changeEmailRoute(tab)) },
+            onChangeEmailClicked = { askForPassword -> navController.openChangeEmail(tab, askForPassword) },
             // Change Phone isn't built yet.
             onChangePhoneClicked = { navController.openPlaceholder(tab, Placeholder.CHANGE_PHONE) }
         )
@@ -327,7 +332,13 @@ private fun NavGraphBuilder.changeEmail(
     snackHostState: SnackbarHostState,
     onSignedOut: () -> Unit
 ) {
-    composable(route = changeEmailRoute(tab)) {
+    composable(
+        route = changeEmailRoute(tab),
+        arguments = listOf(navArgument(ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD) {
+            type = NavType.BoolType
+            defaultValue = false
+        })
+    ) {
         ChangeEmailScreen(
             snackbarHostState = snackHostState,
             onBack = { navController.popBackStack() },

@@ -41,6 +41,7 @@ sealed interface EditProfileEvent {
     data object ProfileUpdated : EditProfileEvent
     /** [canRetry] is false when saving the same values again can't help, like a photo that is too large. */
     data class ProfileUpdateError(val error: UiText, val canRetry: Boolean = true) : EditProfileEvent
-    data object OpenChangeEmail : EditProfileEvent
+    /** [askForPassword]: Change Email should open on the password step (the last check expired). */
+    data class OpenChangeEmail(val askForPassword: Boolean = false) : EditProfileEvent
     data class Message(val text: UiText) : EditProfileEvent
 }

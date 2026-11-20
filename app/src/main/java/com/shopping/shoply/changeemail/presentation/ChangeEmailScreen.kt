@@ -3,6 +3,7 @@ package com.shopping.shoply.changeemail.presentation
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -87,6 +88,7 @@ fun ChangeEmailScreen(
         viewModel.events.collect { event ->
             val message = when (event) {
                 is ChangeEmailEvent.Error -> event.message.asString(context)
+                is ChangeEmailEvent.Info -> event.message.asString(context)
                 ChangeEmailEvent.LinkResent -> context.getString(R.string.verification_link_sent)
             }
             snackbarHostState.showSnackbar(message)
@@ -97,16 +99,20 @@ fun ChangeEmailScreen(
         viewModel.onIntent(ChangeEmailIntent.CheckIfConfirmed)
     }
 
+    // FR-038: once the change ended the session, every way out leads to Sign In.
+    val exit = if (state.mustSignInAgain) onSignedOut else onBack
+    BackHandler(enabled = state.mustSignInAgain, onBack = onSignedOut)
+
     ChangeEmailContent(
         state = state,
         onIntent = viewModel::onIntent,
-        onBack = onBack,
+        onBack = exit,
         onOpenEmailApp = {
             if (!context.openEmailApp()) {
                 scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.no_email_app)) }
             }
         },
-        onDone = if (state.mustSignInAgain) onSignedOut else onBack
+        onDone = exit
     )
 }
 
