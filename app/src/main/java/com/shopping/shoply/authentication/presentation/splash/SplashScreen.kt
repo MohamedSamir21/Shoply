@@ -24,34 +24,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.shopping.shoply.common.presentation.components.ShoplyLogo
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
+import com.shopping.shoply.common.presentation.navigation.navigateToHome
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
-import kotlinx.coroutines.delay
-
-// Kept short because the OS cold-start splash (installSplashScreen) already
-// runs ~1.2s before this Compose splash is shown.
-private const val SPLASH_DURATION_MS = 1400L
+import com.shopping.shoply.launch.domain.LaunchDestination
 
 @Composable
 fun SplashScreen(
-    navController: NavController
+    navController: NavHostController,
+    viewModel: SplashViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(Unit) {
-        delay(SPLASH_DURATION_MS)
-        navController.navigate(NavRoutes.Onboarding.route) {
-            popUpTo(NavRoutes.Splash.route) { inclusive = true }
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is SplashEvent.Navigate -> when (event.destination) {
+                    LaunchDestination.HOME -> navController.navigateToHome()
+                    LaunchDestination.SIGN_IN -> navController.navigate(NavRoutes.SignIn.route) {
+                        popUpTo(NavRoutes.Splash.route) { inclusive = true }
+                    }
+                    LaunchDestination.ONBOARDING -> navController.navigate(NavRoutes.Onboarding.route) {
+                        popUpTo(NavRoutes.Splash.route) { inclusive = true }
+                    }
+                }
+            }
         }
     }
 
-    SplashContent(
-        onTap = {
-            navController.navigate(NavRoutes.Onboarding.route) {
-                popUpTo(NavRoutes.Splash.route) { inclusive = true }
-            }
-        }
-    )
+    SplashContent(onTap = { viewModel.onIntent(SplashIntent.Skip) })
 }
 
 @Composable
