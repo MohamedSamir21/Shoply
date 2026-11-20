@@ -1,6 +1,5 @@
 package com.shopping.shoply.authentication.presentation.resetpassword.forgotpassword
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,7 +29,6 @@ import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 
-private const val TAG = "ForgotPasswordScreen"
 
 @Composable
 fun ForgotPasswordScreen(
@@ -74,7 +72,6 @@ private fun onPhoneChoice(
                     newValue = OtpPurpose.RESET.name
                 )
         )
-        Log.d(TAG, e164Digits)
     } else {
         navController.navigate(NavRoutes.EnterPhone.route)
     }

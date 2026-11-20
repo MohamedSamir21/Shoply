@@ -2,7 +2,6 @@ package com.shopping.shoply.authentication.presentation.resetpassword.enterphone
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.shopping.shoply.authentication.domain.usecase.auth.CheckIfPhoneNumberExistsUseCase
 import com.shopping.shoply.authentication.domain.usecase.countryinfo.GetCountryInfoUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePhoneUseCase
 import com.shopping.shoply.authentication.presentation.utility.asUiText
@@ -20,13 +19,12 @@ import javax.inject.Inject
 
 /**
  * Backs the enter-phone step of the password-reset flow: validates the number against the selected
- * country and confirms an account exists for it. Success is delivered as a one-shot
+ * country, then hands it to the OTP screen, which checks that an account has it. Success is delivered as a one-shot
  * [phoneVerificationResult] event; country data must be loaded explicitly via [loadCountriesInfo].
  */
 @HiltViewModel
 class EnterPhoneViewModel @Inject constructor(
     private val validatePhoneUseCase: ValidatePhoneUseCase,
-    private val checkIfPhoneNumberExistsUseCase: CheckIfPhoneNumberExistsUseCase,
     private val getCountryInfoUseCase: GetCountryInfoUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(EnterPhoneState())
@@ -143,42 +141,16 @@ class EnterPhoneViewModel @Inject constructor(
             return
         }
 
-        // Check if phone exists
+        // No lookup here: the OTP screen signs in with the code, and a number with no account
+        // fails there (PHONE_NUMBER_DOES_NOT_EXIST).
+        _state.update { it.copy(error = null) }
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isProcessing = true,
-                    error = null
+            _phoneVerificationResult.send(
+                EnterPhoneEvent.Success(
+                    countryCode = _state.value.selectedCountryInfo.codeNumber,
+                    phoneNumber = e164.filter(Char::isDigit)
                 )
-            }
-
-            when (val result = checkIfPhoneNumberExistsUseCase(e164)) {
-                is Result.Error -> {
-                    _state.update {
-                        it.copy(
-                            error = result.error.asUiText(),
-                            isProcessing = false
-                        )
-                    }
-                }
-
-                is Result.Success -> {
-                    // The phone exists: hand off to the OTP screen, which owns sending the code.
-                    // It expects E.164 digits (no '+'); it re-adds the '+' before sending.
-                    _state.update {
-                        it.copy(
-                            error = null,
-                            isProcessing = false
-                        )
-                    }
-                    _phoneVerificationResult.send(
-                        EnterPhoneEvent.Success(
-                            countryCode = _state.value.selectedCountryInfo.codeNumber,
-                            phoneNumber = e164.filter(Char::isDigit)
-                        )
-                    )
-                }
-            }
+            )
         }
     }
 }

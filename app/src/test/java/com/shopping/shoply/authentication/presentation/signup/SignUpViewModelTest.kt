@@ -8,7 +8,6 @@ import com.shopping.shoply.authentication.domain.model.PasswordStrength
 import com.shopping.shoply.authentication.domain.model.SignUpData
 import com.shopping.shoply.authentication.domain.model.User
 import com.shopping.shoply.authentication.domain.model.ValidationError
-import com.shopping.shoply.authentication.domain.usecase.auth.CheckIfPhoneNumberExistsUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithFacebookUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpWithGoogleUseCase
@@ -50,7 +49,6 @@ class SignUpViewModelTest {
     private val signUpWithGoogleUseCase = mockk<SignUpWithGoogleUseCase>()
     private val signUpWithFacebookUseCase = mockk<SignUpWithFacebookUseCase>()
     private val getCountryInfoUseCase = mockk<GetCountryInfoUseCase>()
-    private val checkIfPhoneNumberExistsUseCase = mockk<CheckIfPhoneNumberExistsUseCase>()
     private val measurePasswordStrengthUseCase = mockk<MeasurePasswordStrengthUseCase>()
 
     private val egypt =
@@ -81,7 +79,6 @@ class SignUpViewModelTest {
             signUpWithGoogleUseCase = signUpWithGoogleUseCase,
             signUpWithFacebookUseCase = signUpWithFacebookUseCase,
             getCountryInfoUseCase = getCountryInfoUseCase,
-            checkIfPhoneNumberExistsUseCase = checkIfPhoneNumberExistsUseCase,
             measurePasswordStrengthUseCase = measurePasswordStrengthUseCase
         )
     }
@@ -362,32 +359,12 @@ class SignUpViewModelTest {
             }
 
         @Test
-        @DisplayName("reports that the phone number is already registered")
-        fun `reports that the phone number is already registered`() =
-            runTest(mainDispatcherExtension.dispatcher) {
-                val sut = createSut(listOf(egypt))
-                advanceUntilIdle()
-                fillValidForm(sut)
-                coEvery { checkIfPhoneNumberExistsUseCase("+201001234567") } returns Result.Success(Unit)
-
-                sut.onIntent(SignUpScreenIntent.SignUp.SubmitForm)
-
-                val phoneError = sut.state.value.userError.phoneNumberError as UiText.StringResource
-                assertThat(phoneError.id).isEqualTo(R.string.phone_already_registered)
-                assertThat(sut.state.value.isSigningUp).isFalse()
-                coVerify(exactly = 0) { signUpUseCase(any(), any()) }
-            }
-
-        @Test
         @DisplayName("reports success once the account is created")
         fun `reports success once the account is created`() =
             runTest(mainDispatcherExtension.dispatcher) {
                 val sut = createSut(listOf(egypt))
                 advanceUntilIdle()
                 fillValidForm(sut)
-                coEvery {
-                    checkIfPhoneNumberExistsUseCase("+201001234567")
-                } returns Result.Error(DataError.Unknown)
                 coEvery {
                     signUpUseCase(
                         User(username = "mohamed", email = "user@gmail.com", phoneNumber = "+201001234567"),
@@ -410,9 +387,6 @@ class SignUpViewModelTest {
                 val sut = createSut(listOf(egypt))
                 advanceUntilIdle()
                 fillValidForm(sut)
-                coEvery {
-                    checkIfPhoneNumberExistsUseCase("+201001234567")
-                } returns Result.Error(DataError.Unknown)
                 coEvery { signUpUseCase(any(), any()) } returns Result.Error(DataError.Unknown)
 
                 sut.onIntent(SignUpScreenIntent.SignUp.SubmitForm)

@@ -102,8 +102,6 @@ class SettingsTest {
         override suspend fun resendVerificationEmailLink() = unused()
         override suspend fun refreshVerificationStatus(): Result<Boolean, DataError> = error("unused")
         override suspend fun getUserInfo(): Result<User, DataError> = error("unused")
-        override suspend fun checkIfEmailExists(email: String) = unused()
-        override suspend fun checkIfPhoneNumberExists(phoneNumber: String) = unused()
         override suspend fun markPhoneNumberVerified() = unused()
         override fun sendOTPCode(countryCode: String, phoneNumber: String, link: Boolean): Flow<SendOtpEvent> = error("unused")
         override suspend fun verifyOTPCode(code: String) = unused()

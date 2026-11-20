@@ -107,60 +107,6 @@ class FirebaseAuthDataSourceTest {
     }
 
     @Nested
-    @DisplayName("checkIfEmailExists")
-    inner class CheckIfEmailExists {
-
-        private val email = "user@gmail.com"
-        private val snapshot: QuerySnapshot = mockk()
-
-        // Stub the whole Firestore fluent chain in one shot; MockK auto-creates the intermediate
-        // CollectionReference/Query mocks. The terminal .get() must return a REAL completed Task —
-        // a relaxed mock Task would never invoke await()'s listener, hanging the test forever.
-        private fun stubQueryReturns(email: String, task: Task<QuerySnapshot>) {
-            every {
-                firestore.collection(FirebaseAuthDataSource.USER_COLLECTION_NAME)
-                    .whereEqualTo("email", email)
-                    .limit(1)
-                    .get()
-            } returns task
-        }
-
-        @Test
-        @DisplayName("returns Success when a matching document exists")
-        fun `returns Success when a matching document exists`() = runTest(testDispatcher) {
-            stubQueryReturns(email, task = Tasks.forResult(snapshot))
-            every { snapshot.isEmpty } returns false
-
-            val result = sut.checkIfEmailExists(email)
-
-            assertThat(result).isEqualTo(SuccessResult(Unit))
-        }
-
-        @Test
-        @DisplayName("returns EMAIL_DOES_NOT_EXIST when no document matches")
-        fun `returns EMAIL_DOES_NOT_EXIST when no document matches`() = runTest(testDispatcher) {
-            stubQueryReturns(email, task = Tasks.forResult(snapshot))
-            every { snapshot.isEmpty } returns true
-
-            val result = sut.checkIfEmailExists(email)
-
-            assertThat(result).isEqualTo(
-                ErrorResult(DataError.Authentication.EMAIL_DOES_NOT_EXIST)
-            )
-        }
-
-        @Test
-        @DisplayName("returns an Unknown error when the query fails")
-        fun `returns Unknown error when the query fails`() = runTest(testDispatcher) {
-            stubQueryReturns(email, task = Tasks.forException(IOException("firestore down")))
-
-            val result = sut.checkIfEmailExists(email)
-
-            assertThat(result).isEqualTo(ErrorResult(DataError.Unknown))
-        }
-    }
-
-    @Nested
     @DisplayName("markPhoneNumberVerified")
     inner class MarkPhoneNumberVerified {
 
@@ -372,6 +318,8 @@ class FirebaseAuthDataSourceTest {
                     task
                 }
                 every { task.isSuccessful } returns true
+                // A relaxed AuthResult reports an existing (not new) user.
+                every { task.result } returns mockk(relaxed = true)
 
                 sut.sendOTPCode(countryCode, phoneNumber, link = false).test {
                     callbacks.captured.onVerificationCompleted(credential)
@@ -408,6 +356,8 @@ class FirebaseAuthDataSourceTest {
             every { PhoneAuthProvider.getCredential("verification-id", code) } returns credential
             every { auth.signInWithCredential(credential) } returns task
             every { task.isSuccessful } returns true
+            // A relaxed AuthResult reports an existing (not new) user.
+            every { task.result } returns mockk(relaxed = true)
             // singInWithCredential() registers a completion listener — fire it ourselves.
             every { task.addOnCompleteListener(any<OnCompleteListener<AuthResult>>()) } answers {
                 firstArg<OnCompleteListener<AuthResult>>().onComplete(task)
@@ -417,6 +367,39 @@ class FirebaseAuthDataSourceTest {
             val result = sut.verifyOTPCode(code)
 
             assertThat(result).isEqualTo(SuccessResult(Unit))
+        }
+
+        @Test
+        @DisplayName("removes the new empty account and returns PHONE_NUMBER_DOES_NOT_EXIST for an unknown number")
+        fun `removes the new empty account for an unknown number`() = runTest(testDispatcher) {
+            sut.verificationId = "verification-id"
+            mockkStatic(PhoneAuthProvider::class)
+            every { PhoneAuthProvider.getCredential("verification-id", code) } returns credential
+            every { auth.signInWithCredential(credential) } returns task
+            every { task.isSuccessful } returns true
+            val authResult = mockk<AuthResult>(relaxed = true)
+            val newUser = mockk<FirebaseUser>()
+            every { task.result } returns authResult
+            every { authResult.additionalUserInfo?.isNewUser } returns true
+            every { authResult.user } returns newUser
+            // A mock Task that fires its listener at once: a real Task posts it to the main looper.
+            val deleteTask = mockk<Task<Void>>()
+            every { newUser.delete() } returns deleteTask
+            every { deleteTask.addOnCompleteListener(any<OnCompleteListener<Void>>()) } answers {
+                firstArg<OnCompleteListener<Void>>().onComplete(deleteTask)
+                deleteTask
+            }
+            every { auth.signOut() } just Runs
+            every { task.addOnCompleteListener(any<OnCompleteListener<AuthResult>>()) } answers {
+                firstArg<OnCompleteListener<AuthResult>>().onComplete(task)
+                task
+            }
+
+            val result = sut.verifyOTPCode(code)
+
+            assertThat(result).isEqualTo(ErrorResult(DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST))
+            verify(exactly = 1) { newUser.delete() }
+            verify(exactly = 1) { auth.signOut() }
         }
 
         @Test
@@ -521,80 +504,6 @@ class FirebaseAuthDataSourceTest {
         }
     }
 
-
-    @Nested
-    @DisplayName("checkIfPhoneNumberExists")
-    inner class CheckIfPhoneNumberExists {
-        private val phoneNumber = "+2001208210613"
-        private val documentsQuery: QuerySnapshot = mockk()
-        private val documentSnapshot: DocumentSnapshot = mockk()
-
-        @Test
-        @DisplayName("returns PHONE_NUMBER_DOES_NOT_EXIST when no document matches")
-        fun `returns PHONE_NUMBER_DOES_NOT_EXIST when no document matches`() =
-            runTest(testDispatcher) {
-                stubQueryReturns(task = Tasks.forResult(documentsQuery))
-                every { documentsQuery.documents } returns emptyList()
-
-                val result = sut.checkIfPhoneNumberExists(phoneNumber)
-
-                assertThat(result).isEqualTo(
-                    ErrorResult(
-                        DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST
-                    )
-                )
-            }
-
-        @Test
-        @DisplayName("returns Success when the phone number is linked")
-        fun `returns Success when the phone number is linked`() = runTest(testDispatcher) {
-            stubQueryReturns(task = Tasks.forResult(documentsQuery))
-            every { documentsQuery.documents } returns listOf(documentSnapshot)
-            every { documentSnapshot.getBoolean("phoneVerified") } returns true
-
-            val result = sut.checkIfPhoneNumberExists(phoneNumber)
-
-            assertThat(result).isEqualTo(
-                SuccessResult(Unit)
-            )
-        }
-
-        @Test
-        @DisplayName("returns PHONE_NUMBER_NOT_LINKED when the phone number is not linked")
-        fun `returns PHONE_NUMBER_NOT_LINKED when the phone number is not linked`() =
-            runTest(testDispatcher) {
-                stubQueryReturns(task = Tasks.forResult(documentsQuery))
-                every { documentsQuery.documents } returns listOf(documentSnapshot)
-                every { documentSnapshot.getBoolean("phoneVerified") } returns false
-
-                val result = sut.checkIfPhoneNumberExists(phoneNumber)
-
-                assertThat(result).isEqualTo(
-                    ErrorResult(DataError.Authentication.PHONE_NUMBER_NOT_LINKED)
-                )
-            }
-
-        @Test
-        @DisplayName("returns Unknown error when Firebase fails")
-        fun `returns Unknown error when Firebase fails`() = runTest(testDispatcher) {
-            stubQueryReturns(Tasks.forException(IOException("Firestore went down")))
-
-            val result = sut.checkIfPhoneNumberExists(phoneNumber)
-
-            assertThat(result).isEqualTo(
-                ErrorResult(DataError.Unknown)
-            )
-        }
-
-        private fun stubQueryReturns(task: Task<QuerySnapshot>) {
-            every {
-                firestore.collection(FirebaseAuthDataSource.USER_COLLECTION_NAME)
-                    .whereEqualTo("phoneNumber", phoneNumber)
-                    .limit(1)
-                    .get()
-            } returns task
-        }
-    }
 
     @Nested
     @DisplayName("updatePassword")

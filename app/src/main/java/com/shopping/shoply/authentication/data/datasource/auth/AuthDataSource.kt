@@ -13,8 +13,6 @@ interface AuthDataSource {
     // Reloads the user and reports whether the email is verified (Option A: status re-check).
     suspend fun refreshVerificationStatus(): Result<Boolean, DataError>
     suspend fun getUserInfo(): Result<User, DataError>
-    suspend fun checkIfEmailExists(email: String): Result<Unit, DataError>
-    suspend fun checkIfPhoneNumberExists(phoneNumber: String): Result<Unit, DataError>
     // Flags the current user's phone as verified in Firestore (after a successful link).
     suspend fun markPhoneNumberVerified(): Result<Unit, DataError>
     suspend fun sendPasswordResetEmail(email: String): Result<Unit, DataError>

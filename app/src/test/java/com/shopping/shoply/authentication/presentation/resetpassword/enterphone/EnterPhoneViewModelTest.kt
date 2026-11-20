@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.domain.model.CountryInfo
 import com.shopping.shoply.authentication.domain.model.ValidationError
-import com.shopping.shoply.authentication.domain.usecase.auth.CheckIfPhoneNumberExistsUseCase
 import com.shopping.shoply.authentication.domain.usecase.countryinfo.GetCountryInfoUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidatePhoneUseCase
 import com.shopping.shoply.authentication.presentation.utility.UiText
@@ -25,11 +24,9 @@ import org.junit.jupiter.api.extension.RegisterExtension
 @DisplayName("EnterPhoneViewModel")
 class EnterPhoneViewModelTest {
     private val validatePhoneUseCase = mockk<ValidatePhoneUseCase>()
-    private val checkIfPhoneNumberExistsUseCase = mockk<CheckIfPhoneNumberExistsUseCase>()
     private val getCountryInfoUseCase = mockk<GetCountryInfoUseCase>()
     private val sut = EnterPhoneViewModel(
         validatePhoneUseCase = validatePhoneUseCase,
-        checkIfPhoneNumberExistsUseCase = checkIfPhoneNumberExistsUseCase,
         getCountryInfoUseCase = getCountryInfoUseCase
     )
 
@@ -180,31 +177,15 @@ class EnterPhoneViewModelTest {
 
                 val actualUiText = sut.state.value.error as UiText.StringResource
                 assertThat(actualUiText.id).isEqualTo(R.string.enter_valid_phone_number)
-                coVerify(exactly = 0) { checkIfPhoneNumberExistsUseCase(any()) }
+                sut.phoneVerificationResult.test { expectNoEvents() }
             }
 
         @Test
-        @DisplayName("reports an error when checking if the phone number exists fails")
-        fun `reports an error when checking if the phone number exists fails`() =
-            runTest(mainDispatcherExtension.dispatcher) {
-                enterPhoneNumber()
-                every { validatePhoneUseCase(e164) } returns Result.Success(Unit)
-                coEvery { checkIfPhoneNumberExistsUseCase(e164) } returns Result.Error(DataError.Unknown)
-
-                sut.onNext()
-
-                val actualUiText = sut.state.value.error as UiText.StringResource
-                assertThat(actualUiText.id).isEqualTo(R.string.unknown_error)
-                assertThat(sut.state.value.isProcessing).isFalse()
-            }
-
-        @Test
-        @DisplayName("reports success once the phone number is verified")
+        @DisplayName("goes to the code step with a valid number")
         fun `reports success once the phone number is verified`() =
             runTest(mainDispatcherExtension.dispatcher) {
                 enterPhoneNumber()
                 every { validatePhoneUseCase(e164) } returns Result.Success(Unit)
-                coEvery { checkIfPhoneNumberExistsUseCase(e164) } returns Result.Success(Unit)
 
                 sut.onNext()
 

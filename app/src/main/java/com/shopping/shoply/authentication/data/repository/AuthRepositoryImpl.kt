@@ -52,16 +52,10 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun getUserInfo() = authDataSource.getUserInfo()
 
-    override suspend fun checkIfEmailExists(email: String) =
-        authDataSource.checkIfEmailExists(email)
-
 
     override suspend fun sendPasswordResetEmail(email: String) =
         authDataSource.sendPasswordResetEmail(email)
 
-
-    override suspend fun checkIfPhoneNumberExists(phoneNumber: String) =
-        authDataSource.checkIfPhoneNumberExists(phoneNumber)
 
 
     override suspend fun markPhoneNumberVerified() = authDataSource.markPhoneNumberVerified()
