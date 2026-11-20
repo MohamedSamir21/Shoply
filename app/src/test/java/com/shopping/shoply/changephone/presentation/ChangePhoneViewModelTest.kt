@@ -1,5 +1,6 @@
 package com.shopping.shoply.changephone.presentation
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.domain.interfaces.repository.CountryInfoRepository
@@ -13,6 +14,7 @@ import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.testutil.MainDispatcherExtension
 import com.shopping.shoply.testutil.fakes.FakePhoneChangeRepository
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -136,6 +138,67 @@ class ChangePhoneViewModelTest {
 
         assertThat(sut.state.value.step).isEqualTo(ChangePhoneStep.ENTER)
         assertThat(sut.state.value.numberError.id()).isEqualTo(R.string.phone_already_in_use)
+    }
+
+    @Test
+    @DisplayName("an expired sign-in sends password accounts back to the password")
+    fun `an expired sign-in sends password accounts back to the password`() = runTest(main.dispatcher) {
+        repository.verifyResult = Result.Error(DataError.Authentication.REQUIRES_RECENT_LOGIN)
+        val sut = createSut()
+        sut.submit("1009876543")
+
+        sut.events.test {
+            sut.onIntent(ChangePhoneIntent.ChangeCode("382911"))
+            sut.onIntent(ChangePhoneIntent.Verify)
+
+            val message = awaitItem() as ChangePhoneEvent.Message
+            assertThat(message.text.id()).isEqualTo(R.string.requires_recent_login)
+        }
+        assertThat(sut.state.value.step).isEqualTo(ChangePhoneStep.ENTER)
+    }
+
+    @Test
+    @DisplayName("an expired sign-in asks accounts without a password to sign in again")
+    fun `an expired sign-in asks accounts without a password to sign in again`() = runTest(main.dispatcher) {
+        repository.hasPassword = false
+        repository.verifyResult = Result.Error(DataError.Authentication.REQUIRES_RECENT_LOGIN)
+        val sut = createSut()
+        sut.submit("1009876543", password = "")
+
+        sut.events.test {
+            sut.onIntent(ChangePhoneIntent.ChangeCode("382911"))
+            sut.onIntent(ChangePhoneIntent.Verify)
+
+            val message = awaitItem() as ChangePhoneEvent.Message
+            assertThat(message.text.id()).isEqualTo(R.string.sign_in_again_to_change_phone)
+        }
+    }
+
+    @Test
+    @DisplayName("resend waits 30 seconds, then texts the same number again")
+    fun `resend waits 30 seconds, then texts the same number again`() = runTest(main.dispatcher) {
+        val sut = createSut()
+        sut.submit("1009876543")
+
+        sut.onIntent(ChangePhoneIntent.ResendCode)
+        assertThat(repository.sentTo).hasSize(1)
+
+        advanceTimeBy(31_000)
+        sut.onIntent(ChangePhoneIntent.ResendCode)
+        assertThat(repository.sentTo).containsExactly("+201009876543", "+201009876543").inOrder()
+    }
+
+    @Test
+    @DisplayName("Use a different number goes back to the number, ready to send again")
+    fun `Use a different number goes back to the number, ready to send again`() = runTest(main.dispatcher) {
+        val sut = createSut()
+        sut.submit("1009876543")
+
+        sut.onIntent(ChangePhoneIntent.UseDifferentNumber)
+
+        assertThat(sut.state.value.step).isEqualTo(ChangePhoneStep.ENTER)
+        assertThat(sut.state.value.isBusy).isFalse()
+        assertThat(sut.state.value.resendSecondsLeft).isEqualTo(0)
     }
 
     @Test

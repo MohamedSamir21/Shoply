@@ -35,6 +35,7 @@ class ChangePhoneViewModel @Inject constructor(
     private val _events = Channel<ChangePhoneEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
     private var sending: Job? = null
+    private var verifying: Job? = null
     private var countdown: Job? = null
 
     init {
@@ -62,9 +63,13 @@ class ChangePhoneViewModel @Inject constructor(
             ChangePhoneIntent.Verify -> verify()
             ChangePhoneIntent.ResendCode -> resend()
             ChangePhoneIntent.UseDifferentNumber -> {
+                // Stop everything in flight, or a late answer would land on the number step.
                 sending?.cancel()
+                verifying?.cancel()
                 countdown?.cancel()
-                _state.update { it.copy(step = ChangePhoneStep.ENTER, code = "", codeError = null, resendSecondsLeft = 0) }
+                _state.update {
+                    it.copy(step = ChangePhoneStep.ENTER, code = "", codeError = null, resendSecondsLeft = 0, isBusy = false)
+                }
             }
         }
     }
@@ -131,7 +136,7 @@ class ChangePhoneViewModel @Inject constructor(
             return
         }
         _state.update { it.copy(isBusy = true) }
-        viewModelScope.launch {
+        verifying = viewModelScope.launch {
             when (val result = repository.verifyCode(current.code)) {
                 is Result.Success -> done()
                 is Result.Error -> {

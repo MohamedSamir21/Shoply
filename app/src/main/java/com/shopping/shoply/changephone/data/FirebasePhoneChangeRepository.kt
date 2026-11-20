@@ -38,6 +38,9 @@ class FirebasePhoneChangeRepository @Inject constructor(
     private var codeSentTo: String? = null
     private var resendToken: PhoneAuthProvider.ForceResendingToken? = null
 
+    /** Bumped on every send, so callbacks from an older request (another number) are ignored. */
+    private var activeRequest = 0
+
     override fun currentPhone(): String? = auth.currentUser?.phoneNumber?.ifBlank { null }
 
     override fun needsPassword(): Boolean =
@@ -58,6 +61,13 @@ class FirebasePhoneChangeRepository @Inject constructor(
     }
 
     override fun sendCode(e164: String): Flow<PhoneCodeEvent> = callbackFlow {
+        val request = ++activeRequest
+        if (codeSentTo != e164) {
+            // A different number: an earlier code must not be able to link it.
+            verificationId = null
+            codeSentTo = null
+            resendToken = null
+        }
         val activity = activityProvider.current() ?: run {
             trySend(PhoneCodeEvent.Finished(Result.Error(DataError.Unknown)))
             close()
@@ -65,6 +75,7 @@ class FirebasePhoneChangeRepository @Inject constructor(
         }
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
             override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                if (request != activeRequest) return
                 // Android read the SMS (or skipped it): link straight away, no code to type.
                 launch {
                     trySend(PhoneCodeEvent.Finished(link(credential, e164)))
@@ -73,11 +84,13 @@ class FirebasePhoneChangeRepository @Inject constructor(
             }
 
             override fun onVerificationFailed(exception: FirebaseException) {
+                if (request != activeRequest) return
                 trySend(PhoneCodeEvent.Finished(Result.Error(exception.toAccountChangeError())))
                 close()
             }
 
             override fun onCodeSent(id: String, token: PhoneAuthProvider.ForceResendingToken) {
+                if (request != activeRequest) return
                 verificationId = id
                 codeSentTo = e164
                 resendToken = token
@@ -108,14 +121,22 @@ class FirebasePhoneChangeRepository @Inject constructor(
             val hasPhone = user.providerData.any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
             if (hasPhone) user.updatePhoneNumber(credential).await() else user.linkWithCredential(credential).await()
             verificationId = null
-            // Local-first: the profile shows it at once, Firestore syncs it when online.
+            codeSentTo = null
+            resendToken = null
+            // Awaited (linking just needed the network): password reset by phone reads this
+            // document, so it must not keep the old number while the account has the new one.
             firestore.collection("users").document(user.uid)
                 .set(mapOf("phoneNumber" to e164, "phoneVerified" to true), SetOptions.merge())
+                .await()
             Result.Success(Unit)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Result.Error(e.toAccountChangeError())
+            // A rejected phone credential is a bad code here, never a "wrong password".
+            when (val error = e.toAccountChangeError()) {
+                DataError.Authentication.WRONG_PASSWORD -> Result.Error(DataError.Authentication.INVALID_CODE)
+                else -> Result.Error(error)
+            }
         }
     }
 }
