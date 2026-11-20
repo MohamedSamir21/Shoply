@@ -8,10 +8,10 @@ It is built with Kotlin and Jetpack Compose on Clean Architecture (data / domain
 
 | Area | State |
 | --- | --- |
-| Authentication: splash, onboarding, sign in / sign up, social login, account verification, password reset (email link or SMS OTP) | Built and tested |
+| Authentication: splash, onboarding (first launch only), sign in / sign up, social login, account verification, password reset (email link or SMS OTP), stays signed in | Built and tested |
 | Shopping: home, categories, search with filters and sort, product listing, product details, stores, wishlist, cart, checkout, orders, notifications | Built |
 | Account: profile, addresses, payment methods, settings (light / dark theme), help center, support chat | Built |
-| Edit profile | In progress |
+| Edit profile: photo, name, date of birth; change email (confirmed by a link); change phone (confirmed by an SMS code) | Built and tested |
 
 ## Screenshots
 
@@ -157,7 +157,7 @@ Taken from the app running on a phone, each in light and dark theme. The UI was 
 - **UI:** Jetpack Compose, Material 3, Navigation Compose, adaptive layouts, Coil
 - **Architecture:** Clean Architecture per feature, MVI-style ViewModels, use cases, repositories
 - **DI:** Hilt
-- **Backend:** Firebase Auth, Cloud Firestore, Firebase Storage
+- **Backend:** Firebase Auth, Cloud Firestore
 - **Sign-in:** Credential Manager (Google), Facebook Login
 - **Other:** Kotlin Coroutines and Flow, DataStore, libphonenumber, zxcvbn (password strength)
 - **Testing:** JUnit 5, MockK, Turbine, Truth, Robolectric, Compose UI tests, Konsist (architecture rules as tests)
@@ -177,7 +177,7 @@ app/src/main/java/com/shopping/shoply/
 ## Getting started
 
 1. Clone the repo and open it in Android Studio.
-2. To use your own Firebase project, add an Android app with the package `com.shopping.shoply` and replace `app/google-services.json` with yours. Enable Email/Password, Google and Facebook sign-in in Firebase Authentication.
+2. To use your own Firebase project, add an Android app with the package `com.shopping.shoply` and replace `app/google-services.json` with yours. Enable Email/Password, Phone, Google and Facebook sign-in in Firebase Authentication. For SMS on the free Spark plan, add test phone numbers there.
 3. Add the social sign-in keys to `local.properties`:
    ```properties
    GOOGLE_WEB_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
