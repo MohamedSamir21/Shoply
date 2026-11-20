@@ -79,6 +79,29 @@ class SignInViewModelTest {
             }
 
         @Test
+        @DisplayName("enables sign-in as soon as both fields are filled, even in one step each")
+        fun `enables sign-in as soon as both fields are filled, even in one step each`() =
+            runTest(mainDispatcherExtension.dispatcher) {
+                val sut = SignInViewModel(
+                    continueWithFacebookUseCase = continueWithFacebookUseCase,
+                    continueWithGoogleUseCase = continueWithGoogleUseCase,
+                    checkInputsFilledUseCase = CheckInputsFilledUseCase(),
+                    validateEmailUseCase = validateEmailUseCase,
+                    signInUseCase = signInUseCase
+                )
+
+                // Autofill sets each field in a single change.
+                sut.onIntent(SignInScreenIntent.Change.Email(email))
+                assertThat(sut.state.value.enableSignIn).isFalse()
+                sut.onIntent(SignInScreenIntent.Change.Password(password))
+                assertThat(sut.state.value.enableSignIn).isTrue()
+
+                // Emptying a field disables it again straight away.
+                sut.onIntent(SignInScreenIntent.Change.Password(""))
+                assertThat(sut.state.value.enableSignIn).isFalse()
+            }
+
+        @Test
         @DisplayName("toggles the password visibility")
         fun `toggles the password visibility`() = runTest(mainDispatcherExtension.dispatcher) {
             val oldPasswordVisibility1 = sut.state.value.showPassword

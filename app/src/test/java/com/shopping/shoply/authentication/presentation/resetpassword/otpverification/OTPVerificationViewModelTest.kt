@@ -488,5 +488,30 @@ class OTPVerificationViewModelTest {
 
                 collectJob.cancel()
             }
+
+        @Test
+        @DisplayName("a code typed after a failed send shows an error instead of spinning")
+        fun `a code typed after a failed send shows an error instead of spinning`() =
+            runTest(mainDispatcherExtension.dispatcher) {
+                val sendEvents = MutableSharedFlow<SendOtpEvent>()
+                val sut = createSut(sendEvents = sendEvents)
+                val collectJob = launch { sut.state.collect { } }
+                runCurrent()
+
+                sut.otpCodeVerificationResult.test {
+                    sendEvents.emit(SendOtpEvent.AutoVerified(Result.Error(DataError.Unknown)))
+                    awaitItem() // the send failure itself
+
+                    sut.onIntent(OTPVerificationIntent.ChangeCode("123456"))
+
+                    val error = awaitItem() as OTPVerificationEvent.Error
+                    val message = error.message as UiText.StringResource
+                    assertThat(message.id).isEqualTo(R.string.code_not_sent_tap_resend)
+                }
+                assertThat(sut.state.value.isLoading).isFalse()
+                assertThat(sut.state.value.enteredCode).isEmpty()
+
+                collectJob.cancel()
+            }
     }
 }

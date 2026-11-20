@@ -103,14 +103,10 @@ class SignInViewModel @Inject constructor(
         }
     }
 
-    private fun areInputsFilled(): Boolean {
-        return checkInputsFilledUseCase(
-            SignInData(
-                email = state.value.email,
-                password = state.value.password
-            )
-        )
-    }
+    // Takes the new values: reading state here would see them only after the update, so a field
+    // filled in one step (autofill, paste) would leave Sign In disabled.
+    private fun areInputsFilled(email: String, password: String): Boolean =
+        checkInputsFilledUseCase(SignInData(email = email, password = password))
 
     private fun changePasswordVisibility() {
         _state.update {
@@ -124,7 +120,7 @@ class SignInViewModel @Inject constructor(
         _state.update {
             it.copy(
                 password = intent.password,
-                enableSignIn = areInputsFilled()
+                enableSignIn = areInputsFilled(email = it.email, password = intent.password)
             )
         }
     }
@@ -133,7 +129,7 @@ class SignInViewModel @Inject constructor(
         _state.update {
             it.copy(
                 email = intent.email,
-                enableSignIn = areInputsFilled()
+                enableSignIn = areInputsFilled(email = intent.email, password = it.password)
             )
         }
     }

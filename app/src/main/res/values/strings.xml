@@ -52,6 +52,7 @@
     <string name="check_email_link_sent_to">Check the email link sent to</string>
     <string name="continue_to_home">Continue to home</string>
     <string name="resend">Resend</string>
+    <string name="code_not_sent_tap_resend">We couldn\'t send the code. Tap Resend to try again.</string>
     <string name="send_verification_link_again_in">Send verification link again in</string>
     <string name="new_email_link_verification">New email link verification has been sent successfully!!</string>
     <string name="email_not_verified_yet">Your email isn\'t verified yet. Please open the link we emailed you, then try again.</string>
