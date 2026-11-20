@@ -18,6 +18,8 @@ data class EditProfileState(
     val newDateOfBirth: String? = null,
     val email: String? = null,
     val emailVerified: Boolean = false,
+    val pendingEmail: String? = null,
+    val canChangeEmail: Boolean = false,
     val phoneNumber: String? = null,
     val phoneVerified: Boolean = false,
     val isLoading: Boolean = true,
@@ -30,10 +32,16 @@ sealed interface EditProfileIntent {
     /** [pickedUtcMillis] is the day chosen in the calendar, as the date picker reports it. */
     data class ChangeDateOfBirth(val pickedUtcMillis: Long) : EditProfileIntent
     data object SaveUserInfo : EditProfileIntent
+    data object ChangeEmail : EditProfileIntent
+    data object ResendEmailLink : EditProfileIntent
+    data object CancelEmailChange : EditProfileIntent
 }
 
 sealed interface EditProfileEvent {
     data object ProfileUpdated : EditProfileEvent
     /** [canRetry] is false when saving the same values again can't help, like a photo that is too large. */
     data class ProfileUpdateError(val error: UiText, val canRetry: Boolean = true) : EditProfileEvent
+    /** [askForPassword]: Change Email should open on the password step (the last check expired). */
+    data class OpenChangeEmail(val askForPassword: Boolean = false) : EditProfileEvent
+    data class Message(val text: UiText) : EditProfileEvent
 }

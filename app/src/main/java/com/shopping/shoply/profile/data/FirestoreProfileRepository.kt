@@ -1,5 +1,6 @@
 package com.shopping.shoply.profile.data
 
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.DocumentSnapshot
@@ -17,7 +18,9 @@ import com.shopping.shoply.profile.domain.model.DeliveryAddress
 import com.shopping.shoply.profile.domain.model.UserInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 /** Name, email and phone from the existing `users/{uid}` profile document; addresses from `users/{uid}/addresses`. */
@@ -61,9 +64,11 @@ class FirestoreProfileRepository @Inject constructor(
                 )
             )
         return user(uid).liveSnapshots().map { doc ->
+            val docEmail = doc.string("email")
+            val authEmail = syncedEmail(uid, docEmail)
             Account(
                 name = doc.string("username"),
-                email = doc.string("email"),
+                email = authEmail ?: docEmail,
                 phone = doc.string("phoneNumber").ifBlank { null },
                 photoUrl = doc.string("photoUrl").ifBlank { null },
                 customPhoto = doc.string(ProfilePhoto.FIELD_BASE64).ifBlank { null }
@@ -71,8 +76,34 @@ class FirestoreProfileRepository @Inject constructor(
                 dateOfBirth = doc.string("dateOfBirth").ifBlank { null },
                 emailVerified = auth.currentUser?.isEmailVerified == true,
                 phoneVerified = auth.currentUser?.providerData.orEmpty()
-                    .any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
+                    .any { it.providerId == PhoneAuthProvider.PROVIDER_ID },
+                pendingEmail = doc.string("pendingEmail").ifBlank { null }
+                    ?.takeUnless { it.equals(authEmail, ignoreCase = true) },
+                canChangeEmail = auth.currentUser?.providerData.orEmpty()
+                    .any { it.providerId == EmailAuthProvider.PROVIDER_ID }
             )
+        }
+    }
+
+    /**
+     * Firebase Auth owns the sign-in email; the document follows it after a change (FR-034). The
+     * cached email may be stale (another device changed it), so it is only written after a reload
+     * confirms it, which also stops two signed-in devices from overwriting each other.
+     */
+    private suspend fun syncedEmail(uid: String, docEmail: String): String? {
+        val user = auth.currentUser ?: return null
+        if (user.email == null || user.email.equals(docEmail, ignoreCase = true)) return user.email
+        return try {
+            user.reload().await()
+            val fresh = user.email
+            if (fresh != null && !fresh.equals(docEmail, ignoreCase = true)) {
+                user(uid).set(mapOf("email" to fresh), SetOptions.merge())
+            }
+            fresh
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            docEmail // Offline or the session ended: keep showing what the profile says.
         }
     }
 
