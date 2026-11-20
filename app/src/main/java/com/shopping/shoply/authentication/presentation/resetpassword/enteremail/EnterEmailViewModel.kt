@@ -2,7 +2,6 @@ package com.shopping.shoply.authentication.presentation.resetpassword.enteremail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.shopping.shoply.authentication.domain.usecase.auth.CheckIfEmailExistsUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SendPasswordResetEmailUseCase
 import com.shopping.shoply.authentication.domain.usecase.validate.ValidateEmailUseCase
 import com.shopping.shoply.authentication.presentation.utility.asUiText
@@ -18,14 +17,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Backs the enter-email step of the password-reset flow: validates the address and confirms an
- * account exists for it before sending the reset email. Success is delivered as a one-shot
+ * Backs the enter-email step of the password-reset flow: validates the address, then asks Firebase
+ * to send the reset email. Success is delivered as a one-shot
  * [emailVerificationResult] event; validation and lookup failures surface through [state].
  */
 @HiltViewModel
 class EnterEmailViewModel @Inject constructor(
     private val validateEmailUseCase: ValidateEmailUseCase,
-    private val checkIfEmailExistsUseCase: CheckIfEmailExistsUseCase,
     private val sendPasswordResetEmailUseCase: SendPasswordResetEmailUseCase
 ): ViewModel() {
     private val _state = MutableStateFlow(EnterEmailState())
@@ -52,34 +50,8 @@ class EnterEmailViewModel @Inject constructor(
             return
         }
 
-        // Check if email exists
-        viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    isProcessing = true,
-                    error = null
-                )
-            }
-
-            when (val result = checkIfEmailExistsUseCase(state.value.email)) {
-                is Result.Error -> {
-                    _state.update {
-                        it.copy(
-                            error = result.error.asUiText(),
-                            isProcessing = false
-                        )
-                    }
-                }
-                is Result.Success -> {
-                    _state.update {
-                        it.copy(
-                            error = null
-                        )
-                    }
-                    sendPasswordResetEmail()
-                }
-            }
-        }
+        _state.update { it.copy(isProcessing = true, error = null) }
+        sendPasswordResetEmail()
     }
 
     private fun sendPasswordResetEmail() {

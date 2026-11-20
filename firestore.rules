@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// Shoply's Firestore rules.
+// - Each user's document and everything under it (cart, orders, addresses, wishlist, ...) is
+//   readable and writable only by that user.
+// - The shop catalog is read-only for signed-in users; it is edited in the Firebase console.
+// - Anything not listed here is closed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /{subcollection}/{document=**} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    match /categories/{id}   { allow read: if signedIn(); }
+    match /products/{id}     { allow read: if signedIn(); }
+    match /stores/{id}       { allow read: if signedIn(); }
+    match /promos/{id}       { allow read: if signedIn(); }
+    match /homeSections/{id} { allow read: if signedIn(); }
+    match /promoCodes/{code} { allow get: if signedIn(); }
+  }
+}

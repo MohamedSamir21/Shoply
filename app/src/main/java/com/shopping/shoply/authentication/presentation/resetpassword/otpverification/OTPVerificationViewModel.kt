@@ -13,6 +13,7 @@ import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.utility.CountdownTicker
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.utility.asUiText
+import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.common.presentation.navigation.NavRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -227,7 +228,10 @@ class OTPVerificationViewModel @Inject constructor(
                     // Reset shows a generic "wrong code"; link surfaces the specific cause
                     // (e.g. the number is already linked to another account).
                     val message = when (purpose) {
-                        OtpPurpose.RESET -> UiText.StringResource(R.string.incorrect_otp_code)
+                        // A number with no account says so; anything else is a wrong code.
+                        OtpPurpose.RESET ->
+                            if (result.error == DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST) result.error.asUiText()
+                            else UiText.StringResource(R.string.incorrect_otp_code)
                         OtpPurpose.SIGNUP_LINK -> result.error.asUiText()
                     }
                     _otpCodeVerificationResult.send(OTPVerificationEvent.Error(message))

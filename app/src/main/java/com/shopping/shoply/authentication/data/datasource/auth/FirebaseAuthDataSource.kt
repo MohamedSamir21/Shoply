@@ -6,6 +6,7 @@ import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
@@ -349,28 +350,6 @@ class FirebaseAuthDataSource @Inject constructor(
         }
 
     /**
-     * Checks whether a user document with the given [email] exists in Firestore.
-     *
-     * @param email the email to look up.
-     * @return [Result.Success] if a matching document exists; [Result.Error] with
-     *   [DataError.Authentication.EMAIL_DOES_NOT_EXIST] if none matches, or [DataError.Unknown] on
-     *   query failure or timeout.
-     */
-    override suspend fun checkIfEmailExists(email: String): Result<Unit, DataError> =
-        withContext(ioDispatcher) {
-            // suspend + await() instead of a callback, so callers just read a return value.
-            val query =
-                firestore.collection(USER_COLLECTION_NAME).whereEqualTo("email", email).limit(1)
-            try {
-                val documents = withTimeout(5000L) { query.get().await() }
-                if (!documents.isEmpty) Result.Success(Unit)
-                else Result.Error(DataError.Authentication.EMAIL_DOES_NOT_EXIST)
-            } catch (_: Exception) {
-                Result.Error(DataError.Unknown)
-            }
-        }
-
-    /**
      * Triggers Firebase's password-reset email for [email].
      *
      * @param email the address to send the reset link to.
@@ -381,40 +360,10 @@ class FirebaseAuthDataSource @Inject constructor(
         withContext(ioDispatcher) {
             try {
                 auth.sendPasswordResetEmail(email).await()
-                Log.i(TAG, "sendPasswordResetEmail() success!!")
                 Result.Success(Unit)
-            } catch (ex: Exception) {
-                Log.d(TAG, "sendPasswordResetEmail(): ${ex.message.toString()}")
-                Result.Error(DataError.Unknown)
-            }
-        }
-
-    /**
-     * Checks whether a **verified** phone number exists in Firestore, for phone-based recovery.
-     *
-     * A match counts as success only if the number was verified in an authenticated context, so an
-     * unverified or mistyped number cannot be used to hijack account recovery.
-     *
-     * @param phoneNumber the E.164 number to look up.
-     * @return [Result.Success] if a verified match exists; [Result.Error] with
-     *   [DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST] if none matches,
-     *   [DataError.Authentication.PHONE_NUMBER_NOT_LINKED] if it exists but is unverified, or
-     *   [DataError.Unknown] on failure.
-     */
-    override suspend fun checkIfPhoneNumberExists(phoneNumber: String): Result<Unit, DataError> =
-        withContext(ioDispatcher) {
-            Log.d(TAG, "The phone number: $phoneNumber")
-            val query =
-                firestore.collection(USER_COLLECTION_NAME).whereEqualTo("phoneNumber", phoneNumber)
-                    .limit(1)
-            try {
-                val documents = withTimeout(5000L) { query.get().await() }
-                val doc = documents.documents.firstOrNull()
-                    ?: return@withContext Result.Error(DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST)
-                // The number exists, but recovery is only allowed once it was verified in an
-                // authenticated context — otherwise an unverified/typo'd number could be abused.
-                if (doc.getBoolean("phoneVerified") == true) Result.Success(Unit)
-                else Result.Error(DataError.Authentication.PHONE_NUMBER_NOT_LINKED)
+            } catch (_: FirebaseAuthInvalidUserException) {
+                // Only reported when Firebase's email enumeration protection is off.
+                Result.Error(DataError.Authentication.EMAIL_DOES_NOT_EXIST)
             } catch (_: Exception) {
                 Result.Error(DataError.Unknown)
             }
@@ -466,8 +415,6 @@ class FirebaseAuthDataSource @Inject constructor(
         link: Boolean
     ): Flow<SendOtpEvent> = callbackFlow {
         Log.d(TAG, "sendOTPCode is called!")
-        Log.d(TAG, "The phone number is $phoneNumber")
-        Log.d(TAG, "country code is $countryCode")
 
         // Activity comes from the provider, so no Context is threaded through the layers.
         val activity = activityProvider.current() ?: run {
@@ -496,7 +443,6 @@ class FirebaseAuthDataSource @Inject constructor(
                 token: PhoneAuthProvider.ForceResendingToken
             ) {
                 verificationId = id
-                Log.d(TAG, "OTP sent and the verificationID is $verificationId")
                 // Emit "code sent" only now that verificationId is set, so a caller that
                 // navigates away on this event (popping its own back stack) can't race
                 // ahead of verifyOTPCode and read a null verificationId.
@@ -526,7 +472,6 @@ class FirebaseAuthDataSource @Inject constructor(
      */
     override suspend fun verifyOTPCode(code: String): Result<Unit, DataError> =
         withContext(ioDispatcher) {
-            Log.d(TAG, "Start verifying - verification id: $verificationId")
             val id = verificationId
                 ?: return@withContext Result.Error(DataError.Authentication.UNKNOWN)
             val credential = PhoneAuthProvider.getCredential(id, code)
@@ -584,12 +529,28 @@ class FirebaseAuthDataSource @Inject constructor(
         onComplete: (Result<Unit, DataError>) -> Unit
     ) {
         auth.signInWithCredential(credential).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                onComplete(Result.Success(Unit))
-            } else {
-                Log.d(TAG, task.exception?.message.toString())
+            if (!task.isSuccessful) {
                 onComplete(Result.Error(DataError.Authentication.UNKNOWN))
+                return@addOnCompleteListener
             }
+            // A number no account has signs in to a brand-new, empty account. Remove it: resetting
+            // a password by phone only works for an account that already has this number.
+            val result = task.result
+            if (result?.additionalUserInfo?.isNewUser == true) {
+                val notFound = Result.Error<Unit, DataError>(DataError.Authentication.PHONE_NUMBER_DOES_NOT_EXIST)
+                val newUser = result.user
+                if (newUser == null) {
+                    auth.signOut()
+                    onComplete(notFound)
+                } else {
+                    newUser.delete().addOnCompleteListener {
+                        auth.signOut()
+                        onComplete(notFound)
+                    }
+                }
+                return@addOnCompleteListener
+            }
+            onComplete(Result.Success(Unit))
         }
     }
 

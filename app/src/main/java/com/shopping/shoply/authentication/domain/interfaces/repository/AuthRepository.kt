@@ -17,8 +17,6 @@ interface AuthRepository {
     // after the user clicks the web verification link).
     suspend fun refreshVerificationStatus(): Result<Boolean, DataError>
     suspend fun getUserInfo(): Result<User, DataError>
-    suspend fun checkIfEmailExists(email: String): Result<Unit, DataError>
-    suspend fun checkIfPhoneNumberExists(phoneNumber: String): Result<Unit, DataError>
     // Flags the current user's phone as verified (after a successful authenticated link).
     suspend fun markPhoneNumberVerified(): Result<Unit, DataError>
     suspend fun sendPasswordResetEmail(email: String): Result<Unit, DataError>

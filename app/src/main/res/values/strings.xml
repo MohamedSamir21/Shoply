@@ -88,7 +88,6 @@
     <string name="email_verified_success_message">Your email has been verified successfully. You\'re all set!</string>
     <string name="continue_label">Continue</string>
     <string name="incorrect_otp_code">The code you entered is incorrect. Please try again.</string>
-    <string name="phone_already_registered">This phone number is already registered</string>
     <string name="phone_already_in_use">This phone number is already linked to another account</string>
     <string name="method_name">Method Name</string>
     <string name="method_message">Method Message</string>

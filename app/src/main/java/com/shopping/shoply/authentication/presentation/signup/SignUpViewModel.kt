@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.domain.model.User
-import com.shopping.shoply.authentication.domain.usecase.auth.CheckIfPhoneNumberExistsUseCase
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.domain.usecase.validate.CheckInputsFilledUseCase
 import com.shopping.shoply.authentication.domain.usecase.auth.SignUpUseCase
@@ -53,7 +52,6 @@ class SignUpViewModel @Inject constructor(
     private val signUpWithGoogleUseCase: SignUpWithGoogleUseCase,
     private val signUpWithFacebookUseCase: SignUpWithFacebookUseCase,
     private val getCountryInfoUseCase: GetCountryInfoUseCase,
-    private val checkIfPhoneNumberExistsUseCase: CheckIfPhoneNumberExistsUseCase,
     private val measurePasswordStrengthUseCase: MeasurePasswordStrengthUseCase
 ) : ViewModel() {
     private val _state = MutableStateFlow(SignUpScreenState())
@@ -315,18 +313,8 @@ class SignUpViewModel @Inject constructor(
             val e164PhoneNumber =
                 "+" + (state.value.selectedCountryInfo.codeNumber + form.phoneNumber).filter(Char::isDigit)
 
-            // One phone = one account. Reject up front if it's already registered, so we don't
-            // create an account that then fails to link the phone (credential-already-in-use).
-            if (checkIfPhoneNumberExistsUseCase(e164PhoneNumber) is Result.Success) {
-                _state.value = state.value.copy(
-                    isSigningUp = false,
-                    userError = UserError(
-                        phoneNumberError = UiText.StringResource(R.string.phone_already_registered)
-                    )
-                )
-                return@launch
-            }
-
+            // One phone = one account: linking the number later rejects one that is already in
+            // use (PHONE_NUMBER_ALREADY_IN_USE on the code screen).
             val user = User(
                 username = form.username.trim(),
                 email = form.email,
