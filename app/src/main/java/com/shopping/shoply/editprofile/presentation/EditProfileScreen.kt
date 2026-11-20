@@ -85,6 +85,7 @@ import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.components.ShoplyButton
 import com.shopping.shoply.common.presentation.components.Avatar
 import com.shopping.shoply.common.presentation.components.FormTextField
+import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
 import com.shopping.shoply.home.domain.rules.nameParts
 
@@ -116,6 +117,10 @@ fun EditProfileScreen(
                     }
                 }
 
+                EditProfileEvent.OpenChangeEmail -> onChangeEmailClicked()
+
+                is EditProfileEvent.Message -> snackHostState.showSnackbar(event.text.asString(context))
+
                 EditProfileEvent.ProfileUpdated -> {
                     snackHostState.showSnackbar(
                         message = context.getString(R.string.profile_gets_updated_successfully)
@@ -146,7 +151,9 @@ fun EditProfileScreen(
         onSaveUserInfo = {
             viewModel.onIntent(EditProfileIntent.SaveUserInfo)
         },
-        onChangeEmailClicked = onChangeEmailClicked,
+        onChangeEmailClicked = { viewModel.onIntent(EditProfileIntent.ChangeEmail) },
+        onResendEmailLink = { viewModel.onIntent(EditProfileIntent.ResendEmailLink) },
+        onCancelEmailChange = { viewModel.onIntent(EditProfileIntent.CancelEmailChange) },
         onChangePhoneClicked = onChangePhoneClicked
     )
 }
@@ -161,6 +168,8 @@ private fun EditProfileContent(
     onChangeDateOfBirth: (Long) -> Unit,
     onSaveUserInfo: () -> Unit,
     onChangeEmailClicked: () -> Unit,
+    onResendEmailLink: () -> Unit,
+    onCancelEmailChange: () -> Unit,
     onChangePhoneClicked: () -> Unit
 ) {
     // Snackbars show in MainShell's host; a second host here would draw each one twice.
@@ -194,9 +203,12 @@ private fun EditProfileContent(
             ContactAndSignIn(
                 email = state.email ?: "",
                 isEmailVerified = state.emailVerified,
+                pendingEmail = state.pendingEmail,
                 phone = state.phoneNumber,
                 isPhoneVerified = state.phoneVerified,
                 onChangeEmailClicked = onChangeEmailClicked,
+                onResendEmailLink = onResendEmailLink,
+                onCancelEmailChange = onCancelEmailChange,
                 onChangePhoneClicked = onChangePhoneClicked
             )
         }
@@ -377,9 +389,12 @@ private fun PersonInfoSection(
 private fun ContactAndSignIn(
     email: String,
     isEmailVerified: Boolean,
+    pendingEmail: String?,
     phone: String?,
     isPhoneVerified: Boolean,
     onChangeEmailClicked: () -> Unit,
+    onResendEmailLink: () -> Unit,
+    onCancelEmailChange: () -> Unit,
     onChangePhoneClicked: () -> Unit,
 ) {
     Column {
@@ -395,7 +410,11 @@ private fun ContactAndSignIn(
                 value = email,
                 isVerified = isEmailVerified,
                 onAction = onChangeEmailClicked
-            )
+            ) {
+                if (pendingEmail != null) {
+                    PendingEmailBox(pendingEmail, onResend = onResendEmailLink, onCancel = onCancelEmailChange)
+                }
+            }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             ContactRow(
                 icon = Icons.Outlined.Phone,
@@ -424,61 +443,116 @@ private fun ContactRow(
     label: String,
     value: String?,
     isVerified: Boolean,
-    onAction: () -> Unit
+    onAction: () -> Unit,
+    below: @Composable () -> Unit = {}
 ) {
+    Column(Modifier.padding(horizontal = 12.dp, vertical = 14.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            }
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
+                // Long emails or numbers stay on one line and end with an ellipsis.
+                Text(
+                    text = value ?: stringResource(R.string.not_added),
+                    fontSize = 14.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (value == null) MaterialTheme.shoplyExtra.inkFaint else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 3.dp)
+                )
+                if (value != null && isVerified) VerifiedTag(Modifier.padding(top = 6.dp))
+            }
+            if (value == null) {
+                Button(
+                    onClick = onAction,
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(stringResource(R.string.add))
+                }
+            } else {
+                FilledTonalButton(
+                    onClick = onAction,
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    modifier = Modifier.height(36.dp)
+                ) {
+                    Text(stringResource(R.string.change))
+                }
+            }
+        }
+        below()
+    }
+}
+
+/** FR-037: the new address waiting for its link, with Resend and Cancel. */
+@Composable
+private fun PendingEmailBox(email: String, onResend: () -> Unit, onCancel: () -> Unit) {
     Row(
         modifier = Modifier
+            .padding(top = 12.dp)
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        }
+        Icon(
+            imageVector = ShoplyAppIcons.Clock,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(18.dp)
+        )
         Column(Modifier.weight(1f)) {
             Text(
-                text = label,
+                text = stringResource(R.string.waiting_for_confirmation),
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            // Long emails or numbers stay on one line and end with an ellipsis.
             Text(
-                text = value ?: stringResource(R.string.not_added),
-                fontSize = 14.5.sp,
+                text = email,
+                fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (value == null) MaterialTheme.shoplyExtra.inkFaint else MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 3.dp)
+                modifier = Modifier.padding(top = 2.dp)
             )
-            if (value != null && isVerified) VerifiedTag(Modifier.padding(top = 6.dp))
-        }
-        if (value == null) {
-            Button(
-                onClick = onAction,
-                contentPadding = PaddingValues(horizontal = 12.dp),
-                modifier = Modifier.height(36.dp)
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(4.dp))
-                Text(stringResource(R.string.add))
-            }
-        } else {
-            FilledTonalButton(
-                onClick = onAction,
-                contentPadding = PaddingValues(horizontal = 12.dp),
-                modifier = Modifier.height(36.dp)
-            ) {
-                Text(stringResource(R.string.change))
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(top = 4.dp)) {
+                Text(
+                    text = stringResource(R.string.resend),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable(onClick = onResend).padding(vertical = 6.dp)
+                )
+                Text(
+                    text = stringResource(R.string.cancel),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.clickable(onClick = onCancel).padding(vertical = 6.dp)
+                )
             }
         }
     }
@@ -561,6 +635,8 @@ private fun EditProfilePreview(state: EditProfileState, isWide: Boolean = false)
                 onChangeDateOfBirth = {},
                 onSaveUserInfo = {},
                 onChangeEmailClicked = {},
+                onResendEmailLink = {},
+                onCancelEmailChange = {},
                 onChangePhoneClicked = {}
             )
         }
@@ -575,6 +651,12 @@ private fun EditProfileLoadedPreview() = EditProfilePreview(previewState)
 @Composable
 private fun EditProfileVerifiedPhonePreview() = EditProfilePreview(
     previewState.copy(emailVerified = false, phoneNumber = "+201001234567", phoneVerified = true)
+)
+
+@PreviewLightDark
+@Composable
+private fun EditProfilePendingEmailPreview() = EditProfilePreview(
+    previewState.copy(pendingEmail = "ahmed.mansour@outlook.com", canChangeEmail = true)
 )
 
 @PreviewLightDark

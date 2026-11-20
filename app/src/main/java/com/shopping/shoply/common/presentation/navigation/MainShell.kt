@@ -70,6 +70,7 @@ import com.shopping.shoply.checkout.presentation.PROMO_CODE_ARG
 import com.shopping.shoply.categories.presentation.CategoriesDestination
 import com.shopping.shoply.categories.presentation.CategoriesScreen
 import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
+import com.shopping.shoply.changeemail.presentation.ChangeEmailScreen
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
 import com.shopping.shoply.common.presentation.theme.ShoplyTheme
@@ -117,7 +118,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
 
 /** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
 private enum class Placeholder(@StringRes val title: Int) {
-    CHANGE_EMAIL(R.string.screen_change_email),
     CHANGE_PHONE(R.string.screen_change_phone),
 }
 
@@ -148,6 +148,7 @@ private fun storesRoute(tab: ShellTab) =
     "${tab.route}/stores?$STORES_FAVORITES_ONLY_ARG={$STORES_FAVORITES_ONLY_ARG}"
 
 private fun editProfileRoute(tab: ShellTab) = "${tab.route}/edit_profile"
+private fun changeEmailRoute(tab: ShellTab) = "${tab.route}/change_email"
 
 private fun addressesRoute(tab: ShellTab) = "${tab.route}/addresses"
 private fun addressEditRoute(tab: ShellTab) =
@@ -281,6 +282,7 @@ fun MainShell(
                 settings(snackbarHostState, navController)
                 stores(ShellTab.PROFILE, navController, snackbarHostState)
                 editProfile(ShellTab.PROFILE, navController, snackbarHostState)
+                changeEmail(ShellTab.PROFILE, navController, snackbarHostState, onSignedOut)
                 comingSoon(ShellTab.PROFILE, navController)
             }
             navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
@@ -312,9 +314,24 @@ private fun NavGraphBuilder.editProfile(
         EditProfileScreen(
             snackHostState = snackHostState,
             onBack = { navController.popBackStack() },
-            // Change Email and Change Phone aren't built yet.
-            onChangeEmailClicked = { navController.openPlaceholder(tab, Placeholder.CHANGE_EMAIL) },
+            onChangeEmailClicked = { navController.navigate(changeEmailRoute(tab)) },
+            // Change Phone isn't built yet.
             onChangePhoneClicked = { navController.openPlaceholder(tab, Placeholder.CHANGE_PHONE) }
+        )
+    }
+}
+
+private fun NavGraphBuilder.changeEmail(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackHostState: SnackbarHostState,
+    onSignedOut: () -> Unit
+) {
+    composable(route = changeEmailRoute(tab)) {
+        ChangeEmailScreen(
+            snackbarHostState = snackHostState,
+            onBack = { navController.popBackStack() },
+            onSignedOut = onSignedOut
         )
     }
 }

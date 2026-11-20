@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.shopping.shoply.R
 import com.shopping.shoply.authentication.presentation.utility.UiText
 import com.shopping.shoply.authentication.presentation.utility.asUiText
+import com.shopping.shoply.changeemail.domain.EmailChangeRepository
 import com.shopping.shoply.common.domain.DataError
 import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.common.domain.validation.FullNameError
@@ -25,11 +26,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val emailChangeRepository: EmailChangeRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(EditProfileState())
     val state = _state.asStateFlow()
-    private val _events = Channel<EditProfileEvent>()
+    private val _events = Channel<EditProfileEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
     init {
@@ -43,6 +45,8 @@ class EditProfileViewModel @Inject constructor(
                         fullName = account.name,
                         email = account.email,
                         emailVerified = account.emailVerified,
+                        pendingEmail = account.pendingEmail,
+                        canChangeEmail = account.canChangeEmail,
                         dateOfBirth = account.dateOfBirth,
                         phoneNumber = account.phone,
                         phoneVerified = account.phoneVerified,
@@ -58,6 +62,40 @@ class EditProfileViewModel @Inject constructor(
         is EditProfileIntent.ChangeDateOfBirth -> changeDateOfBirth(intent.pickedUtcMillis)
         is EditProfileIntent.ChangeFullName -> _state.update { it.copy(newFullName = intent.newName, nameError = null) }
         EditProfileIntent.SaveUserInfo -> save()
+        EditProfileIntent.ChangeEmail -> changeEmail()
+        EditProfileIntent.ResendEmailLink -> resendEmailLink()
+        EditProfileIntent.CancelEmailChange -> cancelEmailChange()
+    }
+
+    /** FR-036: Google and Facebook own the email of accounts without a password. */
+    private fun changeEmail() {
+        val event = if (state.value.canChangeEmail) {
+            EditProfileEvent.OpenChangeEmail
+        } else {
+            EditProfileEvent.Message(UiText.StringResource(R.string.email_managed_by_provider))
+        }
+        _events.trySend(event)
+    }
+
+    private fun resendEmailLink() {
+        val pending = state.value.pendingEmail ?: return
+        viewModelScope.launch {
+            when (val result = emailChangeRepository.resendEmailChangeLink(pending)) {
+                is Result.Success -> _events.send(EditProfileEvent.Message(UiText.StringResource(R.string.verification_link_sent)))
+                // The password check expired: Change Email asks for it again.
+                is Result.Error -> if (result.error == DataError.Authentication.REQUIRES_RECENT_LOGIN) {
+                    _events.send(EditProfileEvent.OpenChangeEmail)
+                } else {
+                    _events.send(EditProfileEvent.Message(result.error.asUiText()))
+                }
+            }
+        }
+    }
+
+    private fun cancelEmailChange() {
+        emailChangeRepository.cancelEmailChange()
+        _state.update { it.copy(pendingEmail = null) }
+        _events.trySend(EditProfileEvent.Message(UiText.StringResource(R.string.email_change_cancelled)))
     }
 
     private fun changeDateOfBirth(pickedUtcMillis: Long) {

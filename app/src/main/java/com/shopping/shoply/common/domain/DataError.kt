@@ -19,7 +19,9 @@ sealed interface DataError : Error {
         UNKNOWN,
         NOT_VERIFIED,
         INVALID_CREDENTIALS,
-        ALREADY_VERIFIED
+        ALREADY_VERIFIED,
+        TOO_MANY_REQUESTS,
+        REQUIRES_RECENT_LOGIN
     }
 }
 

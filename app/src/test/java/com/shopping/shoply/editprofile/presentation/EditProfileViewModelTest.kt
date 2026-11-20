@@ -9,6 +9,7 @@ import com.shopping.shoply.common.domain.Result
 import com.shopping.shoply.profile.domain.model.Account
 import com.shopping.shoply.profile.domain.model.UserInfo
 import com.shopping.shoply.testutil.MainDispatcherExtension
+import com.shopping.shoply.testutil.fakes.FakeEmailChangeRepository
 import com.shopping.shoply.testutil.fakes.FakeProfileRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.DisplayName
@@ -30,7 +31,12 @@ class EditProfileViewModelTest {
     @JvmField
     val main = MainDispatcherExtension()
 
-    private fun createSut() = EditProfileViewModel(profileRepository = fakeProfileRepository)
+    private val fakeEmailChangeRepository = FakeEmailChangeRepository()
+
+    private fun createSut() = EditProfileViewModel(
+        profileRepository = fakeProfileRepository,
+        emailChangeRepository = fakeEmailChangeRepository
+    )
 
     @Test
     @DisplayName("loading ends once the profile arrives")
@@ -114,6 +120,33 @@ class EditProfileViewModelTest {
             val event = awaitItem() as EditProfileEvent.ProfileUpdateError
             assertThat((event.error as UiText.StringResource).id).isEqualTo(R.string.photo_too_large)
             assertThat(event.canRetry).isFalse()
+        }
+    }
+
+    @Test
+    @DisplayName("an account without a password can't change its email")
+    fun `an account without a password can't change its email`() = runTest(main.dispatcher) {
+        fakeProfileRepository.account.value = fakeProfileRepository.account.value.copy(canChangeEmail = false)
+        val sut = createSut()
+
+        sut.events.test {
+            sut.onIntent(EditProfileIntent.ChangeEmail)
+
+            val event = awaitItem() as EditProfileEvent.Message
+            assertThat((event.text as UiText.StringResource).id).isEqualTo(R.string.email_managed_by_provider)
+        }
+    }
+
+    @Test
+    @DisplayName("an account with a password opens Change Email")
+    fun `an account with a password opens Change Email`() = runTest(main.dispatcher) {
+        fakeProfileRepository.account.value = fakeProfileRepository.account.value.copy(canChangeEmail = true)
+        val sut = createSut()
+
+        sut.events.test {
+            sut.onIntent(EditProfileIntent.ChangeEmail)
+
+            assertThat(awaitItem()).isEqualTo(EditProfileEvent.OpenChangeEmail)
         }
     }
 

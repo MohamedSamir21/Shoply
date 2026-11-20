@@ -43,6 +43,8 @@ Only for accounts that have an email/password sign-in.
 - **FR-034** Once Firebase Auth reports the new email, the `email` field in `users/{uid}` is updated to match the next time the profile loads.
 - **FR-035** Errors map to specific messages: email already in use, too many requests, network failure.
 - **FR-036** For accounts that sign in only with Google or Facebook, the screen explains that the email is managed by that provider and offers no change.
+- **FR-037** While a change is waiting for its link, Edit Profile shows the new address under Email with Resend and Cancel. Change Email opens on "Check your inbox" for it.
+- **FR-038** "Check your inbox" offers Open Email App, Use a different email, and Resend link after a 30-second wait. When the user comes back to the app, it checks whether the link was clicked and shows "Email updated". If the change ended the session, it asks the user to sign in again with the new email.
 
 > Delivery note: on the Spark plan, Firebase drops auth emails until a custom SMTP sender is configured.
 
@@ -66,5 +68,5 @@ Only for accounts that have an email/password sign-in.
 - **T-001** Photo save rules: FR-012, FR-013, FR-014.
 - **T-002** Name and date validation: FR-020, FR-021.
 - **T-003** Only changed fields are written: FR-022.
-- **T-004** Change Email ViewModel: wrong password, and success state (FR-032, FR-033).
+- **T-004** Change Email ViewModel: wrong password, same email, success, confirmed after the link (FR-031 to FR-033, FR-038); Firebase error mapping (FR-035).
 - **T-005** Change Phone ViewModel: correct code, wrong code, number in use (FR-042 to FR-044).

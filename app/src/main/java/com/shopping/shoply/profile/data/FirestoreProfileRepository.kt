@@ -1,5 +1,6 @@
 package com.shopping.shoply.profile.data
 
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.firestore.DocumentSnapshot
@@ -61,9 +62,15 @@ class FirestoreProfileRepository @Inject constructor(
                 )
             )
         return user(uid).liveSnapshots().map { doc ->
+            // Firebase Auth owns the sign-in email; the document follows it after a change (FR-034).
+            val authEmail = auth.currentUser?.email
+            val docEmail = doc.string("email")
+            if (authEmail != null && !authEmail.equals(docEmail, ignoreCase = true)) {
+                user(uid).set(mapOf("email" to authEmail), SetOptions.merge())
+            }
             Account(
                 name = doc.string("username"),
-                email = doc.string("email"),
+                email = authEmail ?: docEmail,
                 phone = doc.string("phoneNumber").ifBlank { null },
                 photoUrl = doc.string("photoUrl").ifBlank { null },
                 customPhoto = doc.string(ProfilePhoto.FIELD_BASE64).ifBlank { null }
@@ -71,7 +78,11 @@ class FirestoreProfileRepository @Inject constructor(
                 dateOfBirth = doc.string("dateOfBirth").ifBlank { null },
                 emailVerified = auth.currentUser?.isEmailVerified == true,
                 phoneVerified = auth.currentUser?.providerData.orEmpty()
-                    .any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
+                    .any { it.providerId == PhoneAuthProvider.PROVIDER_ID },
+                pendingEmail = doc.string("pendingEmail").ifBlank { null }
+                    ?.takeUnless { it.equals(authEmail, ignoreCase = true) },
+                canChangeEmail = auth.currentUser?.providerData.orEmpty()
+                    .any { it.providerId == EmailAuthProvider.PROVIDER_ID }
             )
         }
     }
