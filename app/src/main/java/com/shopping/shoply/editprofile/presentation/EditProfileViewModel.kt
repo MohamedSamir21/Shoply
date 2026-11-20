@@ -77,19 +77,13 @@ class EditProfileViewModel @Inject constructor(
         _events.trySend(event)
     }
 
+    /**
+     * A new link to the pending address goes through Change Email's password step: the address is
+     * read from the profile, so it is re-confirmed before anything is emailed.
+     */
     private fun resendEmailLink() {
-        val pending = state.value.pendingEmail ?: return
-        viewModelScope.launch {
-            when (val result = emailChangeRepository.resendEmailChangeLink(pending)) {
-                is Result.Success -> _events.send(EditProfileEvent.Message(UiText.StringResource(R.string.verification_link_sent)))
-                // The password check expired: Change Email asks for it again.
-                is Result.Error -> if (result.error == DataError.Authentication.REQUIRES_RECENT_LOGIN) {
-                    _events.send(EditProfileEvent.OpenChangeEmail(askForPassword = true))
-                } else {
-                    _events.send(EditProfileEvent.Message(result.error.asUiText()))
-                }
-            }
-        }
+        if (state.value.pendingEmail == null) return
+        _events.trySend(EditProfileEvent.OpenChangeEmail(askForPassword = true))
     }
 
     private fun cancelEmailChange() {

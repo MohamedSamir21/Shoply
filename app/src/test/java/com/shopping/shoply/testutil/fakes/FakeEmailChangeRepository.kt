@@ -18,6 +18,7 @@ class FakeEmailChangeRepository(
     var status: Result<EmailChangeStatus, DataError> = Result.Success(EmailChangeStatus.WAITING)
     val requests = mutableListOf<Pair<String, String>>()
     var cancelled = false
+    var resends = 0
 
     override fun currentEmail() = email
     override suspend fun pendingEmail() = pending
@@ -27,7 +28,10 @@ class FakeEmailChangeRepository(
         return requestResult
     }
 
-    override suspend fun resendEmailChangeLink(newEmail: String) = resendResult
+    override suspend fun resendEmailChangeLink(newEmail: String): Result<Unit, DataError> {
+        resends++
+        return resendResult
+    }
 
     override fun cancelEmailChange() {
         cancelled = true

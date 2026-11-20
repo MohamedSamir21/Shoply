@@ -110,6 +110,19 @@ class ChangeEmailViewModelTest {
     }
 
     @Test
+    @DisplayName("resending to a stored address asks for the password first")
+    fun `resending to a stored address asks for the password first`() = runTest(main.dispatcher) {
+        repository.pending = "sam@mail.com"
+        val sut = createSut()
+
+        sut.onIntent(ChangeEmailIntent.ResendLink)
+
+        assertThat(repository.resends).isEqualTo(0)
+        assertThat(sut.state.value.step).isEqualTo(ChangeEmailStep.ENTER)
+        assertThat(sut.state.value.newEmail).isEqualTo("sam@mail.com")
+    }
+
+    @Test
     @DisplayName("coming back after the link was clicked shows Email updated")
     fun `coming back after the link was clicked shows Email updated`() = runTest(main.dispatcher) {
         repository.pending = "sam@mail.com"

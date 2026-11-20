@@ -17,15 +17,23 @@ data class ChangeEmailState(
     val passwordError: UiText? = null,
     val isSending: Boolean = false,
     val resendSecondsLeft: Int = 0,
-    val mustSignInAgain: Boolean = false
+    val mustSignInAgain: Boolean = false,
+    /** True once this screen sent a link after a password check; only then can Resend skip the password. */
+    val linkSentThisVisit: Boolean = false
 ) {
     // Data class toString would print the password into any log or crash report.
-    override fun toString() = "ChangeEmailState(step=$step, newEmail=$newEmail, isSending=$isSending)"
+    override fun toString() = "ChangeEmailState(step=$step, isSending=$isSending)"
 }
 
 sealed interface ChangeEmailIntent {
-    data class ChangeNewEmail(val email: String) : ChangeEmailIntent
-    data class ChangePassword(val password: String) : ChangeEmailIntent
+    data class ChangeNewEmail(val email: String) : ChangeEmailIntent {
+        override fun toString() = "ChangeNewEmail" // No email addresses in logs.
+    }
+
+    data class ChangePassword(val password: String) : ChangeEmailIntent {
+        override fun toString() = "ChangePassword" // Never print the password.
+    }
+
     data object SendLink : ChangeEmailIntent
     data object ResendLink : ChangeEmailIntent
     data object UseDifferentEmail : ChangeEmailIntent

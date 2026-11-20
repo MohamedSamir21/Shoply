@@ -138,10 +138,9 @@ class EditProfileViewModelTest {
     }
 
     @Test
-    @DisplayName("resending after the password check expired opens Change Email on the password step")
-    fun `resending after the password check expired opens Change Email on the password step`() = runTest(main.dispatcher) {
+    @DisplayName("resending a pending link opens Change Email on the password step")
+    fun `resending a pending link opens Change Email on the password step`() = runTest(main.dispatcher) {
         fakeProfileRepository.account.value = fakeProfileRepository.account.value.copy(pendingEmail = "sam@mail.com")
-        fakeEmailChangeRepository.resendResult = Result.Error(DataError.Authentication.REQUIRES_RECENT_LOGIN)
         val sut = createSut()
 
         sut.events.test {

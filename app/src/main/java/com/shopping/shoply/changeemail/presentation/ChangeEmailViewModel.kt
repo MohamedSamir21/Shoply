@@ -39,12 +39,16 @@ class ChangeEmailViewModel @Inject constructor(
         val askForPassword = savedStateHandle.get<Boolean>(ARG_ASK_FOR_PASSWORD) == true
         viewModelScope.launch {
             val pending = repository.pendingEmail() ?: return@launch
+            // The load can be slow: never overwrite what the user started typing or sending meanwhile.
+            val untouched = state.value.let { it.step == ChangeEmailStep.ENTER && it.newEmail.isEmpty() && !it.isSending }
+            if (!untouched) return@launch
             if (askForPassword) {
                 // The password check expired: ask again, with the pending address filled in.
                 _state.update { it.copy(newEmail = pending) }
                 _events.send(ChangeEmailEvent.Info(DataError.Authentication.REQUIRES_RECENT_LOGIN.asUiText()))
             } else {
                 _state.update { it.copy(step = ChangeEmailStep.CHECK_INBOX, newEmail = pending) }
+                checkIfConfirmed() // The first resume check ran before this load finished.
             }
         }
     }
@@ -85,7 +89,13 @@ class ChangeEmailViewModel @Inject constructor(
             when (val result = repository.requestEmailChange(newEmail, current.password)) {
                 is Result.Success -> {
                     _state.update {
-                        it.copy(step = ChangeEmailStep.CHECK_INBOX, newEmail = newEmail, password = "", isSending = false)
+                        it.copy(
+                            step = ChangeEmailStep.CHECK_INBOX,
+                            newEmail = newEmail,
+                            password = "",
+                            isSending = false,
+                            linkSentThisVisit = true
+                        )
                     }
                     startCountdown()
                 }
@@ -100,6 +110,13 @@ class ChangeEmailViewModel @Inject constructor(
     private fun resendLink() {
         val current = state.value
         if (current.resendSecondsLeft > 0 || current.isSending) return
+        if (!current.linkSentThisVisit) {
+            // The address came from the stored profile, not from a password-checked send just now:
+            // ask for the password before emailing a link that could move the account.
+            _state.update { it.copy(step = ChangeEmailStep.ENTER, password = "") }
+            _events.trySend(ChangeEmailEvent.Info(DataError.Authentication.REQUIRES_RECENT_LOGIN.asUiText()))
+            return
+        }
         _state.update { it.copy(isSending = true) }
         viewModelScope.launch {
             val result = repository.resendEmailChangeLink(current.newEmail)
