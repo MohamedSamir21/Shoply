@@ -71,6 +71,7 @@ import com.shopping.shoply.categories.presentation.CategoriesDestination
 import com.shopping.shoply.categories.presentation.CategoriesScreen
 import com.shopping.shoply.common.presentation.components.ShoplyTopAppBar
 import com.shopping.shoply.changeemail.presentation.ChangeEmailScreen
+import com.shopping.shoply.changephone.presentation.ChangePhoneScreen
 import com.shopping.shoply.changeemail.presentation.ChangeEmailViewModel
 import com.shopping.shoply.common.presentation.theme.ShoplyAppIcons
 import com.shopping.shoply.common.presentation.theme.ShoplyDimens
@@ -117,10 +118,6 @@ private enum class ShellTab(val route: String, @StringRes val label: Int, val ic
     PROFILE("tab_profile", R.string.nav_profile, ShoplyAppIcons.User),
 }
 
-/** Screens not built yet, opened as "Coming soon" inside the current tab. The name travels in the route. */
-private enum class Placeholder(@StringRes val title: Int) {
-    CHANGE_PHONE(R.string.screen_change_phone),
-}
 
 private const val HOME_ROUTE = "home_feed"
 private const val CATEGORIES_ROUTE = "categories_grid"
@@ -133,11 +130,9 @@ private const val ORDER_PLACED_ROUTE = "tab_cart/order_placed/{$ORDER_ID_ARG}"
 // Checkout and its success screen are full-screen flows: the bottom navigation hides there.
 private val ROUTES_WITHOUT_BOTTOM_BAR =
     setOf(CHECKOUT_ROUTE, ORDER_PLACED_ROUTE) + ShellTab.entries.map(::searchRoute)
-private const val PLACEHOLDER_ARG = "placeholder"
 
-// Each tab has its own placeholder and Help Center routes, so the screen keeps its tab selected
+// Each tab has its own Help Center route, so the screen keeps its tab selected
 // (one route can't sit in two tab graphs).
-private fun placeholderRoute(tab: ShellTab) = "${tab.route}/coming_soon/{$PLACEHOLDER_ARG}"
 private fun helpRoute(tab: ShellTab) = "${tab.route}/help_center"
 private fun wishlistRoute(tab: ShellTab) = "${tab.route}/wishlist"
 private fun notificationsRoute(tab: ShellTab) = "${tab.route}/notifications"
@@ -151,6 +146,8 @@ private fun storesRoute(tab: ShellTab) =
 private fun editProfileRoute(tab: ShellTab) = "${tab.route}/edit_profile"
 private fun changeEmailRoute(tab: ShellTab) =
     "${tab.route}/change_email?${ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD}={${ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD}}"
+
+private fun changePhoneRoute(tab: ShellTab) = "${tab.route}/change_phone"
 
 private fun NavHostController.openChangeEmail(tab: ShellTab, askForPassword: Boolean) =
     navigate("${tab.route}/change_email?${ChangeEmailViewModel.ARG_ASK_FOR_PASSWORD}=$askForPassword")
@@ -238,7 +235,6 @@ fun MainShell(
                 paymentMethods(ShellTab.HOME, navController, snackbarHostState)
                 productListing(ShellTab.HOME, navController, snackbarHostState)
                 stores(ShellTab.HOME, navController, snackbarHostState)
-                comingSoon(ShellTab.HOME, navController)
             }
             navigation(startDestination = CATEGORIES_ROUTE, route = ShellTab.CATEGORIES.route) {
                 composable(CATEGORIES_ROUTE) {
@@ -250,7 +246,6 @@ fun MainShell(
                 search(ShellTab.CATEGORIES, navController, snackbarHostState)
                 addresses(ShellTab.CATEGORIES, navController, snackbarHostState)
                 productListing(ShellTab.CATEGORIES, navController, snackbarHostState)
-                comingSoon(ShellTab.CATEGORIES, navController)
             }
             navigation(startDestination = CART_ROUTE, route = ShellTab.CART.route) {
                 composable(CART_ROUTE) {
@@ -263,7 +258,6 @@ fun MainShell(
                 productDetails(ShellTab.CART, navController, snackbarHostState)
                 store(ShellTab.CART, navController, snackbarHostState)
                 search(ShellTab.CART, navController, snackbarHostState)
-                comingSoon(ShellTab.CART, navController)
                 checkout(navController, snackbarHostState)
                 addresses(ShellTab.CART, navController, snackbarHostState)
                 paymentMethods(ShellTab.CART, navController, snackbarHostState)
@@ -288,7 +282,7 @@ fun MainShell(
                 stores(ShellTab.PROFILE, navController, snackbarHostState)
                 editProfile(ShellTab.PROFILE, navController, snackbarHostState)
                 changeEmail(ShellTab.PROFILE, navController, snackbarHostState, onSignedOut)
-                comingSoon(ShellTab.PROFILE, navController)
+                changePhone(ShellTab.PROFILE, navController, snackbarHostState)
             }
             navigation(startDestination = ORDERS_ROUTE, route = ShellTab.ORDERS.route) {
                 composable(ORDERS_ROUTE) {
@@ -302,7 +296,6 @@ fun MainShell(
                 productDetails(ShellTab.ORDERS, navController, snackbarHostState)
                 store(ShellTab.ORDERS, navController, snackbarHostState)
                 search(ShellTab.ORDERS, navController, snackbarHostState)
-                comingSoon(ShellTab.ORDERS, navController)
             }
         }
     }
@@ -320,8 +313,7 @@ private fun NavGraphBuilder.editProfile(
             snackHostState = snackHostState,
             onBack = { navController.popBackStack() },
             onChangeEmailClicked = { askForPassword -> navController.openChangeEmail(tab, askForPassword) },
-            // Change Phone isn't built yet.
-            onChangePhoneClicked = { navController.openPlaceholder(tab, Placeholder.CHANGE_PHONE) }
+            onChangePhoneClicked = { navController.navigate(changePhoneRoute(tab)) }
         )
     }
 }
@@ -347,6 +339,16 @@ private fun NavGraphBuilder.changeEmail(
     }
 }
 
+private fun NavGraphBuilder.changePhone(
+    tab: ShellTab,
+    navController: NavHostController,
+    snackHostState: SnackbarHostState
+) {
+    composable(route = changePhoneRoute(tab)) {
+        ChangePhoneScreen(snackbarHostState = snackHostState, onBack = { navController.popBackStack() })
+    }
+}
+
 private fun NavGraphBuilder.settings(
     snackHostState: SnackbarHostState,
     navController: NavHostController
@@ -363,20 +365,6 @@ private fun NavHostController.switchTab(tab: ShellTab) {
         popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
-    }
-}
-
-/** The "Coming soon" destination inside [tab]'s graph. */
-private fun NavGraphBuilder.comingSoon(tab: ShellTab, navController: NavHostController) {
-    composable(
-        route = placeholderRoute(tab),
-        arguments = listOf(navArgument(PLACEHOLDER_ARG) { type = NavType.StringType }),
-    ) { entry ->
-        val placeholder = Placeholder.valueOf(entry.arguments?.getString(PLACEHOLDER_ARG).orEmpty())
-        ComingSoonScreen(
-            title = stringResource(placeholder.title),
-            onBack = { navController.popBackStack() },
-        )
     }
 }
 
@@ -779,10 +767,6 @@ private fun NavHostController.goToCart(from: ShellTab) {
         CART_ROUTE,
         inclusive = false
     ) else switchTab(ShellTab.CART)
-}
-
-private fun NavHostController.openPlaceholder(tab: ShellTab, placeholder: Placeholder) {
-    navigate("${tab.route}/coming_soon/${placeholder.name}")
 }
 
 private fun NavHostController.openFromCart(destination: CartDestination) {
